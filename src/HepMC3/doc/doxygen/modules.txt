@@ -1,0 +1,207 @@
+/**
+    @defgroup data Particle, Vertex and event serializable data
+
+    This module contains structures used for serializing/deserializing
+    GenEvent objects.
+
+    <hr>
+    Last update 15 April 2014
+*/
+
+
+
+/**
+    @defgroup IO IO-related classes and interfaces
+
+    This module contains interfaces for different IO formats,
+    including an adapter for older version of \b HepMC files.
+
+    <hr>
+    Last update 15 April 2014
+*/
+
+
+
+/**
+    @defgroup attributes Attributes
+
+    @section using_attributes Using Attributes
+
+    Attributes can be attached to GenEvent, GenParticle or GenVertex
+    and they can have any format defined by the user
+    (see @ref writing_attributes). An attribute is accessed through
+    a shared pointer and identified by its name.
+
+    Example of reading an attribute from the event:
+
+    @code{.cpp}
+        shared_ptr<GenPdfInfo> pdf_info = event.attribute<GenPdfInfo>("GenPdfInfo");
+
+        if( pdf_info ) pdf_info->print();
+    @endcode
+
+    Example of adding an attribute to the event:
+
+    @code{.cpp}
+        shared_ptr<GenPdfInfo> pdf_info = make_shared<GenPdfInfo>();
+        evt.add_attribute("GenPdfInfo",pdf_info);
+
+        // Setting values can be done before or after adding it to the event
+        pdf_info->set(1,2,3.4,5.6,7.8,9.0,1.2,3,4);
+    @endcode
+
+    Adding and getting attributes of a vertex or particle uses the same
+    principles.
+
+    @note An event (or particle or vertex) can have more than one attribute
+          of the same type distinguished by different names. This might be
+          useful in some applications, however, we strongly encourage
+          to use just one instance named by its class name, as in these
+          examples.
+
+    @section writing_attributes Writing custom attributes
+
+    Any class that derives from HepMC::Attribute class can be used as
+    an attribute that can be attached to the event, vertex or particle.
+
+    User has to provide two abstract methods from HepMC::Attribute used
+    to parse the class content from/to string.
+
+    Example:
+
+    @code{.cpp}
+        #include "HepMC/Attribute.h"
+
+        struct MyAttribute : public HepMC::Attribute {
+
+            double val1; /// First value
+            int    val2; /// Second value
+
+        public:
+            /// Implementation of Attribute::from_string
+            bool from_string(const string &att) {
+                val1 = stof( att );
+                val2 = stol( att.substr( att.find(' ')+1 ) );
+
+                return true;
+            }
+
+            /// Implementation of Attribute::to_string
+            bool to_string(string &att) const {
+                char buf[64];
+
+                sprintf(buf,"%.8e %i",val1,val2);
+
+                att = buf;
+
+                return true;
+            }
+        };
+    @endcode
+
+    For other examples see attributes provided in the HepMC package.
+
+    <hr>
+    Last update 25 November 2014
+*/
+
+
+
+/**
+    @defgroup search_engine Search engine
+
+    @section using_search_engine Using search engine module
+
+    The aim of the search engine is to provide an unified way to search through
+    the event for any type of particles needed for the analysis without any need
+    of iterators or specific knowledge of event structure.
+
+    Particles can be filtered based on an event or particle pointer:
+
+    @code{.cpp}
+        FindParticles search( event,    FIND_ALL );
+        FindParticles search( event,    FIND_ALL,             STATUS == 1 );
+        FindParticles search( particle, FIND_ALL_DESCENDANTS, STATUS == 1 );
+    @endcode
+
+    Filters can be constructed using any natural operator:
+
+    @code{.cpp}
+        STATUS >= 1     STATUS <= 1     STATUS != 1     ...
+    @endcode
+
+    or boolean checks:
+
+    @code{.cpp}
+        HAS_PRODUCTION_VERTEX,     HAS_END_VERTEX,     !HAS_END_VERTEX     ...
+    @endcode
+
+    They can also be used to find particles selected attribute:
+
+    @code{.cpp}
+        FindParticles search( event, FIND_ALL, ATTRIBUTE("for_deletion") )
+    @endcode
+
+    or with concrete value of an attribute:
+
+    @code{.cpp}
+        shared_ptr<Attribute> our_value  = make_shared<IntAttribute>(1);
+        FindParticles search ( event, FIND_ALL, ATTRIBUTE("some_variable") == our_value )
+        
+        shared_ptr<Attribute> our_string = make_shared<StringAttribute>("test string");
+        FindParticles search2( event, FIND_ALL, ATTRIBUTE("some_other_attribute") == our_string )
+    @endcode
+
+    Filters are additive:
+
+    @code{.cpp}
+        FindParticles search( event, FIND_ALL, PDG_ID == 111 && !HAS_END_VERTEX && STATUS != 3);
+    @endcode
+
+    Sequence point of '&&' operator is kept - if particle does not pass a filter,
+    rest of the filters is not checked
+
+    Applying additional filters:
+
+    @code{.cpp}
+        // Narrow down results
+        // Linear operation equivalent to erase-remove idiom
+        search.narrow_down( PDG_ID >= -6 && PDG_ID <= 6 );
+    @endcode
+
+    Example of advanced search:
+
+    @code{.cpp}
+        // Find all tau's that have end vertex
+        // but this vertex is not a self-decay vertex (does not contain tau):
+        FindParticles search( event, FIND_ALL,  ABS_PDG_ID == 15 &&
+                                                HAS_END_VERTEX   &&
+                                               !HAS_SAME_PDG_ID_DAUGHTER )
+    @endcode
+
+    Getting the results:
+
+    @code{.cpp}
+        // search.results() returns const vector<GenParticlePtr>
+        FOREACH( GenParticle *p, search.results() ) {
+        p->print();
+    @endcode
+
+    Filters are type-safe. Invalid searches will not compile:
+
+    @code{.cpp}
+        FindParticles search( event,    FIND_ALL_DESCENDANTS, ... ); // fails at compile time
+        FindParticles search( particle, FIND_ALL, ... );             // fails at compile time
+    @endcode
+
+    Similarly, following filters will fail at compile time:
+
+    @code{.cpp}
+        !STATUS                   // Variable filter 'STATUS' cannot be used with boolean operator
+        PDG_ID                    // Variable filter 'PDG_ID' cannot be used without an operator
+        HAS_END_VERTEX == vertex  // Boolean  filter 'HAS_END_VERTEX' cannot be used with an operator other than '!'
+    @endcode
+
+    <hr>
+    Last update 6 Apr 2016
+*/

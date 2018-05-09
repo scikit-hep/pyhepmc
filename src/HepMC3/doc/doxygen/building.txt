@@ -1,0 +1,28 @@
+/**
+    @page building Building instructions
+
+    ###########################################################################
+    @section cmake Cmake build system
+    ###########################################################################
+
+    HepMC3 is built using CMake and is fully compatible with c++11.
+    Following options are available:
+
+    @code{.cpp}
+        cmake -DCMAKE_INSTALL_PREFIX=<installation path> \
+              -DHEPMC_BUILD_EXAMPLES=ON|OFF \
+              -DPYTHIA8_ROOT_DIR=<path_to_pythia8180_or_later> \
+              -DROOT_DIR=<path_to_root_bin_dir>
+    @endcode
+
+    @note Path to pythia8 is used for examples only
+
+    @note Path to ROOT is optional. If not provided, CMake will attempt to find
+          default ROOT installation. If no installation is present, ROOT I/O
+          will not be available
+
+    @note cmake is set to detect c++11 support by default. If c++11 is not
+          supported CMake will attempt to use c++0x.
+
+    Last update 20 Mar 2017
+*/

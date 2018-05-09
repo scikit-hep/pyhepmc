@@ -1,0 +1,59 @@
+#! /usr/bin/env bash
+#Adopted from
+#https://yoda.hepforge.org/trac/browser/bin/yoda-config.in
+#Docs from https://cmake.org/cmake/help/v3.2/command/configure_file.html
+## @configure_input@
+#The line below assures at least some relocation.
+prefix=$(dirname $(dirname $(readlink -f  $0)))
+
+tmp=$(echo $* | egrep -- '--\<help\>|-\<h\>')
+if test $# -eq 0 || test -n "$tmp"; then
+    echo "${PROJECT_NAME}-config: configuration tool for the ${PROJECT_NAME} library"
+    echo
+    echo "Usage: $( basename $0 ) [--help|-h] | "
+    echo "           [--{prefix,libdir,includedir}] | "
+    echo "           [--{cxxflags,ldflags,libs}] | "
+    echo "           [--version]"
+    echo "Options:"
+    echo "  --help | -h   : show this help message"
+    echo
+    echo "  --prefix      : show the installation prefix"
+    echo "  --includedir  : show the path to the directory containing the ${PROJECT_NAME} headers"
+    echo "  --libdir      : show the path to the directory containing the ${PROJECT_NAME} libraries"
+    echo
+    echo "  --cflags|--cppflags : returns a '-I' string for insertion into CPPFLAGS or CXXFLAGS"
+    echo "  --ldflags|libs      : returns a '-L/-l' string for insertion into LIBS or LIBADD"
+    echo "  --static            : returns a string for insertion into LIBS or LIBADD"
+    echo "  --rootIO            : returns a '-L/-l' string for insertion into LIBS or LIBADD with rootIO support"
+    echo
+    echo "  --version           : returns the ${PROJECT_NAME} release version number"
+    exit 0
+fi
+
+OUT=""
+
+tmp=$( echo "$*" | egrep -- '--\<prefix\>')
+test -n "$tmp" && OUT="$OUT $prefix"
+
+tmp=$( echo "$*" | egrep -- '--\<includedir\>')
+test -n "$tmp" && OUT="$OUT $prefix/${CMAKE_INSTALL_INCLUDEDIR}"
+
+tmp=$( echo "$*" | egrep -- '--\<libdir\>')
+test -n "$tmp" && OUT="$OUT $prefix/${CMAKE_INSTALL_LIBDIR}"
+
+tmp=$( echo "$*" | egrep -- '--\<cflags|cppflags|cxxflags\>')
+test -n "$tmp" && OUT="$OUT -I$prefix/${CMAKE_INSTALL_INCLUDEDIR}"
+
+tmp=$( echo "$*" | egrep -- '--\<ldflags|libs\>')
+test -n "$tmp" && OUT="$OUT -L$prefix/${CMAKE_INSTALL_LIBDIR} -lHepMC"
+
+tmp=$( echo "$*" | egrep -- '--\<static\>')
+test -n "$tmp" && OUT="$OUT $prefix/${CMAKE_INSTALL_LIBDIR}/libHepMC.a -lHepMC"
+
+tmp=$( echo "$*" | egrep -- '--\<rootIO\>')
+test -n "$tmp" && OUT="$OUT -L$prefix/${CMAKE_INSTALL_LIBDIR}  ${HEPMC_ROOTIO_LIBRARY}"
+
+tmp=$( echo "$*" | egrep -- '--\<version\>')
+test -n "$tmp" && echo ${PROJECT_VERSION}&& exit 0
+
+echo $OUT

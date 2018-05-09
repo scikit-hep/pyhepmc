@@ -1,0 +1,136 @@
+/**
+@page design Design
+
+HEPMC3 interface design
+=======================
+
+
+This document is for recording the motivations for (re)design features in the
+HepMC3 API. It should be written in Markdown notation so we can embed it into
+the Doxygen code documentation.
+
+
+Naming convention
+-----------------
+
+Previous inconsistency, e.g. Gen prefixes on several core objects, but then
+WeightContainer, PdfInfo, HeavyIon, etc. which did not have it. All API objects
+in HepMC3 have a Gen prefix. This is useful because "Event", "Particle",
+"Vertex", etc. are very common concepts in HEP code, and it is often nice to be able to drop the explicit HepMC::
+
+
+Code standard
+-------------
+
+The decision was made to base HepMC3 on the C++11 standard. This provides
+powerful smart pointers, improved iteration machinery (the range-based for
+loop), and constructs such as lambda functions which may be useful for compact
+testing of event constituent properties. A fallback to the Boost library is
+available, at the cost of incomplete syntactic integration and an external
+dependency on Boost.
+
+
+Memory management and ownership
+-------------------------------
+
+@TODO Tomasz! Explain issues with HepMC object ownership, motivation for the
+shared pointer design, veiled pointer nature of new GenParticle, GenEvent's
+holding of the canonical particle & vertex lists as simple vectors, etc.
+
+@TODO Closed directed cycles are forbidden and may produce undefined behaviour.
+
+@TODO Links between particles and iteration. "Parents", "children" links and
+"all" iteration (from the event) are efficient. "Descendents" and "ancestors"
+are not -- they will explicitly return a whole list, rather than allowing early
+exit. If efficient access to such sets is needed, e.g. "test each descendent
+until a photon is found", write a recursive function, perhaps a C++11 lambda.
+
+
+Search engine
+-------------
+
+@TODO Tomasz
+
+
+Generalised attributes
+----------------------
+
+@TODO describe system. Leif?
+
+
+Compatibility with HepMC2
+-------------------------
+
+Avoid changes to the _bulk_ of user code. This typically means event
+interrogation, as opposed to event building and modification; the former
+occupies thousands of lines of LHC code, while building and reading truth
+events occurs only in a relatively few places.
+
+The result is that the naming has generally been kept the same as in HepMC2, and
+where changes to the canonical names have been made for improved consistency or
+otherwise, backward compatibility aliases are provided. This includes the
+iterator design of HepMC2, whose use is strongly discouraged in HepMC3, and the
+STL-like IO_* classes of HepMC2 which have been replaced by the Reader/Writer
+hierarchy. The aliases are provided if the HEPMC_NO_DEPRECATION preprocessor
+macro is not defined; this is the default in version 3.0.x, but we anticipate
+that in future releases (perhaps 3.1.x) the use of HepMC2 features will by
+default first produce compilation warnings, and will eventually be disabled
+entirely.
+
+Forward compatibility aliases and features will be added to final releases of
+HepMC2 to ease transition to version 3.
+
+
+Removal of 'barcode'
+--------------------
+
+The "barcode" integer in HepMC2 was an uncomfortable object, simultaneously
+declared in the code documentation to be a meaningless unique identifier for
+vertex and particle objects, and set to specific ranges by experiments'
+production systems to encode information about a particle's origins. It proved
+impossible to satisfactorily reconcile these twin uses, and experiments' demands
+for particle provenance information have exceeded the capacity of an int (or
+even a long int).
+
+Hence in HepMC3, the two concepts have been separated. Particles and vertices
+have a unique identifier, the ID, and arbitrary provenance information may be
+encoded in attached attributes. Since analysis procedures are accustomed to the
+concept of a barcode which encodes e.g. primary vs. secondary physical
+particles, the name has been entirely removed from HepMC3 such that it may be
+used without fear of clashes in constructing analysis data formats -- in this
+context the barcode will be defined by the user, perhaps combining the ID and
+the provenance attributes in a scheme to meet the specific analysis needs.
+
+
+Removal of 'Flow'
+-----------------
+
+The Flow class has been removed, since it was unused by any widespread event
+generator, and to our knowledge the only active use-case is an abuse of it to
+provide more ints in which to encode provenance information. As this is now done
+via attributes, there is no case for Flow's continued existence. No backward
+compatibility Flow class is provided since this usage is extremely localised in
+one piece of user code and migration to the newer scheme should be simple.
+
+
+Status schemes
+--------------
+
+We continue with the standard status scheme for particles, and adopt the vertex
+'id' scheme as a new vertex status, so named for consistency with the particles.
+
+PARTICLE STATUS:
+0 = null particle, do not use
+1 = a stable physical particle, according to the latest stage of processing
+2 = a decayed physical particle, post-hadronization
+3 = documentation particle, typically meaning a hard process particle but not guaranteed physical
+4 = a beam particle
+
+VERTEX STATUS:
+1 = TODO
+2 = TODO
+3 = TODO
+4 = TODO
+5 = hadronization vertex, with incoming final partons and outgoing hadrons
+
+*/

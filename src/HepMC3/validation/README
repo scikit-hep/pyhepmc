@@ -1,0 +1,78 @@
+###############################################################################
+#   COMPILING                                                                 #
+###############################################################################
+
+Executing 'make' in this directory will compile all available interfaces and
+validation tools. Paths to validation are located in 'make.toolslocation.inc'
+
+Not all paths have to be provided. If a path is missing, appropriate tool
+will not be used in validation.
+
+Even if none of the path is provided, the default tools (such as parsing
+HepMC2 files and saving to text file) will be generated and can be used
+to validate HepMC3.
+
+Providing paths to builds for HepMC2 allows to generate validation
+benchmarks that can be compared against HepMC3.
+
+###############################################################################
+#   USAGE                                                                     #
+###############################################################################
+
+Usage:   ./validation.exe        <config_file> [<optional_events_limit>]
+         ./validation_HEPMC2.exe <config_file> [<optional_events_limit>]
+
+configs/default.conf has been provided with a list of available options.
+If a tool listed in config file has not been compiled, it will be ignored.
+
+If MC-TESTER is used, 'mc-tester.hepmc2.root' or 'mc-tester.hepmc3.root' file
+will be generated. These files can be compared using:
+
+./compare.mc-tester.sh mc-tester.hepmc2.root mc-tester.hepmc3.root
+
+IMPORTANT: path to MC-TESTER is hardcoded in compare.mc-tester.sh file.
+           It has to be changed for the script to work!
+
+###############################################################################
+#   COMPILING TOOLS                                                           #
+###############################################################################
+
+List of configuration options used to compile appropriate tools:
+
+--------------
+1) Photos++
+--------------
+wget http://photospp.web.cern.ch/photospp/resources/PHOTOS.3.54/PHOTOS.3.54.tar.gz
+
+HepMC2: ./configure --without-hepmc
+HepMC3: ./configure --with-hepmc=$HEPMC2LOCATION
+
+--------------
+2) Tauola++
+--------------
+wget http://tauolapp.web.cern.ch/tauolapp/resources/TAUOLA.1.1.4/TAUOLA.1.1.4.tar.gz
+
+HepMC3: ./configure --without-hepmc
+HepMC2: ./configure --with-hepmc=$HEPMC2LOCATION
+
+-------------
+3) Pythia8
+-------------
+wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8185.tgz
+
+HepMC3: ./configure --enable-shared
+HepMC2: ./configure --enable-shared --with-hepmc=$HEPMC2LOCATION
+
+NOTE: HepMC2 interface is compiled to separate library. Same configuration
+      and same path can be used for HepMC2 and HepMC3.
+
+---------------
+4) MC-TESTER
+---------------
+wget http://mc-tester.web.cern.ch/MC-TESTER/MC-TESTER-1.25.0.tar.gz
+
+HepMC3: ./configure
+HepMC2: ./configure --with-HepMC=$HEPMC2LOCATION
+
+NOTE: HepMC2 interface is compiled to separate library. Same configuration
+      and same path can be used for HepMC2 and HepMC3.

@@ -1,0 +1,275 @@
+/**
+    @page differences Differences between HepMC2 and HepMC3
+
+    The following is a list of main differences that should be taken into
+    account when transitioning from HepMC2 to HepMC3.
+
+    ###########################################################################
+    @section technical Technical changes
+    ###########################################################################
+    ###########################################################################
+    @subsection structure Structure change and header file organization
+    ###########################################################################
+
+    Following changes in header files have been applied:
+    @code{.cpp}
+        HepMC/IO_GenEvent.h is now deprecated but can be used
+        HepMC/HeavyIons.h    ->  HepMC/GenHeavyIons.h   (now a POD struct)
+        HepMC/PdfInfo.h      ->  HepMC/GenPdfInfo.h     (now a POD struct)
+        HepMC/SimpleVector.h ->  HepMC/FourVector.h     (ThreeVector class removed)
+    @endcode
+
+    Following header files are no longer available:
+
+    @code{.cpp}
+        CompareGenEvent.h
+        Flow.h
+        GenRanges.h
+        HepMCDefs.h
+        HerwigWrapper.h
+        IteratorRange.h
+        Polarization.h
+        SearchVector.h
+        StreamHelpers.h
+        StreamInfo.h
+        TempParticleMap.h
+        WeightContainer.h
+
+        enable_if.h
+        is_arithmetic.h
+
+        IO_AsciiParticles.h
+        IO_Exception.h
+        IO_HEPEVT.h
+        IO_HERWIG.h
+
+        PythiaWrapper.h
+        PythiaWrapper6_4.h
+        PythiaWrapper6_4_WIN32.h
+    @endcode
+
+    ###########################################################################
+    @subsection memory Memory managed by shared pointers
+    ###########################################################################
+    Particles and vertices are managed using shared pointers,
+    so they should not be created through the call to 'new'.
+
+    @code{.cpp}
+        GenEvent event;
+
+        // Create particles
+        GenParticlePtr p1 = make_shared<GenParticle>();
+        GenParticlePtr p2 = make_shared<GenParticle>();
+        GenParticlePtr p3 = make_shared<GenParticle>();
+
+        p1->set_pdg_id(23);
+        p2->set_pdg_id(15);
+        p3->set_pdg_id(-15);
+
+        // Create vertex
+        GenVertexPtr v1 = make_shared<GenVertex>();
+        v1->add_particle_in(p1);
+        v1->add_particle_out(p2);
+        v1->add_particle_out(p3);
+
+        event.add_vertex(v1);
+    @endcode
+
+    @note An interface to convert raw pointers to GenParticlePtr, GenVertexPtr
+          is available for backward-compatibility. It is marked as deprecated.
+
+    ###########################################################################
+    @subsection topological_order Topological order
+    ###########################################################################
+
+    Particles and vertices in HepMC3 are stored in topological order. This means
+    that when creating vertices, incoming particles must have id lower than
+    any of the outgoing particles.
+
+    This forces the tree structure to be constructed top-to-bottom
+    and disallows creating loops.
+
+    @code{.cpp}
+        GenParticlePtr p1 = make_shared<GenParticle>();
+        GenParticlePtr p2 = make_shared<GenParticle>();
+        GenParticlePtr p3 = make_shared<GenParticle>();
+        GenParticlePtr p4 = make_shared<GenParticle>();
+
+        GenVertexPtr v1 = make_shared<GenVertex>();
+        GenVertexPtr v2 = make_shared<GenVertex>();
+        GenVertexPtr v3 = make_shared<GenVertex>();
+
+        event.add_particle(p1);
+        event.add_particle(p2);
+        event.add_particle(p3);
+        event.add_particle(p4);
+        event.add_vertex(v1);
+        event.add_vertex(v2);
+        event.add_vertex(v3);
+
+        v1->add_particle_in (p2);
+        v1->add_particle_out(p3);
+        v1->add_particle_in (p4); // will cause error, because p3
+                                  // has higher index than p4
+
+        v2->add_particle_in (p4);
+        v2->add_particle_out(p3); // will also cause error
+
+        // Order of vertices does not matter. Index of end vertex
+        // can be lower than index of production vertex
+        v3->add_particle_in (p1);
+        v3->add_particle_out(p2);
+    @endcode
+
+    ###########################################################################
+    @section functionality Changes to user interface and to HepMC functionality
+    ###########################################################################
+    ###########################################################################
+    @subsection deleting Deleting particles and vertices
+    ###########################################################################
+
+    Deleting a particle using GenEvent::remove_particle() will also remove
+    its end_vertex if this is the only particle that is on this vertex
+    particles_in() list.
+
+    Deleting a vertex will delete all of its outgoing
+    particles. (and subsequently, all of their decays).
+
+    ###########################################################################
+    @subsection barcodes Barcodes can no longer be set
+    ###########################################################################
+
+    Barcodes are no longer available. Use attributes to provide additional
+    information that was previously encoded using barcodes
+    (see module @ref attributes).
+    
+    The unique identifier of particles and vertices is now called id() to
+    separate its role from barcodes. Id is set automatically and cannot
+    be changed. Id is not permanently attached to particle/vertex. When
+    a particle or vertex is removed from the event, id's of other particles
+    or vertices may change.
+
+    ###########################################################################
+    @subsection units Units are no longer defined at compilation time
+    ###########################################################################
+
+    The default units are set to GEV and MM. They can be provided as
+    constructor parameters or changed later using HepMC::GenEvent::set_units
+
+    @code{.cpp}
+        GenEvent event(Units::GEV,Units::CM);
+
+        GenParticlePtr p = make_shared<GenParticle>();
+
+        event.add_particle(p);
+        ...
+
+        event.print(); // event printed in GEV/CM
+
+        event.set_units(Units::MEV,Units::MM); // will trigger unit conversion for all particles and vertices
+
+        event.print(); // event printed in MEV/MM
+    @endcode
+
+    ###########################################################################
+    @subsection deprecated_code Deprecated code
+    ###########################################################################
+
+    A lot of HepMC2 functions has been declared obsolete and are marked as
+    deprecated. Warnings displayed at compilation time hint to what functions
+    or classes should be used instead.
+   
+    
+    @code{.cpp}
+        HepMC::FourVector position(pos[1],pos[2],pos[3],pos[0]);
+        
+        // HepMC2 code:
+        vertex = new HepMC::GenVertex(position, id);
+        
+        // Replace with:
+        HepMC::GenVertexPtr vertex = HepMC::make_shared<HepMC::GenVertex>(position);
+        vertex->set_id(1);
+    @endcode
+    
+    @code{.cpp}
+        // HepMC2 code:
+        std::vector<HepMC::GenParticle*> beamparticles
+        // ...
+        event.set_beam_particles(beamparticles[0],beamparticles[1]);
+    
+        // Replace with:
+        std::vector<HepMC::GenParticlePtr> beamparticles;
+        // ...
+        event.add_particle(beamparticles[0]);
+        event.add_particle(beamparticles[1]);
+    @endcode
+
+    @code{.cpp}
+        // HepMC2 code:
+        HepMC::GenVertex * vertex;
+        vertex->set_id(1);
+        vertex->id();
+    
+        // Replace with:
+        HepMC::GenVertexPtr vertex = HepMC::make_shared<HepMC::GenVertex>();
+        vertex->set_status(1);
+        vertex->status();
+    @endcode
+    
+    @code{.cpp}
+        // HepMC2 code:
+        HepMC::GenVertex * vertex;
+        for (HepMC::GenVertex::particles_out_const_iterator pout
+               =v->particles_out_const_begin();
+             pout!=(*vit)->particles_out_const_end(); ++pout) { }
+
+        // Replace with (similarly for particles_in):
+        HepMC::GenVertexPtr vertex = HepMC::make_shared<HepMC::GenVertex>();
+        for (HepMC::GenParticlePtr pout : vertex->particles_out() ) { }
+    @endcode
+
+    @code{.cpp}
+        // HepMC2 code:
+        vertex->weights().push_back(1.);
+        // Replace with:
+        TODO
+    @endcode
+    
+    @code{.cpp}
+        GenEvent evt(Units::GEV,Units::MM);
+        // HepMC2 code:
+        evt.set_alphaQCD(m_alphas);
+        evt.set_alphaQED(m_alpha);
+        // Replace with:
+        evt.add_attribute("AlphaQCD",
+                           make_shared<DoubleAttribute>(m_alphas));
+        evt.add_attribute("AlphaEM",
+                           make_shared<DoubleAttribute>(m_alpha));
+    @endcode
+
+    @code{.cpp}
+        // HepMC2 code:
+        HepMC::GenVertex * vertex;
+        vertex->weights().push_back(1.);
+        // Replace with:
+        TODO
+    @endcode
+
+    @code{.cpp}
+        // HepMC2 code:
+        HepMC::GenVertex * vertex;
+        vertex->check_momentum_conservation();
+        // Replace with:
+        TODO
+    @endcode
+
+    @code{.cpp}
+        // HepMC2 code:
+        HepMC::GenParticle::set_flow(int code_index, int code = 0)	
+        // Replace with:
+        TODO
+    @endcode
+ 
+    <hr>
+    Last update 24 May 2015
+*/

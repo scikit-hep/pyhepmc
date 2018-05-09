@@ -1,0 +1,17 @@
+HEPMC3 DEVELOPMENT TO-DOs
+=========================
+
+See also: http://hepmc.web.cern.ch/hepmc/todo.html and https://sft.its.cern.ch/jira/browse/HEPMC
+
+3.0.0a4
+-------
+
+* Replace ERRORs with proper exceptions
+
+* Eliminate static Setup class
+
+* Provide an empty libHepMCfio library
+
+* Add GV::status handling to ASCII I/O
+
+* Do not install headers only used internally by .cc compilation

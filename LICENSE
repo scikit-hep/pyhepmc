@@ -1,3 +1,6 @@
+HepMC3 code in path src/HepMC3 is distributed under GPL-v3, see
+src/HepMC3/LICENCE. The rest of the code is covered by the following license:
+
 BSD 3-Clause License
 
 Copyright (c) 2018, Hans Dembinski
