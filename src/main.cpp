@@ -14,6 +14,7 @@
 #include "HepMC/Print.h"
 #include "HepMC/WriterAscii.h"
 #include "HepMC/ReaderAscii.h"
+#include "HepMC/HEPEVT_Wrapper.h"
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -138,6 +139,8 @@ PYBIND11_MODULE(pyhepmc, m) {
            GenEvent
            GenParticle
            GenVertex
+           fill_genevent_from_hepevt
+           print_hepevt
            print_content
            print_listing
     )pbdoc";
@@ -370,6 +373,16 @@ PYBIND11_MODULE(pyhepmc, m) {
         METH(close, ReaderAscii)
         ;
 
+    m.def("fill_genevent_from_hepevt", [](GenEvent& evt, long long address) {
+            evt.clear();
+            HEPEVT_Wrapper::set_hepevt_address((char*)address);
+            HEPEVT_Wrapper::HEPEVT_to_GenEvent(&evt);
+        });
+
+    m.def("print_hepevt", [](long long address) {
+            HEPEVT_Wrapper::set_hepevt_address((char*)address);
+            HEPEVT_Wrapper::print_hepevt();
+        });
     m.def("print_content", [](const GenEvent& event) { Print::content(event); });
     m.def("print_listing", [](const GenEvent& event) { Print::listing(event); });
 
