@@ -125,13 +125,13 @@ using namespace py::literals;
 #define METH(name, cls) .def(#name, &cls::name)
 #define METH_OL(name, cls, args) .def(#name, py::overload_cast<args>(&cls::name))
 
-PYBIND11_MODULE(pyhepmc3, m) {
+PYBIND11_MODULE(pyhepmc_ng, m) {
     using namespace HepMC;
 
     m.doc() = R"pbdoc(
-        pyhepmc plugin
+        pyhepmc_ng plugin
         --------------
-        .. currentmodule:: pyhepmc
+        .. currentmodule:: pyhepmc_ng
         .. autosummary::
            :toctree: _generate
            Units

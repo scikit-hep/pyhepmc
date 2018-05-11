@@ -44,7 +44,7 @@ hepmc_source = glob.glob('src/HepMC3/src/*.cc') + glob.glob('src/HepMC3/src/Sear
 hepmc_include = 'src/HepMC3/include'
 ext_modules = [
     Extension(
-        'pyhepmc3',
+        'pyhepmc_ng',
         ['src/main.cpp'] + hepmc_source,
         include_dirs=[
             hepmc_include,
@@ -99,12 +99,12 @@ class BuildExt(build_ext):
 
 
 setup(
-    name='pyhepmc3',
+    name='pyhepmc_ng',
     version=__version__,
     author='Hans Dembinski',
     author_email='hans.dembinski@gmail.com',
     url='https://github.com/hdembinski/pyhepmc',
-    description='Python bindings for HepMC3',
+    description='Python bindings for HepMC3 library',
     long_description='',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.2'],

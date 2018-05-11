@@ -1,4 +1,4 @@
-import pyhepmc3 as hep
+import pyhepmc_ng as hep
 
 
 def test_basic():
