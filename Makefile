@@ -4,7 +4,7 @@ pyhepmc_ng.so: src/main.cpp setup.py
 clean:
 	rm -rf build dist *.so
 
-test: pyhepmc_ng.so
+test:
 	@pytest tests -s
 
 dist:
@@ -14,7 +14,7 @@ test_upload: dist
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 test_install:
-	pip install --user --index-url https://test.pypi.org/simple/ pyhepmc_ng
+	pip install --user --index-url https://test.pypi.org/simple/ pyhepmc-ng
 
 upload:
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*

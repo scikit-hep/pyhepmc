@@ -364,6 +364,12 @@ PYBIND11_MODULE(pyhepmc_ng, m) {
         METH(failed, WriterAscii)
         METH(close, WriterAscii)
         METH(set_precision, WriterAscii)
+        // support contextmanager protocoll
+        .def("__enter__", [](py::object self) { return self; })
+        .def("__exit__", [](py::object self, py::args) {
+                self.attr("close")();
+                return self;
+            })
         ;
 
     py::class_<ReaderAscii>(m, "ReaderAscii")
@@ -371,6 +377,12 @@ PYBIND11_MODULE(pyhepmc_ng, m) {
         METH(read_event, ReaderAscii)
         METH(failed, ReaderAscii)
         METH(close, ReaderAscii)
+        // support contextmanager protocoll
+        .def("__enter__", [](py::object self) { return self; })
+        .def("__exit__", [](py::object self, py::args) {
+                self.attr("close")();
+                return self;
+            })
         ;
 
     m.def("fill_genevent_from_hepevt", [](GenEvent& evt, long long address) {

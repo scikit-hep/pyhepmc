@@ -69,9 +69,8 @@ def test_basic():
     v4.add_particle_out(p8)
 
     oss = hep.ostringstream()
-    f = hep.WriterAscii(oss)
-    f.write_event(evt)
-    f.close()
+    with hep.WriterAscii(oss) as f:
+        f.write_event(evt)
 
     assert oss.str() == """HepMC::Version 3.0.0
 HepMC::IO_GenEvent-START_EVENT_LISTING
@@ -118,16 +117,13 @@ def test_read_write():
     v1.add_particle_out(p4)
     evt1.add_vertex(v1)
 
-    f = hep.WriterAscii("test_read_write_file.dat")
-    f.write_event(evt1)
-    f.close()
+    with hep.WriterAscii("test_read_write_file.dat") as f:
+        f.write_event(evt1)
 
-    f = hep.ReaderAscii("test_read_write_file.dat")
     evt2 = hep.GenEvent()
-
     assert evt1 != evt2
-    f.read_event(evt2)
-    f.close()
+    with hep.ReaderAscii("test_read_write_file.dat") as f:
+        f.read_event(evt2)
 
     assert evt1.particles == evt2.particles
     assert evt1.vertices == evt2.vertices
