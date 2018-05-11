@@ -17,8 +17,9 @@ light-weight library is included.
 
 The original pyhepmc package is not easy to install. It uses SWIG to create
 the bindings, which has to be installed separately. It also requires you to
-install the C++ library HepMC separately. When you try a pip-install of that,
-you get intimidating error messages which are difficult to decipher.
+install the C++ library HepMC separately. When you try a pip-install, it will
+in general not work out-of-the-box. Instead you will get intimidating error
+messages, which are difficult to decipher.
 
 *pyhepmc-ng is actively developed*
 
