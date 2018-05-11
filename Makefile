@@ -18,4 +18,4 @@ test_install:
 	pip install --user --index-url https://test.pypi.org/simple/ pyhepmc-ng
 
 upload:
-	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	echo 
