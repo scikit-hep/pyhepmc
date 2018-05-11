@@ -1,5 +1,5 @@
 """
-pyhepmc-ng is an alternative wrapper of the HepMC3 C++ library.
+pyhepmc-ng is an alternative wrapper of the HepMC-v3 C++ library.
 
 The official wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
 Why should you use this one?
@@ -37,7 +37,7 @@ where it is appropriate.
 - ReaderAscii and WriterAscii support the context manager protocol
 
 License: pyhepmc-ng is covered by the BSD license, but the license only
-applies to the binding code. The HepMC3 code is covered by the GPL-v3 license.
+applies to the binding code. The HepMC code is covered by the GPL-v3 license.
 """
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
