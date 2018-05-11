@@ -1,4 +1,4 @@
-import pyhepmc
+import pyhepmc3
 
 
 def test_basic():
@@ -133,4 +133,5 @@ def test_read_write():
     assert evt1.vertices == evt2.vertices
     assert evt1 == evt2
 
+    import os
     os.unlink("test_read_write_file.dat")

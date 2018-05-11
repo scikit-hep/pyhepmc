@@ -1,8 +1,11 @@
-pyhepmc.so: src/main.cpp setup.py
+pyhepmc3.so: src/main.cpp setup.py
 	python setup.py build_ext -i
 
 clean:
-	rm -rf build *.so
+	rm -rf build dist *.so
 
-test: pyhepmc.so
+test: pyhepmc3.so
 	@pytest tests -s
+
+dist:
+	python setup.py sdist

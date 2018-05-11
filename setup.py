@@ -6,7 +6,7 @@ import os
 import glob
 import os
 
-__version__ = '0.0.2'
+__version__ = '0.1'
 
 
 class lazy_get_pybind_include:
@@ -44,7 +44,7 @@ hepmc_source = glob.glob('src/HepMC3/src/*.cc') + glob.glob('src/HepMC3/src/Sear
 hepmc_include = 'src/HepMC3/include'
 ext_modules = [
     Extension(
-        'pyhepmc',
+        'pyhepmc3',
         ['src/main.cpp'] + hepmc_source,
         include_dirs=[
             hepmc_include,
@@ -99,7 +99,7 @@ class BuildExt(build_ext):
 
 
 setup(
-    name='pyhepmc',
+    name='pyhepmc3',
     version=__version__,
     author='Hans Dembinski',
     author_email='hans.dembinski@gmail.com',

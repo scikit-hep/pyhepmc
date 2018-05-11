@@ -1,4 +1,6 @@
 var
 build
 dist
-pyhepmc.so
+*.so
+*.egg-info
+tests/__pycache__
