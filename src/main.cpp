@@ -345,8 +345,6 @@ PYBIND11_MODULE(pyhepmc_ng, m) {
     // py::class_<GenParticleData>(m, "GenParticleData");
     // py::class_<GenVertexData>(m, "GenVertexData");
 
-    // py::class_<std::ostream>("ostream");
-
     py::class_<std::ostringstream>(m, "ostringstream")
         .def(py::init<>())
         .def("str", (std::string (std::ostringstream::*)() const) &std::ostringstream::str)
