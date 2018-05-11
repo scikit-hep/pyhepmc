@@ -7,7 +7,8 @@ clean:
 test:
 	@pytest tests -s
 
-dist:
+dist: setup.py src/main.cpp
+	rm -rf dist
 	python setup.py sdist
 
 test_upload: dist

@@ -4,3 +4,4 @@ dist
 *.so
 *.egg-info
 tests/__pycache__
+.cache

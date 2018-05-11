@@ -1,3 +1,40 @@
+"""
+pyhepmc-ng is an alternative wrapper of the HepMC3 C++ library.
+
+The official wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
+Why should you use this one?
+
+*pyhepmc-ng is easy to install*
+
+The command `pip install pyhepmc-ng` just works! You only need a compiler that
+supports C++11, everything else is handled by pip.
+
+Under the hood, the bindings are build with the excellent
+[pybind11](http://pybind11.readthedocs.io/en/stable/) library.
+pybind11 is automatically installed as a requirement by pip. You don't need an
+external installation of the HepMC library, either. A copy of this
+light-weight library is included.
+
+The original pyhepmc package is not easy to install. It uses SWIG to create
+the bindings, which has to be installed separately. It also requires you to
+install the C++ library HepMC separately. When you try a pip-install of that,
+you get intimidating error messages which are difficult to decipher.
+
+*pyhepmc-ng is actively developed*
+
+The last release of pyhepmc was May 2013.
+
+*pyhepmc-ng supports Pythonic code*
+
+pyhepmc-ng is not a blind mapping of C++ code to Python. It uses Python idioms
+where it is appropriate.
+
+- C++ methods which act simulate properties are represented as properties,
+  e.g. GenParticle::set_status and GenParticle::status are mapped to a single
+  GenParticle.status field in Python
+- Tuples and lists are implicitly convertible to FourVectors
+- ReaderAscii and WriterAscii support the context manager protocol
+"""
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from setuptools import distutils
@@ -6,7 +43,7 @@ import os
 import glob
 import os
 
-__version__ = '0.1'
+__version__ = '0.1.8'
 
 
 class lazy_get_pybind_include:
@@ -105,7 +142,27 @@ setup(
     author_email='hans.dembinski@gmail.com',
     url='https://github.com/hdembinski/pyhepmc',
     description='Python bindings for HepMC3 library',
-    long_description='',
+    long_description=__doc__,
+    long_description_content_type='text/markdown',
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+
+        # Indicate who your project is intended for
+        'Intended Audience :: Developers',
+
+        # Pick your license as you wish
+        'License :: OSI Approved :: BSD License',
+
+        # Specify the Python versions you support here. In particular, ensure
+        # that you indicate whether you support Python 2, Python 3 or both.
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+    ],
+    keywords='generator montecarlo simulation data hep physics particle',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.2'],
     cmdclass=dict(build_ext=BuildExt),
