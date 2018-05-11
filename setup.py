@@ -30,11 +30,14 @@ The last release of pyhepmc was May 2013.
 pyhepmc-ng is not a blind mapping of C++ code to Python. It uses Python idioms
 where it is appropriate.
 
-- C++ methods which act simulate properties are represented as properties,
+- C++ methods which act like properties are represented as properties,
   e.g. GenParticle::set_status and GenParticle::status are mapped to a single
   GenParticle.status field in Python
 - Tuples and lists are implicitly convertible to FourVectors
 - ReaderAscii and WriterAscii support the context manager protocol
+
+License: pyhepmc-ng is covered by the BSD license, but the license only
+applies to the binding code. The HepMC3 code is covered by the GPL-v3 license.
 """
 from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
@@ -44,7 +47,7 @@ import os
 import glob
 import os
 
-__version__ = '0.1.8'
+__version__ = '0.1.10'
 
 
 class lazy_get_pybind_include:
@@ -142,7 +145,7 @@ setup(
     author='Hans Dembinski',
     author_email='hans.dembinski@gmail.com',
     url='https://github.com/hdembinski/pyhepmc',
-    description='Python bindings for HepMC3 library',
+    description='Next-generation Python interface to the HepMC high-energy physics event record API',
     long_description=__doc__,
     long_description_content_type='text/markdown',
     classifiers=[
