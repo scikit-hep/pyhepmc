@@ -1,14 +1,12 @@
 from setuptools import setup, Extension
-from setuptools.command.build_ext import build_ext
+from distutils.command.build_ext import build_ext
+from setuptools import distutils
 import sys
-import setuptools
 import os
 import glob
+import os
 
-__version__ = '0.0.1'
-
-
-hepmc_source = glob.glob('src/HepMC3/src/*.cc') + glob.glob('src/HepMC3/src/Search/*.cc')
+__version__ = '0.0.2'
 
 
 class lazy_get_pybind_include:
@@ -20,12 +18,36 @@ class lazy_get_pybind_include:
         return pybind11.get_include(self.user)
 
 
+def lazy_compile(self, sources, output_dir=None, macros=None,
+                 include_dirs=None, debug=0, extra_preargs=None,
+                 extra_postargs=None, depends=None):
+    macros, objects, extra_postargs, pp_opts, build = \
+            self._setup_compile(output_dir, macros, include_dirs, sources,
+                                depends, extra_postargs)
+    cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
+
+    for obj in objects:
+        try:
+            src, ext = build[obj]
+        except KeyError:
+            continue
+        if not os.path.exists(obj) or os.stat(obj).st_mtime < os.stat(src).st_mtime:
+            self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
+    return objects
+
+
+import distutils.ccompiler
+distutils.ccompiler.CCompiler.compile = lazy_compile
+
+
+hepmc_source = glob.glob('src/HepMC3/src/*.cc') + glob.glob('src/HepMC3/src/Search/*.cc')
+hepmc_include = 'src/HepMC3/include'
 ext_modules = [
     Extension(
         'pyhepmc',
         ['src/main.cpp'] + hepmc_source,
         include_dirs=[
-            'src/HepMC3/include',
+            hepmc_include,
             lazy_get_pybind_include(user=True),
             lazy_get_pybind_include(),
         ],
@@ -36,11 +58,12 @@ ext_modules = [
 
 def has_flag(compiler, flagname):
     import tempfile
+    from distutils.errors import CompileError
     with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
         f.write('int main (int argc, char **argv) { return 0; }')
         try:
             compiler.compile([f.name], extra_postargs=[flagname])
-        except setuptools.distutils.errors.CompileError:
+        except CompileError:
             return False
     return True
 
@@ -55,10 +78,7 @@ def cpp_flag(compiler):
 
 
 class BuildExt(build_ext):
-    compile_flags = {
-        'msvc': ['/EHsc'],
-        'unix': [],
-    }
+    compile_flags = dict(msvc=['/EHsc'], unix=[])
 
     if sys.platform == 'darwin':
         compile_flags['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
@@ -88,6 +108,6 @@ setup(
     long_description='',
     ext_modules=ext_modules,
     install_requires=['pybind11>=2.2'],
-    cmdclass={'build_ext': BuildExt},
+    cmdclass=dict(build_ext=BuildExt),
     zip_safe=False,
 )

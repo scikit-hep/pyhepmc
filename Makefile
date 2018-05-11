@@ -1,4 +1,4 @@
-pyhepmc.so: src/main.cpp
+pyhepmc.so: src/main.cpp setup.py
 	python setup.py build_ext -i
 
 clean:

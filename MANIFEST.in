@@ -1,0 +1,5 @@
+include *.md
+include LICENSE
+recursive-include src/HepMC3/src *
+recursive-include src/HepMC3/include *
+include src/main.cpp
