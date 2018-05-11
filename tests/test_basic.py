@@ -1,4 +1,4 @@
-import pyhepmc3
+import pyhepmc3 as hep
 
 
 def test_basic():
@@ -26,15 +26,15 @@ def test_basic():
     #   /            p6                                #
     # p2                                               #
     #                                                  #
-    evt = pyhepmc.GenEvent(pyhepmc.Units.GEV, pyhepmc.Units.MM)
+    evt = hep.GenEvent(hep.Units.GEV, hep.Units.MM)
 
     #                           px      py        pz       e      pdgid status
-    p1 = pyhepmc.GenParticle( ( 0.0,    0.0,   7000.0,  7000.0  ), 2212,  3 )
-    p2 = pyhepmc.GenParticle( ( 0.750, -1.569,   32.191,  32.238),    1,  3 )
-    p3 = pyhepmc.GenParticle( ( 0.0,    0.0,  -7000.0,  7000.0  ), 2212,  3 )
-    p4 = pyhepmc.GenParticle( (-3.047,-19.0,    -54.629,  57.920),   -2,  3 )
+    p1 = hep.GenParticle( ( 0.0,    0.0,   7000.0,  7000.0  ), 2212,  3 )
+    p2 = hep.GenParticle( ( 0.750, -1.569,   32.191,  32.238),    1,  3 )
+    p3 = hep.GenParticle( ( 0.0,    0.0,  -7000.0,  7000.0  ), 2212,  3 )
+    p4 = hep.GenParticle( (-3.047,-19.0,    -54.629,  57.920),   -2,  3 )
 
-    v1 = pyhepmc.GenVertex();
+    v1 = hep.GenVertex();
     v1.add_particle_in (p1)
     v1.add_particle_out(p2)
     evt.add_vertex(v1)
@@ -42,34 +42,34 @@ def test_basic():
     # Set vertex status if needed
     v1.status = 4
 
-    v2 = pyhepmc.GenVertex()
+    v2 = hep.GenVertex()
     v2.add_particle_in (p3)
     v2.add_particle_out(p4)
     evt.add_vertex(v2)
 
-    v3 = pyhepmc.GenVertex()
+    v3 = hep.GenVertex()
     v3.add_particle_in(p2)
     v3.add_particle_in(p4)
     evt.add_vertex(v3)
 
-    p5 = pyhepmc.GenParticle( (-3.813,  0.113, -1.833, 4.233),  22, 1 )
-    p6 = pyhepmc.GenParticle( ( 1.517,-20.68, -20.605,85.925), -24, 3 )
+    p5 = hep.GenParticle( (-3.813,  0.113, -1.833, 4.233),  22, 1 )
+    p6 = hep.GenParticle( ( 1.517,-20.68, -20.605,85.925), -24, 3 )
 
     v3.add_particle_out(p5)
     v3.add_particle_out(p6)
 
-    v4 = pyhepmc.GenVertex()
+    v4 = hep.GenVertex()
     v4.add_particle_in (p6)
     evt.add_vertex(v4)
 
-    p7 = pyhepmc.GenParticle( (-2.445, 28.816,  6.082,29.552),  1, 1 )
-    p8 = pyhepmc.GenParticle( ( 3.962,-49.498,-26.687,56.373), -2, 1 )
+    p7 = hep.GenParticle( (-2.445, 28.816,  6.082,29.552),  1, 1 )
+    p8 = hep.GenParticle( ( 3.962,-49.498,-26.687,56.373), -2, 1 )
 
     v4.add_particle_out(p7)
     v4.add_particle_out(p8)
 
-    oss = pyhepmc.ostringstream()
-    f = pyhepmc.WriterAscii(oss)
+    oss = hep.ostringstream()
+    f = hep.WriterAscii(oss)
     f.write_event(evt)
     f.close()
 
@@ -93,37 +93,37 @@ HepMC::IO_GenEvent-END_EVENT_LISTING
 
 
 def test_sequence_access():
-    evt = pyhepmc.GenEvent()
-    evt.particles = (pyhepmc.GenParticle(),)
+    evt = hep.GenEvent()
+    evt.particles = (hep.GenParticle(),)
     evt.particles[0].momentum = (1, 2, 3, 4)
     evt.particles[0].pid = 5
-    evt.vertices = (pyhepmc.GenVertex(),)
+    evt.vertices = (hep.GenVertex(),)
     evt.vertices[0].position = (1, 2, 3, 4)
-    assert evt.particles == [pyhepmc.GenParticle((1, 2, 3, 4), 5),]
-    assert evt.vertices == [pyhepmc.GenVertex((1, 2, 3, 4)),]
+    assert evt.particles == [hep.GenParticle((1, 2, 3, 4), 5),]
+    assert evt.vertices == [hep.GenVertex((1, 2, 3, 4)),]
 
 
 def test_read_write():
     import tempfile
 
-    evt1 = pyhepmc.GenEvent()
-    p1 = pyhepmc.GenParticle( (1, 2, 3, 4), 1, 1)
-    p2 = pyhepmc.GenParticle( (5, 6, 7, 8), 2, 2)
-    p3 = pyhepmc.GenParticle( (9, 10, 11, 12), 3, 3)
-    p4 = pyhepmc.GenParticle( (13, 14, 15, 16), 4, 4)
-    v1 = pyhepmc.GenVertex()
+    evt1 = hep.GenEvent()
+    p1 = hep.GenParticle( (1, 2, 3, 4), 1, 1)
+    p2 = hep.GenParticle( (5, 6, 7, 8), 2, 2)
+    p3 = hep.GenParticle( (9, 10, 11, 12), 3, 3)
+    p4 = hep.GenParticle( (13, 14, 15, 16), 4, 4)
+    v1 = hep.GenVertex()
     v1.add_particle_in(p1)
     v1.add_particle_in(p2)
     v1.add_particle_out(p3)
     v1.add_particle_out(p4)
     evt1.add_vertex(v1)
 
-    f = pyhepmc.WriterAscii("test_read_write_file.dat")
+    f = hep.WriterAscii("test_read_write_file.dat")
     f.write_event(evt1)
     f.close()
 
-    f = pyhepmc.ReaderAscii("test_read_write_file.dat")
-    evt2 = pyhepmc.GenEvent()
+    f = hep.ReaderAscii("test_read_write_file.dat")
+    evt2 = hep.GenEvent()
 
     assert evt1 != evt2
     f.read_event(evt2)
