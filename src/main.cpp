@@ -301,7 +301,8 @@ PYBIND11_MODULE(pyhepmc_ng, m) {
 
     py::class_<GenParticle, GenParticlePtr>(m, "GenParticle")
         .def(py::init<const FourVector&, int, int>(),
-             "momentum"_a = FourVector::ZERO_VECTOR(), "pid"_a = 0, "status"_a = 0)
+             "momentum"_a = py::make_tuple(0, 0, 0, 0),
+             "pid"_a = 0, "status"_a = 0)
         PROP_RO(in_event, GenParticle)
         PROP_RO(parent_event, GenParticle)
         PROP_RO(id, GenParticle)
@@ -315,16 +316,15 @@ PYBIND11_MODULE(pyhepmc_ng, m) {
         PROP(pid, GenParticle)
         PROP(status, GenParticle)
         PROP(momentum, GenParticle)
+        PROP(generated_mass, GenParticle)
         METH(is_generated_mass_set, GenParticle)
-        METH(generated_mass, GenParticle)
-        METH(set_generated_mass, GenParticle)
         METH(unset_generated_mass, GenParticle)
         .def(py::self == py::self)
         ;
 
     py::class_<GenVertex, GenVertexPtr>(m, "GenVertex")
         .def(py::init<const FourVector&>(),
-             "position"_a = FourVector::ZERO_VECTOR())
+             "position"_a = py::make_tuple(0, 0, 0, 0))
         PROP_RO(parent_event, GenVertex)
         PROP_RO(in_event, GenVertex)
         PROP_RO(id, GenVertex)
