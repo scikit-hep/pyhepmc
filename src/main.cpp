@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <cmath>
 #include <sstream>
+#include <stdexcept>
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, HepMC::SmartPointer<T>);
 
@@ -125,25 +126,25 @@ using namespace py::literals;
 #define METH(name, cls) .def(#name, &cls::name)
 #define METH_OL(name, cls, args) .def(#name, py::overload_cast<args>(&cls::name))
 
-PYBIND11_MODULE(pyhepmc_ng, m) {
+PYBIND11_MODULE(_pyhepmc_ng, m) {
     using namespace HepMC;
 
-    m.doc() = R"pbdoc(
-        pyhepmc_ng plugin
-        --------------
-        .. currentmodule:: pyhepmc_ng
-        .. autosummary::
-           :toctree: _generate
-           Units
-           FourVector
-           GenEvent
-           GenParticle
-           GenVertex
-           fill_genevent_from_hepevt
-           print_hepevt
-           print_content
-           print_listing
-    )pbdoc";
+    // m.doc() = R"pbdoc(
+    //     _pyhepmc_ng plugin
+    //     --------------
+    //     .. currentmodule:: pyhepmc_ng
+    //     .. autosummary::
+    //        :toctree: _generate
+    //        Units
+    //        FourVector
+    //        GenEvent
+    //        GenParticle
+    //        GenVertex
+    //        fill_genevent_from_hepevt
+    //        print_hepevt
+    //        print_content
+    //        print_listing
+    // )pbdoc";
 
     // m.def("dummy", []() { return 0; }, R"pbdoc(
     //     Return zero
@@ -345,41 +346,55 @@ PYBIND11_MODULE(pyhepmc_ng, m) {
     // py::class_<GenParticleData>(m, "GenParticleData");
     // py::class_<GenVertexData>(m, "GenVertexData");
 
-    py::class_<std::ostringstream>(m, "ostringstream")
+    py::class_<std::stringstream>(m, "stringstream")
         .def(py::init<>())
-        .def("str", (std::string (std::ostringstream::*)() const) &std::ostringstream::str)
+        .def(py::init<std::string>())
+        .def("__str__", (std::string (std::stringstream::*)() const) &std::stringstream::str)
         METH(flush, std::ostringstream)
         ;
 
     py::class_<WriterAscii>(m, "WriterAscii")
         .def(py::init<const std::string&, GenRunInfoPtr>(),
              "filename"_a, "run"_a = nullptr)
-        .def(py::init<std::ostringstream&, GenRunInfoPtr>(),
+        .def(py::init<std::stringstream&, GenRunInfoPtr>(),
              "ostringstream"_a, "run"_a = nullptr,
              py::keep_alive<1, 2>())
         METH(write_event, WriterAscii)
         METH(write_run_info, WriterAscii)
+        .def("write", [](WriterAscii& self, const GenEvent& evt) {
+                self.write_event(evt);
+            })
         METH(failed, WriterAscii)
         METH(close, WriterAscii)
         METH(set_precision, WriterAscii)
         // support contextmanager protocoll
         .def("__enter__", [](py::object self) { return self; })
-        .def("__exit__", [](py::object self, py::args) {
+        .def("__exit__", [](py::object self, py::object type, py::object value, py::object tb) {
                 self.attr("close")();
-                return self;
+                return false;
             })
         ;
 
     py::class_<ReaderAscii>(m, "ReaderAscii")
         .def(py::init<const std::string>(), "filename"_a)
+        .def(py::init<std::stringstream&>())
         METH(read_event, ReaderAscii)
         METH(failed, ReaderAscii)
         METH(close, ReaderAscii)
+        .def("read", [](ReaderAscii& self) {
+                py::object obj = py::cast(GenEvent());
+                bool ok = self.read_event(py::cast<GenEvent&>(obj));
+                if (!ok) {
+                    PyErr_SetString(PyExc_IOError, "error reading event");
+                    throw py::error_already_set();
+                }
+                return obj;
+            })
         // support contextmanager protocoll
         .def("__enter__", [](py::object self) { return self; })
-        .def("__exit__", [](py::object self, py::args) {
+        .def("__exit__", [](py::object self, py::object type, py::object value, py::object tb) {
                 self.attr("close")();
-                return self;
+                return false;
             })
         ;
 

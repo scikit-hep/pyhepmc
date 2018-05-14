@@ -39,7 +39,7 @@ where it is appropriate.
 License: pyhepmc-ng is covered by the BSD license, but the license only
 applies to the binding code. The HepMC code is covered by the GPL-v3 license.
 """
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_packages
 from distutils.command.build_ext import build_ext
 from setuptools import distutils
 import sys
@@ -85,7 +85,7 @@ hepmc_source = glob.glob('src/HepMC3/src/*.cc') + glob.glob('src/HepMC3/src/Sear
 hepmc_include = 'src/HepMC3/include'
 ext_modules = [
     Extension(
-        'pyhepmc_ng',
+        '_pyhepmc_ng',
         ['src/main.cpp'] + hepmc_source,
         include_dirs=[
             hepmc_include,
@@ -167,8 +167,9 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='generator montecarlo simulation data hep physics particle',
-    ext_modules=ext_modules,
+    packages=find_packages(),
     install_requires=['pybind11>=2.2'],
+    ext_modules=ext_modules,
     cmdclass=dict(build_ext=BuildExt),
     zip_safe=False,
 )

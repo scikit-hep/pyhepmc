@@ -1,10 +1,10 @@
-pyhepmc_ng.so: src/main.cpp setup.py
+_pyhepmc_ng.so: src/main.cpp setup.py
 	python setup.py build_ext -i
 
 clean:
 	rm -rf build dist *.so
 
-test:
+test: _pyhepmc_ng.so
 	@pytest tests -s
 
 dist: setup.py src/main.cpp
@@ -16,6 +16,3 @@ test_upload: dist
 
 test_install:
 	pip install --user --index-url https://test.pypi.org/simple/ pyhepmc-ng
-
-upload:
-	echo 
