@@ -22,6 +22,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "hepevt_wrapper.h"
+
 PYBIND11_DECLARE_HOLDER_TYPE(T, HepMC::SmartPointer<T>);
 
 // need to customize getter for SmartPointer
@@ -182,6 +184,33 @@ PYBIND11_MODULE(_pyhepmc_ng, m) {
         .def_property("py", &FourVector::py, &FourVector::setPy)
         .def_property("pz", &FourVector::pz, &FourVector::setPz)
         .def_property("e", &FourVector::e, &FourVector::setE)
+        // support sequence protocol
+        .def("__len__", [](FourVector& self) { return 4; })
+        .def("__getitem__", [](const FourVector& self, int i) {
+                if (i < 0) i += 4;
+                switch(i) {
+                    case 0: return self.x();
+                    case 1: return self.y();
+                    case 2: return self.z();
+                    case 3: return self.t();
+                    default:;// noop
+                }
+                PyErr_SetString(PyExc_IndexError, "out of bounds");
+                throw py::error_already_set();
+                return 0.0;
+            })
+        .def("__setitem__", [](FourVector& self, int i, double v) {
+                if (i < 0) i += 4;
+                switch(i) {
+                    case 0: self.setX(v); break;
+                    case 1: self.setY(v); break;
+                    case 2: self.setZ(v); break;
+                    case 3: self.setT(v); break;
+                    default:
+                        PyErr_SetString(PyExc_IndexError, "out of bounds");
+                        throw py::error_already_set();
+                }
+            })
         METH(length2, FourVector)
         METH(length, FourVector)
         METH(perp2, FourVector)
@@ -207,6 +236,10 @@ PYBIND11_MODULE(_pyhepmc_ng, m) {
         .def(py::self -= py::self)
         .def(py::self *= double())
         .def(py::self /= double())
+        .def("__repr__", [](const FourVector& self) {
+                return py::str("FourVector({0}, {1}, {2}, {3})").format(
+                    self.x(), self.y(), self.z(), self.t());
+            })
         ;
 
     py::implicitly_convertible<py::sequence, FourVector>();
@@ -346,6 +379,53 @@ PYBIND11_MODULE(_pyhepmc_ng, m) {
     // py::class_<GenParticleData>(m, "GenParticleData");
     // py::class_<GenVertexData>(m, "GenVertexData");
 
+    // this class is here to allow unit testing of HEPEVT converters
+    py::class_<HEPEVT>(m, "HEPEVT")
+        .def(py::init<>())
+        .def_readwrite("event_number", &HEPEVT::nevhep)
+        .def_readwrite("nentries", &HEPEVT::nhep)
+        .def("status", [](py::object self) {
+                auto& evt = py::cast<HEPEVT&>(self);
+                return py::array_t<int>(evt.nhep, evt.isthep, self);
+            })
+        .def("pid", [](py::object self) {
+                auto& evt = py::cast<HEPEVT&>(self);
+                return py::array_t<int>(evt.nhep, evt.idhep, self);
+            })
+        .def("parents", [](py::object self) {
+                auto& evt = py::cast<HEPEVT&>(self);
+                return py::array_t<int>({evt.nhep, 2}, &evt.jmohep[0][0], self);
+            })
+        .def("children", [](py::object self) {
+                auto& evt = py::cast<HEPEVT&>(self);
+                return py::array_t<int>({evt.nhep, 2}, &evt.jdahep[0][0], self);
+            })
+        .def("pm", [](py::object self) {
+                auto& evt = py::cast<HEPEVT&>(self);
+                return py::array_t<momentum_t>({evt.nhep, 5}, &evt.phep[0][0], self);
+            })
+        .def("v", [](py::object self) {
+                auto& evt = py::cast<HEPEVT&>(self);
+                return py::array_t<momentum_t>({evt.nhep, 4}, &evt.vhep[0][0], self);
+            })
+        .def("clear", [](HEPEVT& self) {
+                HepMC::HEPEVT_Wrapper::set_hepevt_address((char*)&self);
+                HepMC::HEPEVT_Wrapper::zero_everything();
+            })
+        // GenEvent_to_HEPEVT is broken: sometimes produces wrong connections
+        // .def("fill_from_genevent", [](HEPEVT& self, const GenEvent& evt) {
+        //         HepMC::HEPEVT_Wrapper::set_hepevt_address((char*)&self);
+        //         HepMC::HEPEVT_Wrapper::GenEvent_to_HEPEVT(&evt);
+        //     })
+        .def("__str__", [](const HEPEVT& self) {
+                HepMC::HEPEVT_Wrapper::set_hepevt_address((char*)&self);
+                std::ostringstream os;
+                HepMC::HEPEVT_Wrapper::print_hepevt(os);
+                return os.str();
+            })
+        .def("ptr", [](const HEPEVT& self) { return (std::intptr_t)&self; })
+        ;
+
     py::class_<std::stringstream>(m, "stringstream")
         .def(py::init<>())
         .def(py::init<std::string>())
@@ -398,16 +478,8 @@ PYBIND11_MODULE(_pyhepmc_ng, m) {
             })
         ;
 
-    m.def("fill_genevent_from_hepevt", [](GenEvent& evt, long long address) {
-            evt.clear();
-            HEPEVT_Wrapper::set_hepevt_address((char*)address);
-            HEPEVT_Wrapper::HEPEVT_to_GenEvent(&evt);
-        });
+    m.def("fill_genevent_from_hepevt", fill_genevent_from_hepevt<double>);
 
-    m.def("print_hepevt", [](long long address) {
-            HEPEVT_Wrapper::set_hepevt_address((char*)address);
-            HEPEVT_Wrapper::print_hepevt();
-        });
     m.def("print_content", [](const GenEvent& event) { Print::content(event); });
     m.def("print_listing", [](const GenEvent& event) { Print::listing(event); });
 

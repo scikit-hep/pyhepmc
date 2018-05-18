@@ -1,11 +1,14 @@
-_pyhepmc_ng.so: src/main.cpp setup.py
+_pyhepmc_ng.so: src/*.* setup.py
 	python setup.py build_ext -i
 
 clean:
-	rm -rf build dist *.so
+	rm -rf build/*/*.o *.so
+
+distclean:
+	rrm -rf build dist *.so
 
 test: _pyhepmc_ng.so
-	@pytest tests -s
+	@pytest tests -sv
 
 dist: setup.py src/main.cpp
 	rm -rf dist

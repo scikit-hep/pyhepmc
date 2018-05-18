@@ -89,6 +89,7 @@ ext_modules = [
         ['src/main.cpp'] + hepmc_source,
         include_dirs=[
             hepmc_include,
+            'src',
             lazy_get_pybind_include(user=True),
             lazy_get_pybind_include(),
         ],
