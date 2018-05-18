@@ -90,7 +90,7 @@ hepmc_source = glob.glob('src/HepMC3/src/*.cc') + glob.glob('src/HepMC3/src/Sear
 hepmc_include = 'src/HepMC3/include'
 ext_modules = [
     Extension(
-        '_pyhepmc_ng',
+        'pyhepmc_ng.cpp',
         ['src/main.cpp'] + hepmc_source,
         include_dirs=[
             hepmc_include,

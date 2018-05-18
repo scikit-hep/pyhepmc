@@ -5,7 +5,7 @@ clean:
 	rm -rf build/*/*.o *.so
 
 distclean:
-	rrm -rf build dist *.so
+	rm -rf build dist *.so
 
 test: _pyhepmc_ng.so
 	@pytest tests -sv

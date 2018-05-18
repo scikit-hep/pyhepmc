@@ -1,6 +1,7 @@
 var
 build
 dist
+*.pyc
 *.so
 *.egg-info
 tests/__pycache__

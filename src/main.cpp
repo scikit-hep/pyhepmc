@@ -128,7 +128,7 @@ using namespace py::literals;
 #define METH(name, cls) .def(#name, &cls::name)
 #define METH_OL(name, cls, args) .def(#name, py::overload_cast<args>(&cls::name))
 
-PYBIND11_MODULE(_pyhepmc_ng, m) {
+PYBIND11_MODULE(cpp, m) {
     using namespace HepMC;
 
     // m.doc() = R"pbdoc(

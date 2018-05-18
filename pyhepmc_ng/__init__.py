@@ -1,4 +1,4 @@
-from _pyhepmc_ng import *
+from cpp import *
 
 
 def print_tree(event):
