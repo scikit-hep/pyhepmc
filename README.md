@@ -5,7 +5,7 @@ An alternative wrapper of the HepMC-v3 C++ library.
 The official wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
 Why should you use this one?
 
-*pyhepmc-ng is easy to install*
+**pyhepmc-ng is easy to install**
 
 The command `pip install pyhepmc-ng` just works! You only need a compiler that
 supports C++11, everything else is handled by pip.
@@ -22,11 +22,16 @@ install the C++ library HepMC separately. When you try a pip-install, it will
 in general not work out-of-the-box. Instead you will get intimidating error
 messages, which are difficult to decipher.
 
-*pyhepmc-ng is actively developed*
+**pyhepmc-ng is actively developed and maintained**
 
 The last release of pyhepmc was May 2013.
 
-*pyhepmc-ng supports Pythonic code*
+**pyhepmc-ng is unit tested**
+
+Everything in pyhepmc-ng is unit tested. A few bugs were already found in
+HepMC3 in this way, notably in the `HEPEVT_Wrapper` class.
+
+**pyhepmc-ng supports Pythonic code**
 
 pyhepmc-ng is not a blind mapping of C++ code to Python. It uses Python idioms
 where it is appropriate.
