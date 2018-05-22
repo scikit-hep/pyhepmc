@@ -478,7 +478,9 @@ PYBIND11_MODULE(cpp, m) {
             })
         ;
 
-    m.def("fill_genevent_from_hepevt", fill_genevent_from_hepevt<double>);
+    m.def("fill_genevent_from_hepevt", fill_genevent_from_hepevt<double>,
+          "evt"_a, "event_number"_a, "p"_a, "m"_a, "v"_a, "status"_a, "pid"_a, "parents"_a,
+          "children"_a, "momentum_scaling"_a = 1.0, "length_scaling"_a = 1.0);
 
     m.def("print_content", [](const GenEvent& event) { Print::content(event); });
     m.def("print_listing", [](const GenEvent& event) { Print::listing(event); });

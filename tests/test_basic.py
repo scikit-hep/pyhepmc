@@ -49,28 +49,29 @@ def prepare_event():
     evt.add_particle(p7)
     evt.add_particle(p8)
 
-    v1 = hep.GenVertex();
+    # make sure vertex is not optimized away by WriterAscii
+    v1 = hep.GenVertex((1.0, 1.0, 1.0, 1.0));
     v1.add_particle_in (p1)
     v1.add_particle_out(p3)
-    v1.status = 4 # make sure vertex is not optimized away by WriterAscii
     evt.add_vertex(v1)
 
-    v2 = hep.GenVertex()
+    # make sure vertex is not optimized away by WriterAscii
+    v2 = hep.GenVertex((2.0, 2.0, 2.0, 2.0))
     v2.add_particle_in (p2)
     v2.add_particle_out(p4)
-    v2.status = 4 # make sure vertex is not optimized away by WriterAscii
     evt.add_vertex(v2)
 
-    v3 = hep.GenVertex()
+    # make sure vertex is not optimized away by WriterAscii
+    v3 = hep.GenVertex((3.0, 3.0, 3.0, 3.0))
     v3.add_particle_in(p3)
     v3.add_particle_in(p4)
     v3.add_particle_out(p5)
     v3.add_particle_out(p6)
     evt.add_vertex(v3)
 
-    v4 = hep.GenVertex()
+    # make sure vertex is not optimized away by WriterAscii
+    v4 = hep.GenVertex((4.0, 4.0, 4.0, 4.0))
     v4.add_particle_in (p5)
-    v4.status = 4 # make sure vertex is not optimized away by WriterAscii
     v4.add_particle_out(p7)
     v4.add_particle_out(p8)
     evt.add_vertex(v4)
@@ -78,13 +79,11 @@ def prepare_event():
     return evt
 
 
-def prepare_hepevt():
-    evt = prepare_event()
+def prepare_hepevt(evt):
     particles = evt.particles
-
     h = hep.HEPEVT()
-    h.event_number = 1
-    h.nentries = 8
+    h.event_number = evt.event_number
+    h.nentries = len(evt.particles)
     pid = h.pid()
     sta = h.status()
     par = h.parents()
@@ -108,7 +107,7 @@ def test_hepevt():
     evt = prepare_event()
     particles = evt.particles
 
-    h = prepare_hepevt()
+    h = prepare_hepevt(evt)
     assert h.event_number == evt.event_number
     assert h.nentries == len(evt.particles)
     pid = h.pid()
@@ -166,14 +165,14 @@ E 1 4 8
 U GEV MM
 P 1 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 7.0000000000000000e+03 7.0000000000000000e+03 0.0000000000000000e+00 1
 P 2 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 -7.0000000000000000e+03 7.0000000000000000e+03 0.0000000000000000e+00 2
-V -1 4 [1]
+V -1 0 [1] @ 1.0000000000000000e+00 1.0000000000000000e+00 1.0000000000000000e+00 1.0000000000000000e+00
 P 3 -1 1 7.5000000000000000e-01 -1.5690000000000000e+00 3.2191000000000003e+01 3.2238000000000000e+01 6.2465990744549081e-02 3
-V -2 4 [2]
+V -2 0 [2] @ 2.0000000000000000e+00 2.0000000000000000e+00 2.0000000000000000e+00 2.0000000000000000e+00
 P 4 -2 -2 -3.0470000000000002e+00 -1.9000000000000000e+01 -5.4628999999999998e+01 5.7920000000000002e+01 3.3845236001575724e-01 4
-V -3 0 [3,4]
+V -3 0 [3,4] @ 3.0000000000000000e+00 3.0000000000000000e+00 3.0000000000000000e+00 3.0000000000000000e+00
 P 5 -3 -24 1.5169999999999999e+00 -2.0680000000000000e+01 -2.0605000000000000e+01 8.5924999999999997e+01 8.0799603408680156e+01 5
 P 6 -3 22 -3.8130000000000002e+00 1.1300000000000000e-01 -1.8330000000000000e+00 4.2329999999999997e+00 8.1621075709617186e-02 6
-V -4 4 [5]
+V -4 0 [5] @ 4.0000000000000000e+00 4.0000000000000000e+00 4.0000000000000000e+00 4.0000000000000000e+00
 P 7 -4 1 -2.4449999999999998e+00 2.8815999999999999e+01 6.0819999999999999e+00 2.9552000000000000e+01 -9.9503768772913739e-02 7
 P 8 -4 -2 3.9620000000000002e+00 -4.9497999999999998e+01 -2.6687000000000001e+01 5.6372999999999998e+01 -1.7403447934355551e-01 8
 HepMC::IO_GenEvent-END_EVENT_LISTING
@@ -238,3 +237,21 @@ def test_read_write_file():
 
     import os
     os.unlink("test_read_write_file.dat")
+
+
+def test_fill_genevent_from_hepevt():
+    evt1 = prepare_event()
+    h = prepare_hepevt(evt1)
+    evt2 = hep.GenEvent()
+    hep.fill_genevent_from_hepevt(evt2,
+                                  h.event_number,
+                                  h.pm()[:,:4],
+                                  h.pm()[:,4],
+                                  h.v(),
+                                  h.status(),
+                                  h.pid(),
+                                  h.parents(),
+                                  h.children())
+    assert evt1.particles == evt2.particles
+    assert evt1.vertices == evt2.vertices
+    assert evt1 == evt2
