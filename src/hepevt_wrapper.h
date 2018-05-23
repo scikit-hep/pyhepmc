@@ -14,12 +14,13 @@ bool fill_genevent_from_hepevt(HepMC::GenEvent& evt,
                                pybind11::array_t<RealType> p_array, // N x 4
                                pybind11::array_t<RealType> m_array, // N
                                pybind11::array_t<RealType> v_array, // N x 4
-                               pybind11::array_t<int> status_array, // N
                                pybind11::array_t<int> pid_array,    // N
                                pybind11::array_t<int> parents_array, // N x 2
                                pybind11::array_t<int> /* children_array */, // N x 2, not used
-                               RealType momentum_scaling = 1,
-                               RealType length_scaling = 1) {
+                               pybind11::array_t<int> particle_status_array, // N
+                               pybind11::array_t<int> vertex_status_array, // N
+                               RealType momentum_scaling,
+                               RealType length_scaling) {
     using namespace HepMC;
     namespace py = pybind11;
 
@@ -30,30 +31,32 @@ bool fill_genevent_from_hepevt(HepMC::GenEvent& evt,
     auto pa = p_array.template unchecked<2>();
     auto va = v_array.template unchecked<2>();
     auto ma = m_array.template unchecked<1>();
-    auto sta = status_array.template unchecked<1>();
     auto pid = pid_array.template unchecked<1>();
     auto par = parents_array.template unchecked<2>();
     // auto chi = children_array.template unchecked<2>();
+    auto psta = particle_status_array.template unchecked<1>();
+    auto vsta = vertex_status_array.template unchecked<1>();
 
     const int nentries = pa.shape(0);
 
     assert(va.shape(0) == nentries);
     assert(ma.shape(0) == nentries);
-    assert(sta.shape(0) == nentries);
     assert(pid.shape(0) == nentries);
     assert(par.shape(0) == nentries);
     // assert(chi.shape(0) == nentries);
+    assert(psta.shape(0) == nentries);
+    assert(vsta.shape(0) == nentries);
 
     /*
         first pass: add all particles to the event
     */
     for (int i = 0; i < nentries; ++i) {
         GenParticlePtr p = std::make_shared<GenParticle>();
-        p->set_momentum(FourVector(pa(i, 0) * momentum_scaling,
-                                   pa(i, 1) * momentum_scaling,
-                                   pa(i, 2) * momentum_scaling,
-                                   pa(i, 3) * momentum_scaling));
-        p->set_status(sta(i));
+        p->set_momentum(FourVector(pa(i, 0) / momentum_scaling,
+                                   pa(i, 1) / momentum_scaling,
+                                   pa(i, 2) / momentum_scaling,
+                                   pa(i, 3) / momentum_scaling));
+        p->set_status(psta(i));
         p->set_pid(pid(i));
         p->set_generated_mass(ma(i) * momentum_scaling);
         evt.add_particle(p);
@@ -85,12 +88,13 @@ bool fill_genevent_from_hepevt(HepMC::GenEvent& evt,
         auto vi = vertex_map.find(parents);
         if (vi == vertex_map.end()) {
             GenVertexPtr v = std::make_shared<GenVertex>();
-            v->set_position(FourVector(va(i, 0) * length_scaling,
-                                       va(i, 1) * length_scaling,
-                                       va(i, 2) * length_scaling,
-                                       va(i, 3) * length_scaling));
+            v->set_position(FourVector(va(i, 0) / length_scaling,
+                                       va(i, 1) / length_scaling,
+                                       va(i, 2) / length_scaling,
+                                       va(i, 3) / length_scaling));
             for (auto j = parents.first; j <= parents.second; ++j)
               v->add_particle_in(evt.particles()[j]);
+            v->set_status(vsta(i));
             evt.add_vertex(v);
             vi = vertex_map.insert(std::make_pair(parents, v)).first;
         }

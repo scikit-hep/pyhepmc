@@ -1,4 +1,6 @@
-pyhepmc_ng/cpp.so: src/*.* setup.py
+.py: ; # do nothing for python scripts as dependencies
+
+pyhepmc_ng/cpp.so: src/*.cpp setup.py
 	python setup.py build_ext -i
 
 clean:
@@ -10,7 +12,7 @@ distclean:
 test: pyhepmc_ng/cpp.so
 	@pytest tests -sv
 
-dist: setup.py src/main.cpp
+dist: setup.py src/*.*
 	rm -rf dist
 	python setup.py sdist
 

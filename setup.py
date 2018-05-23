@@ -50,7 +50,6 @@ from setuptools import distutils
 import sys
 import os
 import glob
-import os
 
 __version__ = '0.1.10'
 
@@ -115,29 +114,23 @@ def has_flag(compiler, flagname):
     return True
 
 
-def cpp_flag(compiler):
-    if has_flag(compiler, '-std=c++14'):
-        return '-std=c++14'
-    elif has_flag(compiler, '-std=c++11'):
-        return '-std=c++11'
-    else:
-        raise RuntimeError('Compiler does not support C++11')
+def cpp_flag(compiler, *flags):
+    for flag in flags:
+        if has_flag(compiler, flag):
+            return flag
 
 
 class BuildExt(build_ext):
     compile_flags = dict(msvc=['/EHsc'], unix=[])
-
-    if sys.platform == 'darwin':
-        compile_flags['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
+    # compile_flags['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
 
     def build_extensions(self):
         ct = self.compiler.compiler_type
         opts = self.compile_flags.get(ct, [])
         if ct == 'unix':
-            opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
-            opts.append(cpp_flag(self.compiler))
-            if has_flag(self.compiler, '-fvisibility=hidden'):
-                opts.append('-fvisibility=hidden')
+            opts += ['-DVERSION_INFO="%s"' % self.distribution.get_version(),
+                     cpp_flag(self.compiler, '-std=c++14', '-std=c++11'),
+                     cpp_flag(self.compiler, '-fvisibility=hidden')]
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
         for ext in self.extensions:

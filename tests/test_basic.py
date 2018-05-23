@@ -245,13 +245,15 @@ def test_fill_genevent_from_hepevt():
     evt2 = hep.GenEvent()
     hep.fill_genevent_from_hepevt(evt2,
                                   h.event_number,
-                                  h.pm()[:,:4],
-                                  h.pm()[:,4],
-                                  h.v(),
-                                  h.status(),
+                                  h.pm()[:,:4] * 2,
+                                  h.pm()[:,4] * 2,
+                                  h.v() * 5,
                                   h.pid(),
                                   h.parents(),
-                                  h.children())
+                                  h.children(),
+                                  h.status(),
+                                  np.zeros_like(h.pid()),
+                                  2, 5)
     assert evt1.particles == evt2.particles
     assert evt1.vertices == evt2.vertices
     assert evt1 == evt2
