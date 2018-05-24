@@ -131,7 +131,8 @@ class BuildExt(build_ext):
         if ct == 'unix':
             opts += ['-DVERSION_INFO="%s"' % self.distribution.get_version(),
                      cpp_flag(self.compiler, '-std=c++14'),
-                     cpp_flag(self.compiler, '-fvisibility=hidden')]
+                     cpp_flag(self.compiler, '-fvisibility=hidden'),
+                     cpp_flag(self.compiler, '-stdlib=libc++', '')]
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
         for ext in self.extensions:
