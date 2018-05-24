@@ -80,7 +80,7 @@ bool operator==(const std::vector<GenVertexPtr>& a,
 {
     if (a.size() != b.size())
         return false;
-    int i = 0;
+    std::size_t i = 0;
     for (; i < a.size() && *a[i] == *b[i]; ++i);
     return i == a.size();
 }
@@ -90,7 +90,7 @@ bool operator==(const std::vector<GenParticlePtr>& a,
 {
     if (a.size() != b.size())
         return false;
-    int i = 0;
+    std::size_t i = 0;
     for (; i < a.size() && *a[i] == *b[i]; ++i);
     return i == a.size();
 }

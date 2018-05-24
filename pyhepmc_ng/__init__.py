@@ -1,5 +1,5 @@
 from __future__ import print_function
-from cpp import *
+from . cpp import *
 
 
 def print_tree(event):
