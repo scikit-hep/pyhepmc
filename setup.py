@@ -118,6 +118,7 @@ def cpp_flag(compiler, *flags):
     for flag in flags:
         if has_flag(compiler, flag):
             return flag
+    raise StandardError("cpp flags failed: {0}".format(flags))
 
 
 class BuildExt(build_ext):
