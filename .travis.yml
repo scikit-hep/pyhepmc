@@ -13,30 +13,23 @@ matrix:
         - CC=gcc-6
         - CXX=g++-6
 
-    # - os: linux
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-7
-    #   env:
-    #     - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+      env:
+        - CC=clang-3.8
+        - CXX=clang++-3.8"
 
-    # - os: linux
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #         - llvm-toolchain-precise-3.8
-    #       packages:
-    #         - clang-3.8
-    #   env:
-    #     - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
+    - os: osx
 
 python:
   - "2.7"
-  # - "3.6"
+  - "3.6"
 
 install:
   - pip install .
