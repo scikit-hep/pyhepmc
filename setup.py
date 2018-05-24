@@ -7,7 +7,7 @@ Why should you use this one?
 **pyhepmc-ng is easy to install**
 
 The command `pip install pyhepmc-ng` just works! You only need a compiler that
-supports C++11, everything else is handled by pip.
+supports C++14, everything else is handled by pip.
 
 Under the hood, the bindings are build with the excellent
 [pybind11](http://pybind11.readthedocs.io/en/stable/) library.
@@ -58,7 +58,7 @@ class lazy_get_pybind_include:
     def __init__(self, user=False):
         self.user = user
 
-    def __str__(self):
+    def __str__(self): # delay import of pybind11 until requirements are installed
         import pybind11
         return pybind11.get_include(self.user)
 
@@ -129,7 +129,7 @@ class BuildExt(build_ext):
         opts = self.compile_flags.get(ct, [])
         if ct == 'unix':
             opts += ['-DVERSION_INFO="%s"' % self.distribution.get_version(),
-                     cpp_flag(self.compiler, '-std=c++14', '-std=c++11'),
+                     cpp_flag(self.compiler, '-std=c++14'),
                      cpp_flag(self.compiler, '-fvisibility=hidden')]
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
