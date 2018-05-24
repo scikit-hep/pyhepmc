@@ -66,13 +66,13 @@ bool operator==(const GenVertex& a, const GenVertex& b) {
     auto equal_id = [](const GenParticlePtr& a,
                        const GenParticlePtr& b) { return a->id() == b->id(); };
     return a.id() == b.id() && a.status() == b.status() &&
-        a.particles_in().size() == b.particles_in().size() &&
-        a.particles_out().size() == b.particles_out().size() &&
         is_close(a.position(), b.position()) &&
         std::equal(a.particles_in().begin(), a.particles_in().end(),
-                   b.particles_in().begin(), equal_id) &&
+                   b.particles_in().begin(), b.particles_in().end(),
+                   equal_id) &&
         std::equal(a.particles_out().begin(), a.particles_out().end(),
-                   b.particles_out().begin(), equal_id);
+                   b.particles_out().begin(), b.particles_out().end(),
+                   equal_id);
 }
 
 bool operator==(const std::vector<GenVertexPtr>& a,
@@ -110,8 +110,8 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
         a_tools = a.run_info()->tools();
     if (b.run_info())
         b_tools = b.run_info()->tools();
-    if (a_tools.size() != b_tools.size() ||
-        !std::equal(a_tools.begin(), a_tools.end(), b_tools.begin()))
+    if (!std::equal(a_tools.begin(), a_tools.end(),
+                    b_tools.begin(), b_tools.end()))
         return false;
 
     return a.vertices() == b.vertices() && a.particles() == b.particles();
