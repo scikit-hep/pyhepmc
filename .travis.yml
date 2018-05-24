@@ -39,9 +39,6 @@ matrix:
         - CXX=clang++-3.8
       python: "2.7"
 
-    - os: osx
-      python: "2.7"
-
 install:
   - pip install .
 

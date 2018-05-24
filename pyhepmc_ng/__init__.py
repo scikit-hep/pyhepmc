@@ -1,4 +1,5 @@
 from cpp import *
+from __future__ import print_function
 
 
 def print_tree(event):
@@ -12,7 +13,7 @@ def print_tree(event):
         else:
             pin = [p]
         s = "+".join(("p[%i](%i, %.3g, %.3g)"%(p.id, p.pid, p.momentum.z/momentum_unit, p.momentum.e/momentum_unit) for p in pin))
-        print indent+s
+        print(indent+s)
         for pi in p.children:
             visitor(level + 1, pi, momentum_unit)
 

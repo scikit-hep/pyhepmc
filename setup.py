@@ -122,7 +122,7 @@ def cpp_flag(compiler, *flags):
 
 
 class BuildExt(build_ext):
-    compile_flags = dict(msvc=['/EHsc'], unix=[])
+    compile_flags = dict(msvc=['/EHsc'], unix=['-stdlib=libc++'])
     # compile_flags['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
 
     def build_extensions(self):
