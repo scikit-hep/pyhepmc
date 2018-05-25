@@ -116,8 +116,10 @@ def has_flag(compiler, flagname):
 
 def cpp_flag(compiler, *flags):
     for flag in flags:
+        if not flag:
+            return []
         if has_flag(compiler, flag):
-            return flag
+            return [flag]
     raise StandardError("cpp flags failed: {0}".format(flags))
 
 
@@ -129,10 +131,10 @@ class BuildExt(build_ext):
         ct = self.compiler.compiler_type
         opts = self.compile_flags.get(ct, [])
         if ct == 'unix':
-            opts += ['-DVERSION_INFO="%s"' % self.distribution.get_version(),
-                     cpp_flag(self.compiler, '-std=c++14'),
-                     cpp_flag(self.compiler, '-fvisibility=hidden'),
-                     cpp_flag(self.compiler, '-stdlib=libc++', '')]
+            opts += ['-DVERSION_INFO="%s"' % self.distribution.get_version()]
+            opts += cpp_flag(self.compiler, '-std=c++14')
+            opts += cpp_flag(self.compiler, '-fvisibility=hidden')
+            opts += cpp_flag(self.compiler, '-stdlib=libc++', '')
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
         for ext in self.extensions:
