@@ -15,7 +15,6 @@ matrix:
         - CC=gcc-6
         - CXX=g++-6
       python: "2.7"
-      compiler: gcc
 
     - os: linux
       addons:
@@ -28,7 +27,6 @@ matrix:
         - CC=gcc-6
         - CXX=g++-6
       python: "3.6"
-      compiler: gcc
 
     - os: linux
       addons:
@@ -36,12 +34,12 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - gcc-c++
             - clang-3.8
       env:
         - CC=clang-3.8
         - CXX=clang++-3.8
       python: "2.7"
-      compiler: clang
 
 install:
   - pip install .
