@@ -21,7 +21,7 @@ install the C++ library HepMC separately. When you try a pip-install, it will
 in general not work out-of-the-box. Instead you will get intimidating error
 messages, which are difficult to decipher.
 
-**pyhepmc-ng is actively developed**
+**pyhepmc-ng is actively developed and maintained**
 
 The last release of pyhepmc was May 2013.
 

@@ -28,4 +28,4 @@ test_install:
 	pip install --user --index-url https://test.pypi.org/simple/ pyhepmc-ng
 
 upload: dist
-	twine upload dist/*
+	twine upload --username hdembins dist/*
