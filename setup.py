@@ -51,7 +51,7 @@ import sys
 import os
 import glob
 
-__version__ = '0.2'
+__version__ = '0.2.1'
 
 
 class lazy_get_pybind_include:

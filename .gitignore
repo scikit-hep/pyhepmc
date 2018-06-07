@@ -6,3 +6,5 @@ dist
 *.egg-info
 tests/__pycache__
 .cache
+.compiler_support_cache
+.pytest_cache
