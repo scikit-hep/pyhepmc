@@ -51,7 +51,7 @@ import sys
 import os
 import glob
 
-__version__ = '0.1.10'
+__version__ = '0.2'
 
 
 class lazy_get_pybind_include:
@@ -152,7 +152,7 @@ setup(
     long_description=__doc__,
     long_description_content_type='text/markdown',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',

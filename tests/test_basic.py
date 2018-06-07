@@ -251,8 +251,8 @@ def test_fill_genevent_from_hepevt():
                                   h.pid(),
                                   h.parents(),
                                   h.children(),
-                                  h.status(),
-                                  np.zeros_like(h.pid()),
+                                  h.status(),             # particle status
+                                  np.zeros_like(h.pid()), # vertex status
                                   2, 5)
     assert evt1.particles == evt2.particles
     assert evt1.vertices == evt2.vertices
