@@ -4,9 +4,6 @@ language: python
 
 matrix:
   include:
-    - os: osx
-      language: generic
-
     - os: linux
       addons:
         apt:
