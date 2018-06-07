@@ -5,38 +5,33 @@ language: python
 matrix:
   include:
     - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env: CC=g++-6
+      env:
+        - CC=clang # clang-5
+        - CXX=clang++
       python: "2.7"
 
     - os: linux
+      env:
+        - CC=clang # clang-5
+        - CXX=clang++
+      python: "3.6"
+
+    # - os: osx
+    #   python: "2.7"
+
+    # - os: osx
+    #   python: "3.6"
+
+    - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-      env: CC=g++-6
-      python: "3.6"
-
-    # - os: linux
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - clang-3.8
-    #   env:
-    #     - CC=clang++
-    #   python: "2.7"
-
-    - os: linux
-      env: CC=clang++
+      env:
+        - CC=gcc-6
+        - CXX=g++-6
       python: "2.7"
 
 install:
