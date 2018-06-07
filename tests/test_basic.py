@@ -33,13 +33,21 @@ def prepare_event():
 
     #                         px      py       pz        e   pdgid status
     p1 = hep.GenParticle((   0.0,    0.0,  7000.0,  7000.0), 2212,  1)
+    p1.generated_mass = 0.938
     p2 = hep.GenParticle((   0.0,    0.0, -7000.0,  7000.0), 2212,  2)
+    p2.generated_mass = 0.938
     p3 = hep.GenParticle(( 0.750, -1.569,  32.191,  32.238),    1,  3)
+    p3.generated_mass = 0
     p4 = hep.GenParticle((-3.047,  -19.0, -54.629,  57.920),   -2,  4)
+    p4.generated_mass = 0
     p5 = hep.GenParticle(( 1.517, -20.68, -20.605,  85.925),  -24,  5)
+    p5.generated_mass = 80.799
     p6 = hep.GenParticle((-3.813,  0.113,  -1.833,   4.233),   22,  6)
+    p6.generated_mass = 0
     p7 = hep.GenParticle((-2.445, 28.816,   6.082,  29.552),    1,  7)
+    p7.generated_mass = 0.01
     p8 = hep.GenParticle(( 3.962,-49.498, -26.687,  56.373),   -2,  8)
+    p8.generated_mass = 0.006
     evt.add_particle(p1)
     evt.add_particle(p2)
     evt.add_particle(p3)
@@ -130,14 +138,14 @@ def test_hepevt():
             assert np.allclose(v[i], p.production_vertex.position)
     assert str(h) == """ Event No.: 1
   Nr   Type   Parent(s)  Daughter(s)      Px       Py       Pz       E    Inv. M.
-    1   2212   0 -    0     3 -    3     0.00     0.00  7000.00  7000.00     0.00
-    2   2212   0 -    0     4 -    4     0.00     0.00 -7000.00  7000.00     0.00
-    3      1   1 -    1     5 -    6     0.75    -1.57    32.19    32.24     0.06
-    4     -2   2 -    2     5 -    6    -3.05   -19.00   -54.63    57.92     0.34
+    1   2212   0 -    0     3 -    3     0.00     0.00  7000.00  7000.00     0.94
+    2   2212   0 -    0     4 -    4     0.00     0.00 -7000.00  7000.00     0.94
+    3      1   1 -    1     5 -    6     0.75    -1.57    32.19    32.24     0.00
+    4     -2   2 -    2     5 -    6    -3.05   -19.00   -54.63    57.92     0.00
     5    -24   3 -    4     7 -    8     1.52   -20.68   -20.61    85.92    80.80
-    6     22   3 -    4     0 -    0    -3.81     0.11    -1.83     4.23     0.08
-    7      1   5 -    5     0 -    0    -2.44    28.82     6.08    29.55    -0.10
-    8     -2   5 -    5     0 -    0     3.96   -49.50   -26.69    56.37    -0.17
+    6     22   3 -    4     0 -    0    -3.81     0.11    -1.83     4.23     0.00
+    7      1   5 -    5     0 -    0    -2.44    28.82     6.08    29.55     0.01
+    8     -2   5 -    5     0 -    0     3.96   -49.50   -26.69    56.37     0.01
 """
 
 
@@ -163,18 +171,18 @@ def test_read_write_stream():
 HepMC::IO_GenEvent-START_EVENT_LISTING
 E 1 4 8
 U GEV MM
-P 1 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 7.0000000000000000e+03 7.0000000000000000e+03 0.0000000000000000e+00 1
-P 2 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 -7.0000000000000000e+03 7.0000000000000000e+03 0.0000000000000000e+00 2
+P 1 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 7.0000000000000000e+03 7.0000000000000000e+03 9.3799999999999994e-01 1
+P 2 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 -7.0000000000000000e+03 7.0000000000000000e+03 9.3799999999999994e-01 2
 V -1 0 [1] @ 1.0000000000000000e+00 1.0000000000000000e+00 1.0000000000000000e+00 1.0000000000000000e+00
-P 3 -1 1 7.5000000000000000e-01 -1.5690000000000000e+00 3.2191000000000003e+01 3.2238000000000000e+01 6.2465990744549081e-02 3
+P 3 -1 1 7.5000000000000000e-01 -1.5690000000000000e+00 3.2191000000000003e+01 3.2238000000000000e+01 0.0000000000000000e+00 3
 V -2 0 [2] @ 2.0000000000000000e+00 2.0000000000000000e+00 2.0000000000000000e+00 2.0000000000000000e+00
-P 4 -2 -2 -3.0470000000000002e+00 -1.9000000000000000e+01 -5.4628999999999998e+01 5.7920000000000002e+01 3.3845236001575724e-01 4
+P 4 -2 -2 -3.0470000000000002e+00 -1.9000000000000000e+01 -5.4628999999999998e+01 5.7920000000000002e+01 0.0000000000000000e+00 4
 V -3 0 [3,4] @ 3.0000000000000000e+00 3.0000000000000000e+00 3.0000000000000000e+00 3.0000000000000000e+00
-P 5 -3 -24 1.5169999999999999e+00 -2.0680000000000000e+01 -2.0605000000000000e+01 8.5924999999999997e+01 8.0799603408680156e+01 5
-P 6 -3 22 -3.8130000000000002e+00 1.1300000000000000e-01 -1.8330000000000000e+00 4.2329999999999997e+00 8.1621075709617186e-02 6
+P 5 -3 -24 1.5169999999999999e+00 -2.0680000000000000e+01 -2.0605000000000000e+01 8.5924999999999997e+01 8.0799000000000007e+01 5
+P 6 -3 22 -3.8130000000000002e+00 1.1300000000000000e-01 -1.8330000000000000e+00 4.2329999999999997e+00 0.0000000000000000e+00 6
 V -4 0 [5] @ 4.0000000000000000e+00 4.0000000000000000e+00 4.0000000000000000e+00 4.0000000000000000e+00
-P 7 -4 1 -2.4449999999999998e+00 2.8815999999999999e+01 6.0819999999999999e+00 2.9552000000000000e+01 -9.9503768772913739e-02 7
-P 8 -4 -2 3.9620000000000002e+00 -4.9497999999999998e+01 -2.6687000000000001e+01 5.6372999999999998e+01 -1.7403447934355551e-01 8
+P 7 -4 1 -2.4449999999999998e+00 2.8815999999999999e+01 6.0819999999999999e+00 2.9552000000000000e+01 1.0000000000000000e-02 7
+P 8 -4 -2 3.9620000000000002e+00 -4.9497999999999998e+01 -2.6687000000000001e+01 5.6372999999999998e+01 6.0000000000000001e-03 8
 HepMC::IO_GenEvent-END_EVENT_LISTING
 
 """
@@ -254,6 +262,55 @@ def test_fill_genevent_from_hepevt():
                                   h.status(),             # particle status
                                   np.zeros_like(h.pid()), # vertex status
                                   2, 5)
+    assert evt1.particles == evt2.particles
+    assert evt1.vertices == evt2.vertices
+    assert evt1 == evt2
+
+
+def test_fill_genevent_from_hepevt_using_raw_ptr():
+    nmax = 10000
+    s_int = 4
+    s_float = 8
+
+    def ptr_to_array(ptr, dtype, shape):
+        import ctypes
+        if dtype is int:
+            data_pointer = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_int))
+            return np.ctypeslib.as_array(data_pointer, shape=shape)
+        elif dtype is float:
+            data_pointer = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
+            return np.ctypeslib.as_array(data_pointer, shape=shape)
+
+    evt1 = prepare_event()
+    h = prepare_hepevt(evt1)
+    ptr = h.ptr
+    event_number = ptr_to_array(ptr, int, (1,))[0]
+    ptr += s_int
+    npart = ptr_to_array(ptr, int, (1,))[0]
+    ptr += s_int
+    status = ptr_to_array(ptr, int, (npart,))
+    ptr += nmax * s_int
+    pid = ptr_to_array(ptr, int, (npart,))
+    ptr += nmax * s_int
+    parents = ptr_to_array(ptr, int, (npart,2))
+    ptr += nmax * 2 * s_int
+    children = ptr_to_array(ptr, int, (npart,2))
+    ptr += nmax * 2 * s_int
+    p = ptr_to_array(ptr, float, (npart,5))
+    ptr += nmax * 5 * s_float
+    v = ptr_to_array(ptr, float, (npart,4))
+    evt2 = hep.GenEvent()
+    hep.fill_genevent_from_hepevt(evt2,
+                                  event_number,
+                                  p[:,:4],
+                                  p[:,4],
+                                  v,
+                                  pid,
+                                  parents,
+                                  children,
+                                  status,             # particle status
+                                  np.zeros_like(pid), # vertex status
+                                  )
     assert evt1.particles == evt2.particles
     assert evt1.vertices == evt2.vertices
     assert evt1 == evt2

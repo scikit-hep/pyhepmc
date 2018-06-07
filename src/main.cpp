@@ -423,7 +423,7 @@ PYBIND11_MODULE(cpp, m) {
                 HepMC::HEPEVT_Wrapper::print_hepevt(os);
                 return os.str();
             })
-        .def("ptr", [](const HEPEVT& self) { return (std::intptr_t)&self; })
+        .def_property_readonly("ptr", [](const HEPEVT& self) { return (std::intptr_t)&self; })
         ;
 
     py::class_<std::stringstream>(m, "stringstream")
