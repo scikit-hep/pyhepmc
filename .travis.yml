@@ -1,6 +1,6 @@
-language: python
-
 sudo: false
+
+language: python
 
 matrix:
   include:
@@ -11,9 +11,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-      env:
-        - CC=gcc-6
-        - CXX=g++-6
+      env: CC=g++-6
       python: "2.7"
 
     - os: linux
@@ -23,22 +21,22 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-      env:
-        - CC=gcc-6
-        - CXX=g++-6
+      env: CC=g++-6
       python: "3.6"
 
+    # - os: linux
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #       packages:
+    #         - clang-3.8
+    #   env:
+    #     - CC=clang++
+    #   python: "2.7"
+
     - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - gcc-c++
-            - clang-3.8
-      env:
-        - CC=clang-3.8
-        - CXX=clang++-3.8
+      env: CC=clang++
       python: "2.7"
 
 install:
