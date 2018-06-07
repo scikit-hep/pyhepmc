@@ -4,20 +4,8 @@ language: python
 
 matrix:
   include:
-    - os: linux
-      env:
-        - CC=clang # clang-5
-        - CXX=clang++
+    - os: osx
       python: "2.7"
-
-    - os: linux
-      env:
-        - CC=clang # clang-5
-        - CXX=clang++
-      python: "3.6"
-
-    # - os: osx
-    #   python: "2.7"
 
     # - os: osx
     #   python: "3.6"
@@ -33,6 +21,18 @@ matrix:
         - CC=gcc-6
         - CXX=g++-6
       python: "2.7"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - CC=gcc-6
+        - CXX=g++-6
+      python: "3.6"
 
 install:
   - pip install .
