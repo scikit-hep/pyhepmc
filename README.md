@@ -36,8 +36,8 @@ HepMC3 in this way, notably in the `HEPEVT_Wrapper` class.
 
 **pyhepmc-ng supports Pythonic code**
 
-pyhepmc-ng is not a blind mapping of C++ code to Python. It uses Python idioms
-where it is appropriate.
+pyhepmc-ng is a hand-crafted mapping of C++ code to Python. It uses Python
+idioms where it is appropriate.
 
 - C++ methods which act like properties are represented as properties,
   e.g. GenParticle::set_status and GenParticle::status are mapped to a single

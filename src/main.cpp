@@ -427,33 +427,12 @@ PYBIND11_MODULE(cpp, m) {
         .def_property_readonly_static("max_size", [](py::object){ return NMXHEP; } )
         ;
 
+    // this class is here to simplify unit testing of Reader- and WriterAscii
     py::class_<std::stringstream>(m, "stringstream")
         .def(py::init<>())
         .def(py::init<std::string>())
         .def("__str__", (std::string (std::stringstream::*)() const) &std::stringstream::str)
         METH(flush, std::ostringstream)
-        ;
-
-    py::class_<WriterAscii>(m, "WriterAscii")
-        .def(py::init<const std::string&, GenRunInfoPtr>(),
-             "filename"_a, "run"_a = nullptr)
-        .def(py::init<std::stringstream&, GenRunInfoPtr>(),
-             "ostringstream"_a, "run"_a = nullptr,
-             py::keep_alive<1, 2>())
-        METH(write_event, WriterAscii)
-        METH(write_run_info, WriterAscii)
-        .def("write", [](WriterAscii& self, const GenEvent& evt) {
-                self.write_event(evt);
-            })
-        METH(failed, WriterAscii)
-        METH(close, WriterAscii)
-        METH(set_precision, WriterAscii)
-        // support contextmanager protocoll
-        .def("__enter__", [](py::object self) { return self; })
-        .def("__exit__", [](py::object self, py::object type, py::object value, py::object tb) {
-                self.attr("close")();
-                return false;
-            })
         ;
 
     py::class_<ReaderAscii>(m, "ReaderAscii")
@@ -473,8 +452,30 @@ PYBIND11_MODULE(cpp, m) {
             })
         // support contextmanager protocoll
         .def("__enter__", [](py::object self) { return self; })
-        .def("__exit__", [](py::object self, py::object type, py::object value, py::object tb) {
-                self.attr("close")();
+        .def("__exit__", [](ReaderAscii& self, py::object type, py::object value, py::object tb) {
+                self.close();
+                return false;
+            })
+        ;
+
+    py::class_<WriterAscii>(m, "WriterAscii")
+        .def(py::init<const std::string&, GenRunInfoPtr>(),
+             "filename"_a, "run"_a = nullptr)
+        .def(py::init<std::stringstream&, GenRunInfoPtr>(),
+             "ostringstream"_a, "run"_a = nullptr,
+             py::keep_alive<1, 2>())
+        METH(write_event, WriterAscii)
+        METH(write_run_info, WriterAscii)
+        .def("write", [](WriterAscii& self, const GenEvent& evt) {
+                self.write_event(evt);
+            })
+        METH(failed, WriterAscii)
+        METH(close, WriterAscii)
+        PROP(precision, WriterAscii)
+        // support contextmanager protocoll
+        .def("__enter__", [](py::object self) { return self; })
+        .def("__exit__", [](WriterAscii& self, py::object type, py::object value, py::object tb) {
+                self.close();
                 return false;
             })
         ;

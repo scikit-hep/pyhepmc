@@ -59,6 +59,11 @@ public:
         m_precision = prec;
     }
 
+    /// @brief Return output precision
+    int precision() const {
+        return m_precision;
+    }
+
 private:
 
     /// @name Buffer management
