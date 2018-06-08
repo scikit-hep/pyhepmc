@@ -46,12 +46,8 @@ def fill_genevent_from_hepevent_ptr(ptr_as_int, max_size,
 
     event_number = h.event_number
     n = h.nentries
-    status = np.asarray(h.status)
-    pid = np.asarray(h.pid)
-    parents = np.asarray(h.parents)
-    children = np.asarray(h.children)
+    status = np.asarray(h.status)[:n]
     pm = np.asarray(h.pm)
-    v = np.asarray(h.v)
 
     if hep_status_decoder is None:
         particle_status = status
@@ -64,12 +60,12 @@ def fill_genevent_from_hepevent_ptr(ptr_as_int, max_size,
                               event_number,
                               pm[:n,:4],
                               pm[:n,4],
-                              v[:n],
-                              pid[:n],
-                              parents[:n],
-                              children[:n],
-                              particle_status[:n],
-                              vertex_status[:n],
+                              h.v[:n],
+                              h.pid[:n],
+                              h.parents[:n],
+                              h.children[:n],
+                              particle_status,
+                              vertex_status,
                               momentum_unit,
                               length_unit)
     return evt
