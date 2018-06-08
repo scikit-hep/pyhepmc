@@ -267,10 +267,11 @@ def test_fill_genevent_from_hepevt():
     assert evt1 == evt2
 
 
-def test_fill_genevent_from_hepevt_using_raw_ptr():
+def test_fill_genevent_from_hepevt_ptr():
     evt1 = prepare_event()
     h = prepare_hepevt(evt1)
-    evt2 = hep.fill_genevent_from_hepevent_ptr(h.ptr, h.max_size)
+    evt2 = hep.GenEvent()
+    hep.fill_genevent_from_hepevent_ptr(evt2, h.ptr, h.max_size)
     assert evt1.particles == evt2.particles
     assert evt1.vertices == evt2.vertices
     assert evt1 == evt2

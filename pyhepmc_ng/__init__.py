@@ -3,7 +3,7 @@ import ctypes
 import numpy as np
 
 
-def fill_genevent_from_hepevent_ptr(ptr_as_int, max_size,
+def fill_genevent_from_hepevent_ptr(evt, ptr_as_int, max_size,
                                     int_type=ctypes.c_int,
                                     float_type=ctypes.c_double,
                                     hep_status_decoder=None,
@@ -55,7 +55,6 @@ def fill_genevent_from_hepevent_ptr(ptr_as_int, max_size,
     else:
         particle_status, vertex_status = hep_status_decoder(status)
 
-    evt = GenEvent()
     fill_genevent_from_hepevt(evt,
                               event_number,
                               pm[:n,:4],
