@@ -268,49 +268,9 @@ def test_fill_genevent_from_hepevt():
 
 
 def test_fill_genevent_from_hepevt_using_raw_ptr():
-    nmax = 10000
-    s_int = 4
-    s_float = 8
-
-    def ptr_to_array(ptr, dtype, shape):
-        import ctypes
-        if dtype is int:
-            data_pointer = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_int))
-            return np.ctypeslib.as_array(data_pointer, shape=shape)
-        elif dtype is float:
-            data_pointer = ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
-            return np.ctypeslib.as_array(data_pointer, shape=shape)
-
     evt1 = prepare_event()
     h = prepare_hepevt(evt1)
-    ptr = h.ptr
-    event_number = ptr_to_array(ptr, int, (1,))[0]
-    ptr += s_int
-    npart = ptr_to_array(ptr, int, (1,))[0]
-    ptr += s_int
-    status = ptr_to_array(ptr, int, (npart,))
-    ptr += nmax * s_int
-    pid = ptr_to_array(ptr, int, (npart,))
-    ptr += nmax * s_int
-    parents = ptr_to_array(ptr, int, (npart,2))
-    ptr += nmax * 2 * s_int
-    children = ptr_to_array(ptr, int, (npart,2))
-    ptr += nmax * 2 * s_int
-    p = ptr_to_array(ptr, float, (npart,5))
-    ptr += nmax * 5 * s_float
-    v = ptr_to_array(ptr, float, (npart,4))
-    evt2 = hep.GenEvent()
-    hep.fill_genevent_from_hepevt(evt2,
-                                  event_number,
-                                  p[:,:4],
-                                  p[:,4],
-                                  v,
-                                  pid,
-                                  parents,
-                                  children,
-                                  status,             # particle status
-                                  np.zeros_like(pid), # vertex status
-                                  )
+    evt2 = hep.fill_genevent_from_hepevent_ptr(h.ptr, h.max_size)
     assert evt1.particles == evt2.particles
     assert evt1.vertices == evt2.vertices
     assert evt1 == evt2

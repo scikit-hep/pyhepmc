@@ -424,6 +424,7 @@ PYBIND11_MODULE(cpp, m) {
                 return os.str();
             })
         .def_property_readonly("ptr", [](const HEPEVT& self) { return (std::intptr_t)&self; })
+        .def_property_readonly_static("max_size", [](py::object){ return NMXHEP; } )
         ;
 
     py::class_<std::stringstream>(m, "stringstream")

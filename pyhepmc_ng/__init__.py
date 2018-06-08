@@ -1,23 +1,75 @@
-from __future__ import print_function
 from . cpp import *
+import ctypes
+import numpy as np
 
 
-def print_tree(event):
-    momentum_unit = event.momentum_unit
-    momentum_unit_value = 1.0 if momentum_unit == Units.GEV else 1e3
-    def visitor(level, p, momentum_unit):
-        indent = "  " * level
-        v = p.end_vertex
-        if v:
-            pin = v.particles_in
-        else:
-            pin = [p]
-        s = "+".join(("p[%i](%i, %.3g, %.3g)"%(p.id, p.pid, p.momentum.z/momentum_unit, p.momentum.e/momentum_unit) for p in pin))
-        print(indent+s)
-        for pi in p.children:
-            visitor(level + 1, pi, momentum_unit)
+def fill_genevent_from_hepevent_ptr(ptr_as_int, max_size,
+                                    int_type=ctypes.c_int,
+                                    float_type=ctypes.c_double,
+                                    hep_status_decoder=None,
+                                    momentum_unit = 1,
+                                    length_unit = 1):
 
-    for p in event.particles:
-        if len(p.parents) == 0:
-            visitor(0, p, momentum_unit_value)
+    # struct HEPEVT                      // Fortran common block HEPEVT
+    # {
+    #     int        nevhep;             // Event number
+    #     int        nhep;               // Number of entries in the event
+    #     int        isthep[NMXHEP];     // Status code
+    #     int        idhep [NMXHEP];     // PDG ID
+    #     int        jmohep[NMXHEP][2];  // Idx of first and last mother
+    #     int        jdahep[NMXHEP][2];  // Idx of first and last daughter
+    #     momentum_t phep  [NMXHEP][5];  // Momentum: px, py, pz, e, m
+    #     momentum_t vhep  [NMXHEP][4];  // Vertex: x, y, z, t
+    # };
 
+    IntArray = int_type * max_size
+    Int2 = int_type * 2
+    Int2Array = Int2 * max_size
+    Float4 = float_type * 4
+    Float5 = float_type * 5
+    Float4Array = Float4 * max_size
+    Float5Array = Float5 * max_size
+
+    class HEPEVT(ctypes.Structure):
+        _fields_ = (
+                ("event_number", int_type),
+                ("nentries", int_type),
+                ("status", IntArray),
+                ("pid", IntArray),
+                ("parents", Int2Array),
+                ("children", Int2Array),
+                ("pm", Float5Array),
+                ("v", Float4Array)
+            )
+
+    h = ctypes.cast(ptr_as_int, ctypes.POINTER(HEPEVT))[0]
+
+    event_number = h.event_number
+    n = h.nentries
+    status = np.asarray(h.status)
+    pid = np.asarray(h.pid)
+    parents = np.asarray(h.parents)
+    children = np.asarray(h.children)
+    pm = np.asarray(h.pm)
+    v = np.asarray(h.v)
+
+    if hep_status_decoder is None:
+        particle_status = status
+        vertex_status = np.zeros_like(status)
+    else:
+        particle_status, vertex_status = hep_status_decoder(status)
+
+    evt = GenEvent()
+    fill_genevent_from_hepevt(evt,
+                              event_number,
+                              pm[:n,:4],
+                              pm[:n,4],
+                              v[:n],
+                              pid[:n],
+                              parents[:n],
+                              children[:n],
+                              particle_status[:n],
+                              vertex_status[:n],
+                              momentum_unit,
+                              length_unit)
+    return evt
