@@ -57,8 +57,8 @@ public:
 // Fields
 //
 private:
-    TFile m_file; //!< File handler
-    TIter m_next; //!< Iterator for event reading
+    TFile* m_file; //!< File handler
+    TIter* m_next; //!< Iterator for event reading
 };
 
 } // namespace HepMC

@@ -35,7 +35,7 @@ bool ReaderHEPEVT::read_hepevt_event_header()
     int m_i=0, m_p=0;
     while(!eventline)
         {
-            if (fgets(buf_e,READERHEPEVTBUFFERSIZE,m_file)==NULL) break;
+            if (fgets(buf_e,READERHEPEVTBUFFERSIZE,m_file)==nullptr) break;
             std::stringstream st_e(buf_e);
             char attr=' ';
             eventline=false;
@@ -63,8 +63,8 @@ bool ReaderHEPEVT::read_hepevt_particle( int i, bool iflong )
     int   intcodes[6];
     double fltcodes1[5];
     double fltcodes2[4];
-    if (fgets(buf_p,READERHEPEVTBUFFERSIZE,m_file)==NULL) return false;
-    if (iflong) if (fgets(buf_v,READERHEPEVTBUFFERSIZE,m_file)==NULL) return false;
+    if (fgets(buf_p,READERHEPEVTBUFFERSIZE,m_file)==nullptr) return false;
+    if (iflong) if (fgets(buf_v,READERHEPEVTBUFFERSIZE,m_file)==nullptr) return false;
     std::stringstream st_p(buf_p);
     std::stringstream st_v(buf_v);
     if (iflong)
@@ -97,11 +97,8 @@ bool ReaderHEPEVT::read_hepevt_particle( int i, bool iflong )
 bool ReaderHEPEVT::read_event(GenEvent& evt, bool iflong)
 {
     evt.clear();
-
-
-    bool fileok=true;
     HEPEVT_Wrapper::zero_everything();
-    fileok=read_hepevt_event_header();
+    bool fileok=read_hepevt_event_header();
     for (int i=1; (i<=HEPEVT_Wrapper::number_entries())&&fileok; i++)
         fileok=read_hepevt_particle(i, iflong);
     bool result=false;

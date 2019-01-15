@@ -4,8 +4,11 @@
 #Docs from https://cmake.org/cmake/help/v3.2/command/configure_file.html
 ## @configure_input@
 #The line below assures at least some relocation.
+if [ "$(uname)" == "Darwin" ]; then
+prefix=$(dirname $(dirname $(greadlink -f  $0)))
+else
 prefix=$(dirname $(dirname $(readlink -f  $0)))
-
+fi
 tmp=$(echo $* | egrep -- '--\<help\>|-\<h\>')
 if test $# -eq 0 || test -n "$tmp"; then
     echo "${PROJECT_NAME}-config: configuration tool for the ${PROJECT_NAME} library"

@@ -88,7 +88,7 @@ public:
   virtual bool from_string(const string &att);
   
   /** @brief Parse the XML-tags. */
-  virtual bool init(const GenEvent & geneve);
+  virtual bool init();
 
   /** @brief Dummy function. */
   virtual bool init(const GenRunInfo & /*runinfo*/) {

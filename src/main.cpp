@@ -14,6 +14,7 @@
 #include "HepMC/Print.h"
 #include "HepMC/WriterAscii.h"
 #include "HepMC/ReaderAscii.h"
+#include "HepMC/ReaderAsciiHepMC2.h"
 #include "HepMC/HEPEVT_Wrapper.h"
 #include <memory>
 #include <vector>
@@ -23,6 +24,7 @@
 #include <stdexcept>
 
 #include "hepevt_wrapper.h"
+// #include "GzReaderAscii.h"
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, HepMC::SmartPointer<T>);
 
@@ -331,6 +333,16 @@ PYBIND11_MODULE(cpp, m) {
         .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0)
         METH(clear, GenEvent)
         .def(py::self == py::self)
+        .def("__repr__", [](GenEvent& self) {
+          std::ostringstream os;
+          Print::content(os, self);
+          return os.str();
+        })
+        .def("__str__", [](GenEvent& self) {
+          std::ostringstream os;
+          Print::listing(os, self, 2);
+          return os.str();
+        })
         ;
 
     py::class_<GenParticle, GenParticlePtr>(m, "GenParticle")
@@ -345,8 +357,8 @@ PYBIND11_MODULE(cpp, m) {
         .def_property_readonly("end_vertex", (GenVertexPtr (GenParticle::*)()) &GenParticle::end_vertex)
         PROP_RO(parents, GenParticle)
         PROP_RO(children, GenParticle)
-        PROP_RO(ancestors, GenParticle)
-        PROP_RO(descendants, GenParticle)
+        // PROP_RO(ancestors, GenParticle)
+        // PROP_RO(descendants, GenParticle)
         PROP(pid, GenParticle)
         PROP(status, GenParticle)
         PROP(momentum, GenParticle)
@@ -368,7 +380,7 @@ PYBIND11_MODULE(cpp, m) {
         METH_OL(add_particle_out, GenVertex, GenParticlePtr)
         METH_OL(remove_particle_in, GenVertex, GenParticlePtr)
         METH_OL(remove_particle_out, GenVertex, GenParticlePtr)
-        METH(particles, GenVertex)
+        // METH(particles, GenVertex)
         PROP_RO(particles_in, GenVertex)
         PROP_RO(particles_out, GenVertex)
         PROP(position, GenVertex)
@@ -432,7 +444,9 @@ PYBIND11_MODULE(cpp, m) {
         .def(py::init<>())
         .def(py::init<std::string>())
         .def("__str__", (std::string (std::stringstream::*)() const) &std::stringstream::str)
-        METH(flush, std::ostringstream)
+        METH(flush, std::stringstream)
+        METH(write, std::stringstream)
+        METH(read, std::stringstream)
         ;
 
     py::class_<ReaderAscii>(m, "ReaderAscii")
@@ -453,6 +467,28 @@ PYBIND11_MODULE(cpp, m) {
         // support contextmanager protocoll
         .def("__enter__", [](py::object self) { return self; })
         .def("__exit__", [](ReaderAscii& self, py::object type, py::object value, py::object tb) {
+                self.close();
+                return false;
+            })
+        ;
+
+    py::class_<ReaderAsciiHepMC2>(m, "ReaderAsciiHepMC2")
+        .def(py::init<const std::string>(), "filename"_a)
+        METH(read_event, ReaderAsciiHepMC2)
+        METH(failed, ReaderAsciiHepMC2)
+        METH(close, ReaderAsciiHepMC2)
+        .def("read", [](ReaderAsciiHepMC2& self) {
+                py::object obj = py::cast(GenEvent());
+                bool ok = self.read_event(py::cast<GenEvent&>(obj));
+                if (!ok) {
+                    PyErr_SetString(PyExc_IOError, "error reading event");
+                    throw py::error_already_set();
+                }
+                return obj;
+            })
+        // support contextmanager protocoll
+        .def("__enter__", [](py::object self) { return self; })
+        .def("__exit__", [](ReaderAsciiHepMC2& self, py::object type, py::object value, py::object tb) {
                 self.close();
                 return false;
             })
@@ -485,8 +521,16 @@ PYBIND11_MODULE(cpp, m) {
           "children"_a, "particle_status"_a, "vertex_status"_a,
           "momentum_scaling"_a = 1.0, "length_scaling"_a = 1.0);
 
-    m.def("print_content", [](const GenEvent& event) { Print::content(event); });
-    m.def("print_listing", [](const GenEvent& event) { Print::listing(event); });
+    m.def("print_content", [](const GenEvent& event) {
+      std::ostringstream os;
+      Print::content(os, event);
+      return os.str();
+    });
+    m.def("print_listing", [](const GenEvent& event, unsigned short precision = 2) {
+      std::ostringstream os;
+      Print::listing(os, event, precision);
+      return os.str();
+    });
 
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;

@@ -68,6 +68,7 @@ struct HEPEVT
 #include <iostream>
 #include <cstdio>
 #include <cstring> // memset
+#include <algorithm> //min max for VS2017
 #ifndef HEPEVT_WRAPPER_HEADER_ONLY
 #include "HepMC/GenEvent.h"
 #endif
@@ -111,34 +112,34 @@ public:
     static int    max_number_entries()      { return NMXHEP;                              } //!< Block size
     static int    event_number()            { return hepevtptr->nevhep;             } //!< Get event number
     static int    number_entries()          { return hepevtptr->nhep;               } //!< Get number of entries
-    static int    status( int index )       { return hepevtptr->isthep[index-1];    } //!< Get status code
-    static int    id( int index )           { return hepevtptr->idhep[index-1];     } //!< Get PDG particle id
-    static int    first_parent( int index ) { return hepevtptr->jmohep[index-1][0]; } //!< Get index of 1st mother
-    static int    last_parent( int index )  { return hepevtptr->jmohep[index-1][1]; } //!< Get index of last mother
-    static int    first_child( int index )  { return hepevtptr->jdahep[index-1][0]; } //!< Get index of 1st daughter
-    static int    last_child( int index )   { return hepevtptr->jdahep[index-1][1]; } //!< Get index of last daughter
-    static double px( int index )           { return hepevtptr->phep[index-1][0];   } //!< Get X momentum
-    static double py( int index )           { return hepevtptr->phep[index-1][1];   } //!< Get Y momentum
-    static double pz( int index )           { return hepevtptr->phep[index-1][2];   } //!< Get Z momentum
-    static double e( int index )            { return hepevtptr->phep[index-1][3];   } //!< Get Energy
-    static double m( int index )            { return hepevtptr->phep[index-1][4];   } //!< Get generated mass
-    static double x( int index )            { return hepevtptr->vhep[index-1][0];   } //!< Get X Production vertex
-    static double y( int index )            { return hepevtptr->vhep[index-1][1];   } //!< Get Y Production vertex
-    static double z( int index )            { return hepevtptr->vhep[index-1][2];   } //!< Get Z Production vertex
-    static double t( int index )            { return hepevtptr->vhep[index-1][3];   } //!< Get production time
-    static int    number_parents( int index );                                   //!< Get number of parents
-    static int    number_children( int index );                                  //!< Get number of children from the range of daughters
-    static int    number_children_exact( int index );                            //!< Get number of children by counting
+    static int    status(const int& index )       { return hepevtptr->isthep[index-1];    } //!< Get status code
+    static int    id(const int& index )           { return hepevtptr->idhep[index-1];     } //!< Get PDG particle id
+    static int    first_parent(const int& index ) { return hepevtptr->jmohep[index-1][0]; } //!< Get index of 1st mother
+    static int    last_parent(const int& index )  { return hepevtptr->jmohep[index-1][1]; } //!< Get index of last mother
+    static int    first_child(const int& index )  { return hepevtptr->jdahep[index-1][0]; } //!< Get index of 1st daughter
+    static int    last_child(const int& index )   { return hepevtptr->jdahep[index-1][1]; } //!< Get index of last daughter
+    static double px(const int& index )           { return hepevtptr->phep[index-1][0];   } //!< Get X momentum
+    static double py(const int& index )           { return hepevtptr->phep[index-1][1];   } //!< Get Y momentum
+    static double pz(const int& index )           { return hepevtptr->phep[index-1][2];   } //!< Get Z momentum
+    static double e(const int& index )            { return hepevtptr->phep[index-1][3];   } //!< Get Energy
+    static double m(const int& index )            { return hepevtptr->phep[index-1][4];   } //!< Get generated mass
+    static double x(const int& index )            { return hepevtptr->vhep[index-1][0];   } //!< Get X Production vertex
+    static double y(const int& index )            { return hepevtptr->vhep[index-1][1];   } //!< Get Y Production vertex
+    static double z(const int& index )            { return hepevtptr->vhep[index-1][2];   } //!< Get Z Production vertex
+    static double t(const int& index )            { return hepevtptr->vhep[index-1][3];   } //!< Get production time
+    static int    number_parents(const int& index );                                   //!< Get number of parents
+    static int    number_children(const int& index );                                  //!< Get number of children from the range of daughters
+    static int    number_children_exact(const int& index );                            //!< Get number of children by counting
 
-    static void set_event_number( int evtno )       { hepevtptr->nevhep = evtno;         } //!< Set event number
-    static void set_number_entries( int noentries ) { hepevtptr->nhep = noentries;       } //!< Set number of entries
-    static void set_status( int index, int status ) { hepevtptr->isthep[index-1] = status; } //!< Set status code
-    static void set_id( int index, int id )         { hepevtptr->idhep[index-1] = id;      } //!< Set PDG particle id
-    static void set_parents( int index, int firstparent, int lastparent );              //!< Set parents
-    static void set_children( int index, int firstchild, int lastchild );               //!< Set children
-    static void set_momentum( int index, double px, double py, double pz, double e );   //!< Set 4-momentum
-    static void set_mass( int index, double mass );                                     //!< Set mass
-    static void set_position( int index, double x, double y, double z, double t );      //!< Set position in time-space
+    static void set_event_number( const int& evtno )       { hepevtptr->nevhep = evtno;         } //!< Set event number
+    static void set_number_entries( const int& noentries ) { hepevtptr->nhep = noentries;       } //!< Set number of entries
+    static void set_status( const int& index, const int& status ) { hepevtptr->isthep[index-1] = status; } //!< Set status code
+    static void set_id(const int& index, const int& id )         { hepevtptr->idhep[index-1] = id;      } //!< Set PDG particle id
+    static void set_parents( const int& index, const int& firstparent, const int& lastparent );              //!< Set parents
+    static void set_children( const int& index, const int& firstchild, const int& lastchild );               //!< Set children
+    static void set_momentum( const int& index, const double& px, const double& py, const double& pz, const double& e );   //!< Set 4-momentum
+    static void set_mass( const int& index, double mass );                                     //!< Set mass
+    static void set_position( const int& index, const double& x, const double& y, const double& z, const double& t );      //!< Set position in time-space
 };
 
 //
@@ -154,7 +155,7 @@ inline void HEPEVT_Wrapper::print_hepevt( std::ostream& ostr )
         }
 }
 
-inline void HEPEVT_Wrapper::print_hepevt_particle( int index, std::ostream& ostr )
+inline void HEPEVT_Wrapper::print_hepevt_particle( int index, std::ostream& ostr ) 
 {
     char buf[255];
 
@@ -182,17 +183,17 @@ inline void HEPEVT_Wrapper::zero_everything()
     memset(hepevtptr,0,sizeof(struct HEPEVT));
 }
 
-inline int HEPEVT_Wrapper::number_parents( int index )
+inline int HEPEVT_Wrapper::number_parents( const int& index )
 {
     return (hepevtptr->jmohep[index-1][0]) ? (hepevtptr->jmohep[index-1][1]) ? hepevtptr->jmohep[index-1][1]-hepevtptr->jmohep[index-1][0] : 1 : 0;
 }
 
-inline int HEPEVT_Wrapper::number_children( int index )
+inline int HEPEVT_Wrapper::number_children( const int& index ) 
 {
     return (hepevtptr->jdahep[index-1][0]) ? (hepevtptr->jdahep[index-1][1]) ? hepevtptr->jdahep[index-1][1]-hepevtptr->jdahep[index-1][0] : 1 : 0;
 }
 
-inline int HEPEVT_Wrapper::number_children_exact( int index )
+inline int HEPEVT_Wrapper::number_children_exact( const int& index ) 
 {
     int nc=0;
     for( int i=1; i<=hepevtptr->nhep; ++i )
@@ -202,19 +203,19 @@ inline int HEPEVT_Wrapper::number_children_exact( int index )
 
 
 
-inline void HEPEVT_Wrapper::set_parents( int index, int firstparent, int lastparent )
+inline void HEPEVT_Wrapper::set_parents( const int& index,  const int& firstparent, const int&lastparent )
 {
     hepevtptr->jmohep[index-1][0] = firstparent;
     hepevtptr->jmohep[index-1][1] = lastparent;
 }
 
-inline void HEPEVT_Wrapper::set_children( int index, int firstchild, int lastchild )
+inline void HEPEVT_Wrapper::set_children(  const int& index,  const int&  firstchild,  const int& lastchild )
 {
     hepevtptr->jdahep[index-1][0] = firstchild;
     hepevtptr->jdahep[index-1][1] = lastchild;
 }
 
-inline void HEPEVT_Wrapper::set_momentum( int index, double px, double py, double pz, double e )
+inline void HEPEVT_Wrapper::set_momentum( const int& index, const double& px,const double& py, const double& pz, const double& e )
 {
     hepevtptr->phep[index-1][0] = px;
     hepevtptr->phep[index-1][1] = py;
@@ -222,12 +223,12 @@ inline void HEPEVT_Wrapper::set_momentum( int index, double px, double py, doubl
     hepevtptr->phep[index-1][3] = e;
 }
 
-inline void HEPEVT_Wrapper::set_mass( int index, double mass )
+inline void HEPEVT_Wrapper::set_mass( const int& index, double mass )
 {
     hepevtptr->phep[index-1][4] = mass;
 }
 
-inline void HEPEVT_Wrapper::set_position( int index, double x, double y, double z, double t )
+inline void HEPEVT_Wrapper::set_position(  const int& index, const double& x, const double& y, const double& z, const double& t )
 {
     hepevtptr->vhep[index-1][0] = x;
     hepevtptr->vhep[index-1][1] = y;

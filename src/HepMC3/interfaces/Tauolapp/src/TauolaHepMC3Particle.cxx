@@ -117,7 +117,8 @@ void TauolaHepMC3Particle::setMothers(vector<TauolaParticle*> mothers){
 
       //update status info
       if(moth->status()==TauolaParticle::STABLE)
-        moth->set_status(TauolaParticle::DECAYED);
+     //   moth->set_status(TauolaParticle::DECAYED);
+        moth->set_status(2);
     }
     production_vertex->add_particle_out(m_particle);
   }

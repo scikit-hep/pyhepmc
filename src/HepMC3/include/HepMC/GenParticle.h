@@ -38,7 +38,7 @@ friend class SmartPointer<GenParticle>;
 //
 public:
     /** @brief Default constructor */
-    GenParticle( const FourVector &momentum = FourVector::ZERO_VECTOR(), int pid = 0, int status = 0 );
+    GenParticle( const FourVector &momentum = FourVector::ZERO_VECTOR(), const int& pid = 0, const int& status = 0 );
 
     /** @brief Constructor based on particle data */
     GenParticle( const GenParticleData &data );
@@ -74,12 +74,6 @@ public:
     /// @note Less efficient than via the vertex since return must be by value (in case there is no vertex)
     vector<GenParticlePtr> children() const;
 
-    /// @brief Convenience access to all incoming particles via production vertex
-    vector<GenParticlePtr> ancestors() const;
-
-    /// @brief Convenience access to all outgoing particles via end vertex
-    vector<GenParticlePtr> descendants() const;
-
 
     int   pid()                   const { return m_data.pid;            } //!< Get PDG ID
     int   status()                const { return m_data.status;         } //!< Get status code
@@ -93,33 +87,32 @@ public:
     double generated_mass() const;
 
 
-    void set_pid(int pid);                         //!< Set PDG ID
-    void set_status(int status);                   //!< Set status code
+    void set_pid(const int& pid);                         //!< Set PDG ID
+    void set_status(const int& status);                   //!< Set status code
     void set_momentum(const FourVector& momentum); //!< Set momentum
-    void set_generated_mass(double m);             //!< Set generated mass
+    void set_generated_mass(const double& m);             //!< Set generated mass
     void unset_generated_mass();                   //!< Declare that generated mass is not set
-
-
+  
     /** @brief Add an attribute to this particle
      *
      *  This will overwrite existing attribute if an attribute with
      *  the same name is present. The attribute will be stored in the
      *  parent_event(). @return false if there is no parent_event();
      */
-    bool add_attribute(string name, shared_ptr<Attribute> att);
+    bool add_attribute(const string& name, shared_ptr<Attribute> att);
 
     /// @brief Get list of names of attributes assigned to this particle
     vector<string> attribute_names() const;
 
     /// @brief Remove attribute
-    void remove_attribute(string name);
+    void remove_attribute(const string& name);
 
     /// @brief Get attribute of type T
     template<class T>
-    shared_ptr<T> attribute(string name) const;
+    shared_ptr<T> attribute(const string& name) const;
 
     /// @brief Get attribute of any type as string
-    string attribute_as_string(string name) const;
+    string attribute_as_string(const string& name) const;
 
 
     /// @name Deprecated functionality
@@ -135,7 +128,7 @@ public:
     /// @brief Set PDG ID
     /// @deprecated Use set_pid() instead
     // HEPMC_DEPRECATED("Use set_pid() instead")
-    void set_pdg_id(int pidin) { set_pid(pidin); }
+    void set_pdg_id(const int& pidin) { set_pid(pidin); }
 
     #endif
 
@@ -159,7 +152,7 @@ private:
 
 /// @brief Get attribute of type T
 template<class T>
-HepMC::shared_ptr<T> HepMC::GenParticle::attribute(string name) const {
+HepMC::shared_ptr<T> HepMC::GenParticle::attribute(const string& name) const {
   return parent_event()?
     parent_event()->attribute<T>(name, id()): HepMC::shared_ptr<T>();
 }

@@ -21,15 +21,8 @@ namespace HepMC {
 
     using namespace std;
 
-    // /** @brief Type of iteration. Used by backward-compatibility interface */
-    // #ifndef HEPMC_NO_DEPRECATED
-    // enum IteratorRange { parents, children, family, ancestors, descendants, relatives };
-    // #endif
-
-
-    class GenEvent;
     class Attribute;
-
+    class GenEvent;
 
     /// Stores vertex-related information
     class GenVertex {
@@ -63,17 +56,20 @@ namespace HepMC {
 
         /// Check if this vertex belongs to an event
         /// @todo Needed? Wouldn't it be good enough to just rely on user testing nullness of parent_event()?
-        bool in_event() const { return parent_event() != NULL; }
+        bool in_event() const { return parent_event() != nullptr; }
 
         /// Get the vertex unique identifier
         ///
         /// @note This is not the same as id() in HepMC v2, which is now @c status()
         int id() const { return m_id; }
 
+        /// @brief set the vertex identifier
+        void set_id(const int& id);
+
         /// Get vertex status code
         int status() const { return m_data.status; }
         /// Set vertex status code
-        void set_status(int stat) { m_data.status = stat; }
+        void set_status(const int& stat) { m_data.status = stat; }
 
         /// Get vertex data
         const GenVertexData& data() const { return m_data; }
@@ -87,9 +83,6 @@ namespace HepMC {
         /// Remove outgoing particle
         void remove_particle_out( GenParticlePtr p);
 
-        /// Get list of associated particles
-        /// @note Note relatively inefficient return by value
-        const vector<GenParticlePtr> particles(Relationship range) const;
         /// Get list of incoming particles
         const vector<GenParticlePtr>& particles_in() const { return m_particles_in; }
         /// Get list of outgoing particles
@@ -117,20 +110,20 @@ namespace HepMC {
         /// This will overwrite existing attribute if an attribute with
         /// the same name is present. The attribute will be stored in the
         /// parent_event(). @return false if there is no parent_event();
-        bool add_attribute(string name, shared_ptr<Attribute> att);
+        bool add_attribute(const string& name, shared_ptr<Attribute> att);
 
         /// @brief Get list of names of attributes assigned to this particle
         vector<string> attribute_names() const;
 
         /// @brief Remove attribute
-        void remove_attribute(string name);
+        void remove_attribute(const string& name);
 
         /// @brief Get attribute of type T
         template<class T>
-        shared_ptr<T> attribute(string name) const;
+        shared_ptr<T> attribute(const string& name) const;
 
         /// @brief Get attribute of any type as string
-        string attribute_as_string(string name) const;
+        string attribute_as_string(const string& name) const;
 
         /// @name Deprecated functionality
         //@{
@@ -208,9 +201,9 @@ namespace HepMC {
 
         /// @name Fields
         //@{
-        GenEvent      *m_event;  //!< Parent event
-        int            m_id;     //!< Vertex id
-        GenVertexData  m_data;   //!< Vertex data
+        GenEvent       *m_event;  //!< Parent event
+        int             m_id;     //!< Vertex id
+        GenVertexData   m_data;   //!< Vertex data
 
         vector<GenParticlePtr>  m_particles_in;  //!< Incoming particle list
         vector<GenParticlePtr>  m_particles_out; //!< Outgoing particle list
@@ -226,7 +219,7 @@ namespace HepMC {
 
 /// @brief Get attribute of type T
 template<class T>
-HepMC::shared_ptr<T> HepMC::GenVertex::attribute(string name) const {
+HepMC::shared_ptr<T> HepMC::GenVertex::attribute(const string& name) const {
   return parent_event()?
     parent_event()->attribute<T>(name, id()): HepMC::shared_ptr<T>();
 }

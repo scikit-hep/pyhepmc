@@ -14,9 +14,9 @@ public:
     void write_event(const GenEvent &evt);
     void set_run_number(const int nr);
 private:
-    Float_t  m_Ebeam;
-    Int_t    m_Irun;
-    Int_t m_Ievnt;
+    float  m_Ebeam;
+    int    m_Irun;
+    int    m_Ievnt;
 };
 }
 #endif

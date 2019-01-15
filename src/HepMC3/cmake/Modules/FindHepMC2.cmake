@@ -7,14 +7,28 @@
 #  HEPMC2_INCLUDE_DIRS (not cached)
 #  HEPMC2_LIBRARIES
 #  HEPMC2_FIO_LIBRARIES
+set(TEST_HEPMC2_ROOT_DIR  "" ${HEPMC2_ROOT_DIR})
+IF(TEST_HEPMC2_ROOT_DIR STREQUAL "")
+IF(DEFINED ENV{HEPMC2_ROOT_DIR})
+set(HEPMC2_ROOT_DIR  $ENV{HEPMC2_ROOT_DIR})
+else()
+set(HEPMC2_ROOT_DIR  "/usr")
+endif()
+endif()
 
 find_path(HEPMC2_INCLUDE_DIR HepMC/GenEvent.h
-          HINTS $ENV{HEPMC2_ROOT_DIR}/include ${HEPMC2_ROOT_DIR}/include
-          $ENV{HEPMC2_DIR}/include ${HEPMC2_DIR}/include)
+          HINTS $ENV{HEPMC2_ROOT_DIR}/include 
+          HINTS ${HEPMC2_ROOT_DIR}/include
+          HINTS $ENV{HEPMC2_DIR}/include 
+          HINTS ${HEPMC2_DIR}/include
+          )
 
 find_library(HEPMC2_LIBRARIES NAMES HepMC
              HINTS $ENV{HEPMC2_ROOT_DIR}/lib ${HEPMC2_ROOT_DIR}/lib
-             HINTS $ENV{HEPMC2_DIR}/lib ${HEPMC2_DIR}/lib)
+             HINTS $ENV{HEPMC2_DIR}/lib ${HEPMC2_DIR}/lib
+             HINTS $ENV{HEPMC2_ROOT_DIR}/lib64 ${HEPMC2_ROOT_DIR}/lib64
+             HINTS $ENV{HEPMC2_DIR}/lib64 ${HEPMC2_DIR}/lib64
+             )
 
 get_filename_component(HEPMC2_LIBRARY_DIR ${HEPMC2_LIBRARIES} PATH)
 set(HEPMC2_FIO_LIBRARIES "-L${HEPMC2_LIBRARY_DIR} -lHepMCfio")

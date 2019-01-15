@@ -10,12 +10,10 @@
 namespace HepMC {
 
 /** What is not in current HepMC implementation:
- *  - units
  *  - color flow (will probably be removed altogether)
  *  - beam particles
- *  - PDF
- *  - process code, scale, alpha_em, alpha_s
- *  - weight, cross section
+ *  - random seeds 
+ *  - mpi
  */
 bool Pythia8ToHepMC3::fill_next_event( Pythia8::Event& pyev, GenEvent* evt, int ievnum, Pythia8::Info* pyinfo, Pythia8::Settings* pyset) {
 
@@ -47,20 +45,10 @@ bool Pythia8ToHepMC3::fill_next_event( Pythia8::Event& pyev, GenEvent* evt, int 
                                                               pyev[i].pz(), pyev[i].e() ),
                                                               pyev[i].id(), pyev[i].statusHepMC() )
                                   );
-
 /*
         hepevt_particles[i]->suggest_barcode(i);
 */
         hepevt_particles[i]->set_generated_mass( pyev[i].m() );
-
-/*
-        // Colour flow uses index 1 and 2.
-        int colType = pyev[i].colType();
-        if (colType ==  1 || colType == 2)
-            hepevt_particles[i]->set_flow(1, pyev[i].col());
-        if (colType == -1 || colType == 2)
-            hepevt_particles[i]->set_flow(2, pyev[i].acol());
-*/
     }
 
     // 3. Fill vertex information
@@ -101,6 +89,20 @@ bool Pythia8ToHepMC3::fill_next_event( Pythia8::Event& pyev, GenEvent* evt, int 
 
     // Add particles and vertices in topological order
     evt->add_tree( beam_particles );
+    //Attributes should be set after adding the particles to event
+    for(int i=0;i<pyev.size(); ++i) {
+        /* TODO: Set polarization */
+        // Colour flow uses index 1 and 2.
+        int colType = pyev[i].colType();
+        if (colType ==  -1 ||colType ==  1 || colType == 2)
+        {
+        int flow1=0, flow2=0;
+        if (colType ==  1 || colType == 2) flow1=pyev[i].col();
+        if (colType == -1 || colType == 2) flow2=pyev[i].acol();
+        hepevt_particles[i]->add_attribute("flow1",make_shared<IntAttribute>(flow1));
+        hepevt_particles[i]->add_attribute("flow2",make_shared<IntAttribute>(flow2));
+        }
+     }
 
 /*
     evt->set_beam_particles( hepevt_particles[1], hepevt_particles[2] );
@@ -155,15 +157,15 @@ bool Pythia8ToHepMC3::fill_next_event( Pythia8::Event& pyev, GenEvent* evt, int 
         // Store PDF information.
         evt->set_pdf_info( pdfinfo );
     }
-/*
+
     // Store process code, scale, alpha_em, alpha_s.
     if (m_store_proc && pyinfo != 0) {
-        evt->set_signal_process_id( pyinfo->code() );
-        evt->set_event_scale( pyinfo->QRen() );
-        if (evt->alphaQED() <= 0) evt->set_alphaQED( pyinfo->alphaEM() );
-        if (evt->alphaQCD() <= 0) evt->set_alphaQCD( pyinfo->alphaS() );
+        evt->add_attribute("signal_process_id",make_shared<IntAttribute>( pyinfo->code()));
+        evt->add_attribute("event_scale",make_shared<DoubleAttribute>(pyinfo->QRen()));
+        evt->add_attribute("alphaQCD",make_shared<DoubleAttribute>(pyinfo->alphaS()));
+        evt->add_attribute("alphaQED",make_shared<DoubleAttribute>(pyinfo->alphaEM()));
     }
-*/
+
     // Store cross-section information in pb.
     if (m_store_xsec && pyinfo != 0) {
         HepMC::GenCrossSectionPtr xsec = make_shared<HepMC::GenCrossSection>();
@@ -173,6 +175,7 @@ bool Pythia8ToHepMC3::fill_next_event( Pythia8::Event& pyev, GenEvent* evt, int 
 
     // Store event weights.
     if (m_store_weights && pyinfo != 0) {
+        evt->weights().clear();
         for (int iweight=0; iweight < pyinfo->nWeights(); ++iweight) {
             evt->weights().push_back(pyinfo->weight(iweight));
         }

@@ -53,17 +53,15 @@ public:
 
     /// @brief Set output precision
     ///
-    /// Available range is [2,24]. Default is 16.
-    void set_precision( size_t prec ) {
+    /// So far available range is [2,24]. Default is 16.
+    void set_precision(const int& prec ) {
         if (prec < 2 || prec > 24) return;
         m_precision = prec;
     }
-
     /// @brief Return output precision
     int precision() const {
         return m_precision;
     }
-
 private:
 
     /// @name Buffer management
@@ -82,14 +80,14 @@ private:
     ///
     /// Default is 256kb. Minimum is 256b.
     /// Size can only be changed before first read/write operation.
-    void set_buffer_size( size_t size ) {
+    void set_buffer_size(const size_t& size ) {
         if (m_buffer) return;
         if (size < 256) return;
         m_buffer_size = size;
     }
 
     /// @brief Escape '\' and '\n' characters in string
-    std::string escape(const std::string s);
+    std::string escape(const std::string& s)  const;
 
     /// Inline function flushing buffer to output stream when close to buffer capacity
     void flush();
@@ -125,6 +123,7 @@ private:
 
     std::ofstream m_file; //!< Output file
     std::ostream* m_stream; //!< Output stream
+
     int m_precision; //!< Output precision
     char* m_buffer;  //!< Stream buffer
     char* m_cursor;  //!< Cursor inside stream buffer

@@ -15,6 +15,7 @@
 #include "HepMC/Data/SmartPointer.h"
 #include "HepMC/Units.h"
 #include "HepMC/Attribute.h"
+#include <mutex>
 #endif // __CINT__
 
 #ifdef HEPMC_ROOTIO
@@ -52,7 +53,9 @@ public:
 
     /// @brief Default constructor
     GenRunInfo() {}
-
+    GenRunInfo(const GenRunInfo& r);
+    GenRunInfo& operator=(const GenRunInfo& r);
+    
     #if !defined(__CINT__)
 
     /// @brief The vector of tools used to produce this run.
@@ -65,14 +68,14 @@ public:
     }
 
     /// @brief Check if a weight name is present.
-    bool has_weight(string name) const {
+    bool has_weight(const string& name) const {
       return m_weight_indices.find(name) !=  m_weight_indices.end();
     }
 
     /// @brief Return the index corresponding to a weight name.
     /// @return -1 if name was not found
     /// @todo Throw exception instead? Or return ssize_t for better signed/unsigned safety?
-    int weight_index(string name) const {
+    int weight_index(const string& name) const {
 	std::map<std::string, int>::const_iterator it = m_weight_indices.find(name);
   	  return it == m_weight_indices.end()? -1: it->second;
     }
@@ -93,11 +96,13 @@ public:
     /// with the same name is present
     void add_attribute(const string &name,
 		       const shared_ptr<Attribute> &att) {
+      std::lock_guard<std::recursive_mutex> lock(m_lock_attributes);
       if ( att ) m_attributes[name] = att;
     }
 
     /// @brief Remove attribute
     void remove_attribute(const string &name) {
+      std::lock_guard<std::recursive_mutex> lock(m_lock_attributes);
       m_attributes.erase(name);
     }
 
@@ -108,10 +113,15 @@ public:
     /// @brief Get attribute of any type as string
     string attribute_as_string(const string &name) const;
 
-    /// @brief Get list of attributes
-    const std::map< std::string, shared_ptr<Attribute> > & attributes() const {
+    /// @brief Get list of attribute names
+    std::vector<string> attribute_names() const;
+
+    /// @brief Get a copy of the list of attributes
+    /// @todo To avoid thread issues, this is returns a copy. Better solution may be needed.
+    std::map< std::string, shared_ptr<Attribute> > attributes() const {
       return m_attributes;
     }
+
 
     #endif // __CINT__
 
@@ -148,6 +158,9 @@ private:
 
     /// @brief Map of attributes
     mutable std::map< std::string, shared_ptr<Attribute> > m_attributes;
+
+    /// @breif Mutex lock for the m_attibutes map.
+    mutable std::recursive_mutex m_lock_attributes;
     //@}
 
     #endif // __CINT__
@@ -161,7 +174,7 @@ private:
 
 template<class T>
 shared_ptr<T> GenRunInfo::attribute(const string &name) const {
-
+    std::lock_guard<std::recursive_mutex> lock(m_lock_attributes);
     std::map< std::string, shared_ptr<Attribute> >::iterator i =
       m_attributes.find(name);
     if( i == m_attributes.end() ) return shared_ptr<T>();

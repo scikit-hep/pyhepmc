@@ -88,7 +88,10 @@ void PhotosHepMC3Particle::setMothers(vector<PhotosParticle*> mothers){
 
       //update status info
       if(moth->status()==PhotosParticle::STABLE)
-        moth->set_status(PhotosParticle::DECAYED);
+        {
+        //AV moth->set_status(PhotosParticle::DECAYED);
+        moth->set_status(2);
+    }
     }
     production_vertex->add_particle_out(m_particle);
   }

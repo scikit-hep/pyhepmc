@@ -19,7 +19,8 @@
 
     @note Path to ROOT is optional. If not provided, CMake will attempt to find
           default ROOT installation. If no installation is present, ROOT I/O
-          will not be available
+          will not be available. Please note that cmake configuretion file supplied with
+          ROOT distribution (ROOTUseFile.cmake) might require higher version of cmake than HepMC3 itself.
 
     @note cmake is set to detect c++11 support by default. If c++11 is not
           supported CMake will attempt to use c++0x.

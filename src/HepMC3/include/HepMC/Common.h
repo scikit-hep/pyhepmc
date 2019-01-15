@@ -12,6 +12,16 @@
 #include <iostream>
 #include <memory>
 
+/// Neater/extensible C++11 availability test
+#if __cplusplus >= 201103L
+#define HEPMC_HAS_CXX11
+#endif
+#if !defined(HEPMC_HAS_CXX11) && (__GNUC__) && (__cplusplus) && (__GXX_EXPERIMENTAL_CXX0X__)
+#define HEPMC_HAS_CXX0X_GCC_ONLY
+#define nullptr NULL
+#endif
+
+
 namespace HepMC {
 
 
@@ -34,24 +44,14 @@ namespace HepMC {
       CHILDREN = 3, FIND_CHILDREN = 3, FIND_DAUGHTERS = 3, children = 3,
       PRODUCTION_SIBLINGS = 4, FIND_PRODUCTION_SIBLINGS = 4
     };
-
-    /// Compatibility name
-    using FilterParticle = Relationship;
-    #ifndef HEPMC_NO_DEPRECATED
-    /// Compatibility name
-    using IteratorRange = Relationship;
-    #endif
-
+#ifndef __CINT__
+      typedef   Relationship FilterParticle;
+      typedef   Relationship IteratorRange;
+#endif
 }
 
 
-/// Neater/extensible C++11 availability test
-#if __cplusplus >= 201103L
-#define HEPMC_HAS_CXX11
-#endif
-#if !defined(HEPMC_HAS_CXX11) && (__GNUC__) && (__cplusplus) && (__GXX_EXPERIMENTAL_CXX0X__)
-#define HEPMC_HAS_CXX0X_GCC_ONLY
-#endif
+
 
 
 /// Define a FOREACH directive
@@ -158,19 +158,5 @@ typename T::reference deref(auto_any_base const& cur, T&)
 #ifndef HEPMC_DEPRECATED
 #define HEPMC_DEPRECATED(x)
 #endif
-/// @todo Activate in version 3.1.0
-// #ifndef HEPMC_DEPRECATED
-// #if __GNUC__ && __cplusplus && HEPMC_NO_DEPRECATION_WARNINGS == 0
-// #define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-// #if GCC_VERSION >= 40500
-//   #define HEPMC_DEPRECATED(x) __attribute__((deprecated(x)))
-// #else
-//   #define HEPMC_DEPRECATED(x) __attribute__((deprecated))
-// #endif
-// #else
-//   #define HEPMC_DEPRECATED(x)
-// #endif
-// #endif
-
 
 #endif

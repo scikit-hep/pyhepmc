@@ -13,12 +13,18 @@
 
     Following changes in header files have been applied:
     @code{.cpp}
-        HepMC/IO_GenEvent.h is now deprecated but can be used
         HepMC/HeavyIons.h    ->  HepMC/GenHeavyIons.h   (now a POD struct)
         HepMC/PdfInfo.h      ->  HepMC/GenPdfInfo.h     (now a POD struct)
         HepMC/SimpleVector.h ->  HepMC/FourVector.h     (ThreeVector class removed)
     @endcode
-
+    The structure of GenCrossSection class has been changed to handle multiple 
+    values of cross-sections. The cross-section values and errors (uncertainties) 
+    can be accessed only by public functions, the corresponding data members are 
+    private. By default, the number of cross-section values in every event is equal 
+    to the number of event weights.  Accordingly, each cross-section value can be 
+    accessed using the corresponding event weight name (std::string) or event 
+    weight index (int).
+     
     Following header files are no longer available:
 
     @code{.cpp}
@@ -34,6 +40,7 @@
         StreamInfo.h
         TempParticleMap.h
         WeightContainer.h
+        IO_GenEvent.h
 
         enable_if.h
         is_arithmetic.h
@@ -48,6 +55,45 @@
         PythiaWrapper6_4_WIN32.h
     @endcode
 
+    ###########################################################################
+    @subsection pythia6 Fortran generators 
+    ###########################################################################
+    An example of interface to Pythia6 Fortran blocks is given in the examples.
+
+    ###########################################################################
+    @subsection io Changes to the I/O handeling
+    ###########################################################################    
+    Multiple file formats are supported. The implementation of reading  and wrining 
+    is separated in HepMC3. All the reading operations are performed in 
+    "reader" objects inherited from HepMC::Reader and the writing operations in the "writer" 
+    objects inherited from HePMC::Writer. Therefore it is to use the desired headers explicitely, as needed.
+    
+    The IO_GenEvent.h header is not available anymore.
+    to write and/or read HepMC2 files the following includes 
+    @code{.cpp}
+    WriterAsciiHepMC2.h
+    ReaderAsciiHepMC2.h
+    @endcode
+    should be used instead of 
+    @code{.cpp}
+    IO_GenEvent.h
+    @endcode
+    Please note that HepMC2 format  is outdated and is not able to contain a lot 
+    of information stored into event record by the modern Monte Carlo event generators.
+    It is recommended to use HepMC3 native event record in plain text or in ROOT TTree format.
+    The corresponding readers and writers are 
+    @code{.cpp}
+    WriterAscii.h
+    ReaderAscii.h
+    @endcode   
+    and 
+    @code{.cpp}
+    WriterRootTree.h
+    ReaderRootTree.h
+    @endcode   
+
+    Implementation of custom Reader and Writer objects is possible as well.
+    
     ###########################################################################
     @subsection memory Memory managed by shared pointers
     ###########################################################################
@@ -240,19 +286,33 @@
         // HepMC2 code:
         evt.set_alphaQCD(m_alphas);
         evt.set_alphaQED(m_alpha);
+        evt.set_event_scale(m_event_scale);
+        evt.set_mpi(m_mpi);
+        evt.set_signal_process_id(m_signal_process_id);
+        evt.set_random_states(m_random_states);
         // Replace with:
-        evt.add_attribute("AlphaQCD",
+        evt.add_attribute("alphaQCD",
                            make_shared<DoubleAttribute>(m_alphas));
-        evt.add_attribute("AlphaEM",
+        evt.add_attribute("alphaEM",
                            make_shared<DoubleAttribute>(m_alpha));
+        evt.add_attribute("event_scale",
+                           make_shared<DoubleAttribute>(m_event_scale));
+        evt.add_attribute("mpi",
+                           make_shared<IntAttribute>(m_mpi));
+        evt.add_attribute("signal_process_id",
+                           make_shared<IntAttribute>(m_signal_process_id));
+        for ( size_t i=0;i<m_random_states.size();i++)        
+          evt.add_attribute("random_states"+to_string(i),make_shared<IntAttribute>(m_random_states[i]));
     @endcode
 
     @code{.cpp}
         // HepMC2 code:
         HepMC::GenVertex * vertex;
+        ...
         vertex->weights().push_back(1.);
         // Replace with:
-        TODO
+        vertex->add_attribute("weight1", make_shared<DoubleAttribute>(1.0));
+
     @endcode
 
     @code{.cpp}
@@ -266,10 +326,50 @@
     @code{.cpp}
         // HepMC2 code:
         HepMC::GenParticle::set_flow(int code_index, int code = 0)	
+        HepMC::GenParticle::set_polarization( Polarization(theta,phi))	
         // Replace with:
-        TODO
+        HepMC::GenParticle::add_attribute("flow"+to_string(code_index),make_shared<IntAttribute>(code));
+        HepMC::GenParticle::add_attribute("theta",make_shared<DoubleAttribute>(theta));
+        HepMC::GenParticle::add_attribute("phi",make_shared<DoubleAttribute>(phi));
     @endcode
- 
+    ###########################################################################
+    @subsection attributes Standard attributes
+    ###########################################################################
+    
+    For the user convenience and backward compatibility the following standard attributes are 
+    supported for the 
+    
+    GenEvent 
+    @code{.cpp}
+        double alphaQCD
+        double alphaEM
+        double event_scale
+        int mpi        
+        int signal_process_id
+        int signal_vertex_id
+        int random_states1... random_statesN
+    @endcode 
+     
+    GenVertex
+    @code{.cpp}
+        double weight1... weightN
+    @endcode 
+
+    GenParticle
+    @code{.cpp}
+        int flow
+        double theta
+        double phi
+    @endcode 
+
+    The presence of cycles in the event structure is indecated with an attribute 
+    @code{.cpp}
+        int cycles
+    @endcode     
+     
+     Note that attributes belong to the event, therefore these can be set only for particles and vertices 
+     that belong to a GenEvent object.
+     
     <hr>
-    Last update 24 May 2015
+    Last update 14 Dec 2018
 */

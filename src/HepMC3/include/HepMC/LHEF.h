@@ -23,7 +23,19 @@
 #include <cstdlib>
 #include <cmath>
 #include <limits>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
 
+
+/**
+ * @brief Les Houches event file classes.
+ *
+ * The namespace containing helper classes and Reader and Writer
+ * classes for handling Les Houches event files.
+ *
+ * @ingroup LHEF
+ */
 namespace LHEF {
 
 /**
@@ -448,7 +460,7 @@ struct TagBase {
   /**
    * The contents of this tag.
    */
-  std::string contents;
+  mutable std::string contents;
 
   /**
    * Static string token for truth values.
@@ -502,21 +514,26 @@ struct XSecInfo : public TagBase {
   /**
    * Intitialize default values.
    */
-  XSecInfo(): neve(-1), totxsec(0.0), maxweight(1.0), meanweight(1.0),
-	      negweights(false), varweights(false) {}
+  XSecInfo(): neve(-1), ntries(-1), totxsec(0.0), xsecerr(0.0), maxweight(1.0),
+              meanweight(1.0), negweights(false), varweights(false) {}
 
   /**
    * Create from XML tag
    */
   XSecInfo(const XMLTag & tag)
-    : TagBase(tag.attr, tag.contents), neve(-1), totxsec(0.0),
-      maxweight(1.0), meanweight(1.0), negweights(false), varweights(false) {
+    : TagBase(tag.attr, tag.contents), neve(-1), ntries(-1),
+      totxsec(0.0), xsecerr(0.0), maxweight(1.0), meanweight(1.0),
+      negweights(false), varweights(false) {
     if ( !getattr("neve", neve) ) 
       throw std::runtime_error("Found xsecinfo tag without neve attribute "
 			       "in Les Houches Event File.");
+    ntries = neve;
+    getattr("ntries", ntries);
     if ( !getattr("totxsec", totxsec) ) 
       throw std::runtime_error("Found xsecinfo tag without totxsec "
 			       "attribute in Les Houches Event File.");
+    getattr("xsecerr", xsecerr);
+    getattr("weightname", weightname);
     getattr("maxweight", maxweight);
     getattr("meanweight", meanweight);
     getattr("negweights", negweights);
@@ -528,8 +545,14 @@ struct XSecInfo : public TagBase {
    * Print out an XML tag.
    */
   void print(std::ostream & file) const {
-    file << "<xsecinfo" << oattr("neve", neve) << oattr("totxsec", totxsec)
-	 << oattr("maxweight", maxweight) << oattr("meanweight", meanweight);
+    file << "<xsecinfo" << oattr("neve", neve)
+         << oattr("totxsec", totxsec);
+    if ( maxweight != 1.0 ) 
+      file << oattr("maxweight", maxweight)
+           << oattr("meanweight", meanweight);
+    if ( ntries > neve ) file << oattr("ntries", ntries);
+    if ( xsecerr > 0.0 ) file << oattr("xsecerr", xsecerr);
+    if ( !weightname.empty() ) file << oattr("weightname", weightname);
     if ( negweights ) file << oattr("negweights", yes());
     if ( varweights ) file << oattr("varweights", yes());
     printattrs(file);
@@ -542,9 +565,19 @@ struct XSecInfo : public TagBase {
   long neve;
 
   /**
+   * The number of attempte that was needed to produce the neve events.
+   */
+  long ntries;
+
+  /**
    * The total cross section in pb.
    */
   double totxsec;
+
+  /**
+   * The estimated statistical error on totxsec.
+   */
+  double xsecerr;
 
   /**
    * The maximum weight.
@@ -566,6 +599,64 @@ struct XSecInfo : public TagBase {
    */
   bool varweights;
 
+  /**
+   * The named weight to which this object belongs.
+   */
+  std::string weightname;
+
+};
+
+/**
+ * Convenient Alias.
+ */
+typedef std::map<std::string,XSecInfo> XSecInfos;
+
+struct EventFile : public TagBase {
+
+  /**
+   * Intitialize default values.
+   */
+  EventFile(): filename(""), neve(-1), ntries(-1) {}
+
+  /**
+   * Create from XML tag
+   */
+  EventFile(const XMLTag & tag)
+    : TagBase(tag.attr, tag.contents), filename(""), neve(-1), ntries(-1) {
+    if ( !getattr("name", filename) ) 
+      throw std::runtime_error("Found eventfile tag without name attribute "
+			       "in Les Houches Event File.");
+    getattr("neve", neve);
+    ntries = neve;
+    getattr("ntries", ntries);
+  }
+
+  /**
+   * Print out an XML tag.
+   */
+  void print(std::ostream & file) const {
+    if ( filename.empty() ) return;
+    file << "  <eventfile" << oattr("name", filename);
+    if ( neve > 0 ) file << oattr("neve", neve);
+    if ( ntries > neve ) file << oattr("ntries", ntries);
+    printattrs(file);
+    closetag(file, "eventfile");
+  }
+
+  /**
+   * The name of the file.
+   */
+  std::string filename;
+  
+  /**
+   * The number of events.
+   */
+  long neve;
+
+  /**
+   * The number of attempte that was needed to produce the neve events.
+   */
+  long ntries;
 
 };
 
@@ -1213,6 +1304,110 @@ struct Clus : public TagBase {
 };
 
 /**
+ * Store special scales from within a scales tag.
+ */
+
+struct Scale : public TagBase {
+
+  /**
+   * Empty constructor
+   */
+  Scale(string st = "veto", int emtr = 0, double sc = 0.0)
+    : stype(st), emitter(emtr), scale(sc) {}
+
+  /**
+   * Construct from an XML-tag.
+   */
+  Scale(const XMLTag & tag)
+    : TagBase(tag.attr, tag.contents),stype("veto"), emitter(0) {
+    if ( !getattr("stype", stype) )
+      throw std::runtime_error("Found scale tag without stype attribute "
+			       "in Les Houches Event File.");
+    std::string pattr;
+    if ( getattr("pos", pattr) ) {
+      std::istringstream pis(pattr);
+      if ( !(pis >> emitter) ) emitter = 0;
+      else {
+        int rec = 0;
+        while ( pis >> rec ) recoilers.insert(rec);
+      }
+    }
+    
+    std::string eattr;
+    if ( getattr("etype", eattr) ) {
+      if ( eattr == "QCD" ) eattr = "-5 -4  -3 -2 -1 1 2 3 4 5 21";
+      if ( eattr == "EW" ) eattr = "-13 -12 -11 11 12 13 22 23 24";
+      std::istringstream eis(eattr);
+      int pdg = 0;
+      while ( eis >> pdg ) emitted.insert(pdg);
+    }
+    std::istringstream cis(tag.contents);
+    cis >> scale;
+    
+  }
+
+  /**
+   * Print out an XML tag.
+   */
+  void print(std::ostream & file) const {
+    file << "<scale" << oattr("stype", stype);
+    if ( emitter > 0 ) {
+      std::ostringstream pos;
+      pos << emitter;
+      for ( std::set<int>::iterator it = recoilers.begin();
+            it != recoilers.end(); ++it )
+        pos << " " << *it;
+      file << oattr("pos", pos.str());
+    }
+    if ( emitted.size() > 0 ) {
+      std::set<int>::iterator it = emitted.begin();
+      std::ostringstream eos;
+      eos << *it;
+      while ( ++it != emitted.end() ) eos << " " << *it;
+      if ( eos.str() == "-5 -4  -3 -2 -1 1 2 3 4 5 21" )
+        file << oattr("etype", string("QCD"));
+      else if ( eos.str() == "-13 -12 -11 11 12 13 22 23 24" )
+        file << oattr("etype", string("EW"));
+      else
+        file << oattr("etype", eos.str());
+    }
+    std::ostringstream os;
+    os << scale;
+    contents = os.str();
+    closetag(file, "scale");
+  }
+
+  /**
+   * The type of scale this represents. Predefined values are "veto"
+   * and "start".
+   */
+  std::string stype;
+
+  /**
+   * The emitter this scale applies to. This is the index of a
+   * particle in HEPEUP (starting at 1). Zero corresponds to any
+   * particle in HEPEUP.
+   */
+  int emitter;
+
+  /** 
+   * The set of recoilers for which this scale applies.
+   */
+  std::set<int> recoilers;
+
+  /**
+   * The set of emitted particles (PDG id) this applies to.
+   */
+  std::set<int> emitted;
+
+  /**
+   * The actual scale given.
+   */
+  double scale;
+  
+};
+
+/**
  * Collect different scales relevant for an event.
  */
 struct Scales : public TagBase {
@@ -1220,31 +1415,91 @@ struct Scales : public TagBase {
   /**
    * Empty constructor.
    */
-  Scales(double defscale = -1.0)
-  : muf(defscale), mur(defscale), mups(defscale), SCALUP(defscale) {}
+  Scales(double defscale = -1.0, int npart = 0)
+    : muf(defscale), mur(defscale), mups(defscale), SCALUP(defscale) {
+  }
 
   /**
    * Construct from an XML-tag
    */
-  Scales(const XMLTag & tag, double defscale = -1.0)
+  Scales(const XMLTag & tag, double defscale = -1.0, int npart = 0)
     : TagBase(tag.attr, tag.contents),
-      muf(defscale), mur(defscale), mups(defscale), SCALUP(defscale) {
+      muf(defscale), mur(defscale), mups(defscale),
+      SCALUP(defscale) {
     getattr("muf", muf);
     getattr("mur", mur);
     getattr("mups", mups);
+    for ( int i = 0, N = tag.tags.size(); i < N; ++i )
+      if ( tag.tags[i]->name == "scale" )
+        scales.push_back(Scale(*tag.tags[i]));
+    for ( int i = 0; i < npart; ++i ) {
+      std::ostringstream pttag;
+      pttag << "pt_start_" << i + 1;
+      double sc = 0.0;
+      if ( getattr(pttag.str(), sc) )
+        scales.push_back(Scale("start", i + 1, sc));
+    }
+    
+  }
+
+  /**
+   * Check if this object contains useful information besides SCALUP.
+   */
+  bool hasInfo() const {
+    return  muf != SCALUP || mur != SCALUP || mups != SCALUP ||
+      !scales.empty();
   }
 
   /**
    * Print out the corresponding XML-tag.
    */
   void print(std::ostream & file) const {
-    if ( muf == SCALUP && mur == SCALUP && mups == SCALUP ) return;
+    if ( !hasInfo() ) return;
     file << "<scales";
     if ( muf != SCALUP ) file << oattr("muf", muf);
     if ( mur != SCALUP ) file << oattr("mur", mur);
     if ( mups != SCALUP ) file << oattr("mups", mups);
     printattrs(file);
+
+    if ( !scales.empty() ) {
+      std::ostringstream os;
+      for ( int i = 0, N = scales.size(); i < N; ++i )
+        scales[i].print(os);
+      contents = os.str();
+    }
     closetag(file, "scales");
+  }
+
+  /**
+   * Return the scale of type st for a given emission of particle type
+   * pdgem from the emitter with number emr and a recoiler rec. (Note
+   * that the indices for emr and rec starts at 1 and 0 is interpreted
+   * as any particle.) First it will check for Scale object with an
+   * exact match. If not found, it will search for an exact match for
+   * the emitter and recoiler with an undefined emitted particle. If
+   * not found, it will look for a match for only emitter and emitted,
+   * of if not found, a match for only the emitter. Finally a general
+   * Scale object will be used, or if nothing matches, the mups will
+   * be returned.
+   */
+  double getScale(std::string st, int pdgem, int emr, int rec) const {
+    for ( int i = 0, N = scales.size(); i < N; ++i ) {
+      if ( scales[i].emitter == emr && st == scales[i].stype &&
+           ( emr == rec ||
+             scales[i].recoilers.find(rec) != scales[i].recoilers.end() ) &&
+           scales[i].emitted.find(pdgem) != scales[i].emitted.end()  )
+        return scales[i].scale;
+    }
+    for ( int i = 0, N = scales.size(); i < N; ++i ) {
+      if ( scales[i].emitter == emr && st == scales[i].stype &&
+           ( emr == rec ||
+             scales[i].recoilers.find(rec) != scales[i].recoilers.end() ) &&
+           scales[i].emitted.empty() )
+        return scales[i].scale;
+    }
+    if ( emr != rec ) return getScale(st, pdgem, emr, emr);
+    if ( emr == rec ) return getScale(st, pdgem, 0, 0);
+    return mups;
   }
 
   /**
@@ -1268,6 +1523,11 @@ struct Scales : public TagBase {
    */
   double SCALUP;
 
+  /**
+   * The list of special scales.
+   */
+  std::vector<Scale> scales;
+  
 };
 
 /**
@@ -1389,7 +1649,8 @@ public:
     XERRUP = x.XERRUP;
     XMAXUP = x.XMAXUP;
     LPRUP = x.LPRUP;
-    xsecinfo = x.xsecinfo;
+    xsecinfos = x.xsecinfos;
+    eventfiles = x.eventfiles;
     cuts = x.cuts;
     ptypes = x.ptypes;
     procinfo = x.procinfo;
@@ -1451,8 +1712,16 @@ public:
 	weightgroup.push_back(WeightGroup(tag, weightgroup.size(),
 					  weightinfo));
       }
+      if ( tag.name == "eventfiles" ) {
+	for ( int j = 0, M = tag.tags.size(); j < M; ++j ) {
+	  XMLTag & eftag = *tag.tags[j];
+          if ( eftag.name == "eventfile" )
+            eventfiles.push_back(EventFile(eftag));
+        }
+      }
       if ( tag.name == "xsecinfo" ) {
-	xsecinfo = XSecInfo(tag);
+	XSecInfo xsecinfo = XSecInfo(tag);
+        xsecinfos[xsecinfo.weightname] = xsecinfo;
       }
       if ( tag.name == "generator" ) {
 	generators.push_back(Generator(tag));
@@ -1540,7 +1809,16 @@ public:
     for ( int i = 0, N = generators.size(); i < N; ++i )
       generators[i].print(file);
 
-    if ( xsecinfo.neve > 0 ) xsecinfo.print(file);
+    if ( !eventfiles.empty() ) {
+      file << "<eventfiles>\n";
+      for ( int i = 0, N = eventfiles.size(); i < N; ++i )
+        eventfiles[i].print(file);
+      file << "</eventfiles>\n";
+    }
+    if ( !xsecinfos.empty() > 0 )
+      for ( XSecInfos::const_iterator it = xsecinfos.begin();
+            it != xsecinfos.end(); ++it )
+        if ( it->second.neve > 0 ) it->second.print(file);
 
     if ( cuts.size() > 0 ) {
       file << "<cutsinfo>" << std::endl;
@@ -1647,9 +1925,32 @@ public:
    * @return the number of weights (including the nominial one).
    */
   int nWeights() const {
-    return weightmap.size() + 1;
+    return weightmap.size() + 1;    
   }
 
+  /**
+   * @return the XSecInfo object corresponding to the named weight \a
+   * weithname. If no such object exists, it will be created.
+   */
+  XSecInfo & getXSecInfo(std::string weightname = "") {
+    XSecInfo & xi = xsecinfos[weightname];
+    xi.weightname = weightname;
+    return xi;
+  }
+
+  /**
+   * @return the XSecInfo object corresponding to the named weight \a
+   * weithname. If no such object exists, an empty XSecInfo will be
+   * returned..
+   */
+  const XSecInfo & getXSecInfo(std::string weightname = "") const {
+    static XSecInfo noinfo;
+    XSecInfos::const_iterator it = xsecinfos.find(weightname);
+    if ( it != xsecinfos.end() ) return it->second;
+    else return noinfo;
+  }
+    
+  
 public:
 
   /**
@@ -1709,9 +2010,15 @@ public:
   std::vector<int> LPRUP;
 
   /**
-   * Contents of the xsecinfo tag
+   * Contents of the xsecinfo tags.
    */
-  XSecInfo xsecinfo;
+  XSecInfos xsecinfos;
+
+  /**
+   * A vector of EventFiles where the events are stored separate fron
+   * the init block.
+   */
+  std::vector<EventFile> eventfiles;
 
   /**
    * Contents of the cuts tag.
@@ -1840,7 +2147,7 @@ public:
   HEPEUP()
     : NUP(0), IDPRUP(0), XWGTUP(0.0), XPDWUP(0.0, 0.0),
       SCALUP(0.0), AQEDUP(0.0), AQCDUP(0.0), heprup(0), currentWeight(0),
-      isGroup(false) {}
+      ntries(1), isGroup(false) {}
 
   /**
    * Copy constructor
@@ -1879,6 +2186,7 @@ public:
     scales = x.scales;
     junk = x.junk;
     currentWeight = x.currentWeight;
+    ntries = x.ntries;
     return *this;
   }
 
@@ -1910,7 +2218,7 @@ public:
   HEPEUP(const XMLTag & tagin, HEPRUP & heprupin)
     : TagBase(tagin.attr), NUP(0), IDPRUP(0), XWGTUP(0.0), XPDWUP(0.0, 0.0),
       SCALUP(0.0), AQEDUP(0.0), AQCDUP(0.0), heprup(&heprupin),
-      currentWeight(0), isGroup(tagin.name == "eventgroup") {
+      currentWeight(0), ntries(1), isGroup(tagin.name == "eventgroup") {
 
     if ( heprup->NPRUP < 0 )
       throw std::runtime_error("Tried to read events but no processes defined "
@@ -1925,7 +2233,8 @@ public:
 	if ( tags[i]->name == "event" )
 	  subevents.push_back(new HEPEUP(*tags[i], heprupin));
       return;
-    }
+    } else
+      getattr("ntries", ntries);
       
 
 
@@ -1950,7 +2259,7 @@ public:
     std::string ss;
     while ( getline(iss, ss) ) junk += ss + '\n';
     
-    scales = Scales(SCALUP);
+    scales = Scales(SCALUP, NUP);
     pdfinfo = PDFInfo(SCALUP);
     namedweights.clear();
     weights.clear();
@@ -2000,7 +2309,7 @@ public:
 	pdfinfo = PDFInfo(tag, SCALUP);
       }
       else if ( tag.name == "scales" ) {
-	scales = Scales(tag, SCALUP);
+	scales = Scales(tag, SCALUP, NUP);
       }
 
     }
@@ -2048,6 +2357,7 @@ public:
     }
 
     file << "<event";
+    if ( ntries > 1 ) file << oattr("ntries", ntries);
     printattrs(file);
     file << ">\n";
     file << " " << setw(4) << NUP
@@ -2072,40 +2382,38 @@ public:
 	   << " " << setw(1) << VTIMUP[i]
 	   << " " << setw(1) << SPINUP[i] << std::endl;
 
-      if ( weights.size() > 0 ) {
-	file << "<weights>";
-	for ( int i = 1, N = weights.size(); i < N; ++i )
-	  file << " " << weights[i].first;
-	file << "</weights>\n";
+    if ( weights.size() > 0 ) {
+      file << "<weights>";
+      for ( int i = 1, N = weights.size(); i < N; ++i )
+        file << " " << weights[i].first;
+      file << "</weights>\n";
+    }
+
+    bool iswgt = false;
+    for ( int i = 0, N = namedweights.size(); i < N; ++i ) {
+      if ( namedweights[i].iswgt ) {
+        if ( !iswgt ) file << "<rwgt>\n";
+        iswgt = true;
+      } else {
+        if ( iswgt ) file << "</rwgt>\n";
+        iswgt = false;
       }
+      for ( int j = 0, M = namedweights[i].indices.size(); j < M; ++j )
+        namedweights[i].weights[j] = weight(namedweights[i].indices[j]);
+      namedweights[i].print(file);
+    }
+    if ( iswgt ) file << "</rwgt>\n";
+    
+    if ( !clustering.empty() ) {
+      file << "<clustering>" << std::endl;
+      for ( int i = 0, N = clustering.size(); i < N; ++i )
+        clustering[i].print(file);
+      file << "</clustering>" << std::endl;	
+    }
 
-      bool iswgt = false;
-      for ( int i = 0, N = namedweights.size(); i < N; ++i ) {
-	if ( namedweights[i].iswgt ) {
-	  if ( !iswgt ) file << "<rwgt>\n";
-	  iswgt = true;
-	} else {
-	  if ( iswgt ) file << "</rwgt>\n";
-	  iswgt = false;
-	}
-	for ( int j = 0, M = namedweights[i].indices.size(); j < M; ++j )
-	  namedweights[i].weights[j] = weight(namedweights[i].indices[j]);
-	namedweights[i].print(file);
-      }
-      if ( iswgt ) file << "</rwgt>\n";
-
-      if ( !clustering.empty() ) {
-	file << "<clustering>" << std::endl;
-	for ( int i = 0, N = clustering.size(); i < N; ++i )
-	  clustering[i].print(file);
-	file << "</clustering>" << std::endl;	
-      }
-
-      pdfinfo.print(file);
-      scales.print(file);
-
-      //    }
-
+    pdfinfo.print(file);
+    scales.print(file);
+    
     file << hashline(junk) << "</event>\n";
 
   }
@@ -2383,6 +2691,12 @@ public:
   Scales scales;
 
   /**
+   * The number of attempts the ME generator did before accepting this
+   * event.
+   */
+  int ntries;
+
+  /**
    * Is this an event or an event group?
    */
   bool isGroup;
@@ -2460,7 +2774,8 @@ public:
    * @param is the stream to read from.
    */
   Reader(std::istream & is)
-    : file(is) {
+    : file(&is), currevent(-1),
+      curreventfile(-1), currfileevent(-1), dirpath("") {
     init();
   }
 
@@ -2475,7 +2790,11 @@ public:
    * @param filename the name of the file to read from.
    */
   Reader(std::string filename)
-    : intstream(filename.c_str()), file(intstream) {
+    : intstream(filename.c_str()), file(&intstream), currevent(-1),
+      curreventfile(-1), currfileevent(-1), dirpath("") {
+
+    size_t slash = filename.find_last_of('/');
+    if ( slash != std::string::npos ) dirpath = filename.substr(0, slash + 1);
     init();
   }
 
@@ -2486,6 +2805,9 @@ private:
    * blocks.
    */
   void init() {
+
+    // initialize reading from multi-file runs.
+    initfile = file;
 
     bool readingHeader = false;
     bool readingInit = false;
@@ -2550,6 +2872,8 @@ private:
 	break;
       }
     XMLTag::deleteAll(tags);
+
+    if ( !heprup.eventfiles.empty() ) openeventfile(0);
  
   }
 
@@ -2558,7 +2882,7 @@ public:
   /**
    * Read an event from the file and store it in the hepeup
    * object. Optional comment lines are stored i the eventComments
-   * member variable.
+   * member variable. 
    * @return true if the read sas successful.
    */
   bool readEvent() {
@@ -2568,7 +2892,7 @@ public:
     if ( heprup.NPRUP < 0 ) return false;
 
     std::string eventLines;
-    int inEvent = 0;;
+    int inEvent = 0;
 
     // Keep reading lines until we hit the end of an event or event group.
     while ( getline() ) {
@@ -2589,8 +2913,13 @@ public:
 	outsideBlock += currentLine + "\n";
       }
     }
-    if ( inEvent == 1 && !currentFind("</event>") ) return false;
-    if ( inEvent == 2 && !currentFind("</eventgroup>") ) return false;
+    if ( ( inEvent == 1 && !currentFind("</event>") ) ||
+         ( inEvent == 2 && !currentFind("</eventgroup>") ) ) {
+      if ( heprup.eventfiles.empty() ||
+           ++curreventfile >= int(heprup.eventfiles.size()) ) return false;
+      openeventfile(curreventfile);
+      return readEvent();
+    }
 
     std::vector<XMLTag*> tags = XMLTag::findXMLTags(eventLines);
 
@@ -2598,13 +2927,39 @@ public:
       if ( tags[i]->name == "event" || tags[i]->name == "eventgroup" ) {
 	hepeup = HEPEUP(*tags[i], heprup);
 	XMLTag::deleteAll(tags);
+        ++currevent;
+        if ( curreventfile >= 0 ) ++currfileevent;
 	return true;
       }
     }
 
+    if ( !heprup.eventfiles.empty() &&
+         ++curreventfile < int(heprup.eventfiles.size()) ) {
+      openeventfile(curreventfile);
+      return readEvent();
+    }
+ 
     XMLTag::deleteAll(tags);
     return false;
 
+  }
+
+  /**
+   * Open the efentfile with index ifile. If another eventfile is
+   * being read, its remaining contents is discarded. This is a noop
+   * if current read session is not a multi-file run.
+   */
+  void openeventfile(int ifile) {
+    std::cerr << "opening file " << ifile << std::endl;
+    efile.close();
+    string fname = heprup.eventfiles[ifile].filename;
+    if ( fname[0] != '/' ) fname = dirpath + fname;
+    efile.open(fname.c_str());
+    if ( !efile ) throw std::runtime_error("Could not open event file " +
+                                           fname);
+    file = &efile;
+    curreventfile = ifile;
+    currfileevent = 0;
   }
 
 protected:
@@ -2613,7 +2968,7 @@ protected:
    * Used internally to read a single line from the stream.
    */
   bool getline() {
-    return ( (bool)std::getline(file, currentLine) );
+    return ( (bool)std::getline(*file, currentLine) );
   }
 
   /**
@@ -2632,10 +2987,21 @@ protected:
   std::ifstream intstream;
 
   /**
-   * The stream we are reading from. This may be a reference to an
-   * external stream or the internal intstream.
+   * The stream we are reading from. This may be a pointer to an
+   * external stream or the internal intstream, or a separate event
+   * file from a multi-file run
    */
-  std::istream & file;
+  std::istream * file;
+
+  /**
+   * The original stream from where we read the init block.
+   */
+  std::istream * initfile;
+  
+  /**
+   * A separate stream for reading multi-file runs.
+   */
+  std::ifstream efile;
 
   /**
    * The last line read in from the stream in getline().
@@ -2680,6 +3046,27 @@ public:
    */
   std::string eventComments;
 
+  /**
+   * The number of the current event (starting from 1).
+   */
+  int currevent;
+
+  /**
+   * The current event file being read from (-1 means there are no
+   * separate event files).
+   */
+  int curreventfile;
+
+  /**
+   * The number of the current event in the current event file.
+   */
+  int currfileevent;
+
+  /**
+   * The directory from where we are reading files.
+   */
+  std::string dirpath;
+  
 private:
 
   /**
@@ -2729,20 +3116,32 @@ public:
    * @param os the stream where the event file is written.
    */
   Writer(std::ostream & os)
-    : file(os) {  }
+    : file(&os), initfile(&os), dirpath("") {  }
 
   /**
    * Create a Writer object giving a filename to write to.
    * @param filename the name of the event file to be written.
    */
   Writer(std::string filename)
-    : intstream(filename.c_str()), file(intstream) {}
+    : intstream(filename.c_str()), file(&intstream), initfile(&intstream),
+      dirpath("") {
+    size_t slash = filename.find_last_of('/');
+    if ( slash != std::string::npos ) dirpath = filename.substr(0, slash + 1);
+  }
 
   /**
    * The destructor writes out the final XML end-tag.
    */
   ~Writer() {
-    file << "</LesHouchesEvents>" << std::endl;
+    file = initfile;
+    if ( !heprup.eventfiles.empty() ) {
+      if ( curreventfile >= 0 &&
+           curreventfile < int(heprup.eventfiles.size()) &&
+           heprup.eventfiles[curreventfile].neve < 0 )
+        heprup.eventfiles[curreventfile].neve = currfileevent;
+      writeinit();
+    }
+    *file << "</LesHouchesEvents>" << std::endl;
   }
 
   /**
@@ -2767,36 +3166,74 @@ public:
   }
 
   /**
+   * Initialize the writer.
+   */
+  void init() {
+    if ( heprup.eventfiles.empty() ) writeinit();
+    lastevent = 0;
+    curreventfile = currfileevent = -1;
+    if ( !heprup.eventfiles.empty() ) openeventfile(0);
+  }
+
+  /**
+   * Open a new event file, possibly closing a previous opened one.
+   */
+  bool openeventfile(int ifile) {
+    if ( heprup.eventfiles.empty() ) return false;
+    if ( ifile < 0 || ifile >= int(heprup.eventfiles.size()) ) return false;
+    if ( curreventfile >= 0 ) {
+      EventFile & ef = heprup.eventfiles[curreventfile];
+      if ( ef.neve > 0 && ef.neve != currfileevent )
+        std::cerr << "LHEF::Writer number of events in event file "
+                  << ef.filename << " does not match the given number."
+                  << std::endl;
+      ef.neve = currfileevent;
+    }
+    efile.close();
+    string fname = heprup.eventfiles[ifile].filename;
+    if ( fname[0] != '/' ) fname = dirpath + fname;
+    efile.open(fname.c_str());
+    if ( !efile ) throw std::runtime_error("Could not open event file " +
+                                           fname);
+    std::cerr << "Opened event file " << fname << std::endl;
+    file = &efile;
+    curreventfile = ifile;
+    currfileevent = 0;
+    return true;
+  }
+    
+
+  /**
    * Write out an optional header block followed by the standard init
    * block information together with any comment lines.
    */
-  void init() {
+  void writeinit() {
 
     // Write out the standard XML tag for the event file.
     if ( heprup.version == 3 )
-      file << "<LesHouchesEvents version=\"3.0\">\n";
+      *file << "<LesHouchesEvents version=\"3.0\">\n";
     else if ( heprup.version == 2 )
-      file << "<LesHouchesEvents version=\"2.0\">\n";
+      *file << "<LesHouchesEvents version=\"2.0\">\n";
     else
-      file << "<LesHouchesEvents version=\"1.0\">\n";
+      *file << "<LesHouchesEvents version=\"1.0\">\n";
 
 
-    file << std::setprecision(10);
+    *file << std::setprecision(10);
 
     using std::setw;
 
     std::string headBlock = headerStream.str();
     if ( headBlock.length() ) {
       if ( headBlock.find("<header>") == std::string::npos )
-	file << "<header>\n";
+	*file << "<header>\n";
       if ( headBlock[headBlock.length() - 1] != '\n' )
 	headBlock += '\n';
-      file << headBlock;
+      *file << headBlock;
       if ( headBlock.find("</header>") == std::string::npos )
-	file << "</header>\n";
+	*file << "</header>\n";
     }
 
-    heprup.print(file);
+    heprup.print(*file);
 
   }
 
@@ -2804,7 +3241,17 @@ public:
    * Write the current HEPEUP object to the stream;
    */
   void writeEvent() {
-    hepeup.print(file);
+
+    if ( !heprup.eventfiles.empty() ) {
+      if ( currfileevent == heprup.eventfiles[curreventfile].neve &&
+           curreventfile + 1 < int(heprup.eventfiles.size()) )
+        openeventfile(curreventfile + 1);
+    }
+
+    hepeup.print(*file);
+
+    ++lastevent;
+    ++currfileevent;
   }
       
 protected:
@@ -2819,8 +3266,39 @@ protected:
    * The stream we are writing to. This may be a reference to an
    * external stream or the internal intstream.
    */
-  std::ostream & file;
+  std::ostream * file;
 
+  /**
+   * The original stream from where we read the init block.
+   */
+  std::ostream * initfile;
+  
+  /**
+   * A separate stream for reading multi-file runs.
+   */
+  std::ofstream efile;
+
+  /**
+   * The number of the last event written (starting from 1).
+   */
+  int lastevent;
+
+  /**
+   * The current event file being written to (-1 means there are no
+   * separate event files).
+   */
+  int curreventfile;
+
+  /**
+   * The number of the current event in the current event file.
+   */
+  int currfileevent;
+
+  /**
+   * The directory from where we are reading files.
+   */
+  std::string dirpath;
+  
 public:
 
   /**

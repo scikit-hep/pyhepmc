@@ -45,7 +45,7 @@ ReaderAscii::~ReaderAscii() { if (!m_isstream) close(); }
 
 
 bool ReaderAscii::read_event(GenEvent &evt) {
-    if ( !m_file.is_open() &! m_isstream ) return false;
+    if ( (!m_file.is_open()) && (!m_isstream) ) return false;
 
     char               peek;
     char               buf[512*512];
@@ -67,6 +67,12 @@ bool ReaderAscii::read_event(GenEvent &evt) {
 
         // Check for ReaderAscii header/footer
         if( strncmp(buf,"HepMC",5) == 0 ) {
+			if( strncmp(buf,"HepMC::Version",14) != 0 && strncmp(buf,"HepMC::Asciiv3",14)!=0 )
+            {
+            WARNING( "ReaderAscii: found unsupported expression in header. Will close the input." )
+            std::cout<<buf<<std::endl;
+            m_isstream ? m_stream->clear(ios::eofbit) : m_file.clear(ios::eofbit);
+            }
             if(parsed_event_header) {
                 is_parsing_successful = true;
                 break;
@@ -124,15 +130,28 @@ bool ReaderAscii::read_event(GenEvent &evt) {
 
 
     // Check if all particles and vertices were parsed
-    if ((int)evt.particles().size() != vertices_and_particles.second ) {
-        ERROR( "ReaderAscii: too few or too many particles were parsed" )
+    if ((int)evt.particles().size() > vertices_and_particles.second ) {
+        ERROR( "ReaderAscii: too many particles were parsed" )
+        printf("%zu  vs  %i expected\n",evt.particles().size(),vertices_and_particles.second );
+        is_parsing_successful = false;
+    }
+    if ((int)evt.particles().size() < vertices_and_particles.second ) {
+        ERROR( "ReaderAscii: too few  particles were parsed" )
+        printf("%zu  vs  %i expected\n",evt.particles().size(),vertices_and_particles.second );
         is_parsing_successful = false;
     }
 
-    if ((int)evt.vertices().size()  != vertices_and_particles.first) {
-       ERROR( "ReaderAscii: too few or too many vertices were parsed" )
-        is_parsing_successful =  false;
+    if ((int)evt.vertices().size()  > vertices_and_particles.first) {
+       ERROR( "ReaderAscii: too many vertices were parsed" )
+       printf("%zu  vs  %i expected\n",evt.vertices().size(),vertices_and_particles.first );
+       is_parsing_successful =  false;
     }
+
+    if ((int)evt.vertices().size()  < vertices_and_particles.first) {
+       ERROR( "ReaderAscii: too few vertices were parsed" )
+       printf("%zu  vs  %i expected\n",evt.vertices().size(),vertices_and_particles.first );
+        is_parsing_successful =  false;
+    }    
     // Check if there were errors during parsing
     if( !is_parsing_successful ) {
         ERROR( "ReaderAscii: event parsing failed. Returning empty event" )
@@ -143,7 +162,6 @@ bool ReaderAscii::read_event(GenEvent &evt) {
 
         return false;
     }
-
     return true;
 }
 
@@ -204,8 +222,8 @@ bool ReaderAscii::parse_weight_values(GenEvent &evt, const char *buf) {
     if ( run_info() && run_info()->weight_names().size()
      && run_info()->weight_names().size() != wts.size() )
     throw std::logic_error("ReaderAscii::parse_weight_values: "
-                           "The number of weights does not match "
-                           "the weight names in the GenRunInfo object");
+                           "The number of weights ("+std::to_string((long long int)(wts.size()))+") does not match "
+                           "the  number weight names("+std::to_string((long long int)(run_info()->weight_names().size()))+") in the GenRunInfo object");
     evt.weights() = wts;
 
     return true;
@@ -237,9 +255,8 @@ bool ReaderAscii::parse_vertex_information(GenEvent &evt, const char *buf) {
     GenVertexPtr  data = make_shared<GenVertex>();
     FourVector    position;
     const char   *cursor          = buf;
-    const char   *cursor2         = NULL;
+    const char   *cursor2         = nullptr;
     int           id              = 0;
-    int           particle_in     = 0;
     int           highest_id      = evt.particles().size();
 
     // id
@@ -256,13 +273,23 @@ bool ReaderAscii::parse_vertex_information(GenEvent &evt, const char *buf) {
     while(true) {
         ++cursor;             // skip the '[' or ',' character
         cursor2     = cursor; // save cursor position
-        particle_in = atoi(cursor);
+        int  particle_in = atoi(cursor);
 
         // add incoming particle to the vertex
         if( particle_in > 0 && particle_in <= highest_id) {
             data->add_particle_in( evt.particles()[particle_in-1] );
         }
         else {
+			shared_ptr<IntAttribute> existing_hc=evt.attribute<IntAttribute>("cycles");            
+            if (existing_hc)
+            {
+            if (existing_hc->value()!=0&&particle_in > 0 )
+            {
+             WARNING( "ReaderAscii: event has cycles, this vertex might be repeated." )
+            //if( particle_in > 0 ) data->add_particle_in( evt.particles()[particle_in-1] );
+		    }
+		    }
+		    else
             return false;
         }
 
@@ -463,7 +490,7 @@ bool ReaderAscii::parse_tool(const char *buf) {
 }
 
 
-string ReaderAscii::unescape(const string s) {
+string ReaderAscii::unescape(const string& s) {
     string ret;
     ret.reserve(s.length());
     for ( string::const_iterator it = s.begin(); it != s.end(); ++it ) {

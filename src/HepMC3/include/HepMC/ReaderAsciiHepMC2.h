@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
 // This file is part of HepMC
-// Copyright (C) 2014-2015 The HepMC collaboration (see AUTHORS for details)
+// Copyright (C) 2014-2018 The HepMC collaboration (see AUTHORS for details)
 //
 #ifndef  HEPMC_READER_ASCII_HEPMC2_H
 #define  HEPMC_READER_ASCII_HEPMC2_H
@@ -17,17 +17,15 @@
  */
 #include "HepMC/Reader.h"
 
-#include "HepMC/Data/SmartPointer.h"
+#include "HepMC/GenEvent.h"
 
 #include <string>
 #include <fstream>
-#include <vector>
-using std::vector;
-using std::ifstream;
+#include <istream>
 
 namespace HepMC {
 
-class GenEvent;
+
 
 class ReaderAsciiHepMC2 : public Reader {
 //
@@ -36,6 +34,12 @@ class ReaderAsciiHepMC2 : public Reader {
 public:
     /** @brief Default constructor */
     ReaderAsciiHepMC2(const std::string& filename);
+
+    /// The ctor to read from stdin
+    ReaderAsciiHepMC2(std::istream &);
+
+    /// @brief Destructor
+    ~ReaderAsciiHepMC2();
 //
 // Functions
 //
@@ -44,7 +48,7 @@ public:
     bool read_event(GenEvent &evt);
 
     /// @brief Return status of the stream
-    bool failed() { return (bool)m_file.rdstate(); }
+    bool failed() { return m_isstream ? (bool)m_stream->rdstate() :(bool)m_file.rdstate(); }
 
     /// @brief Close file stream
     void close();
@@ -118,13 +122,20 @@ private:
 // Fields
 //
 private:
-    ifstream               m_file;                //!< Input file
-
+     /// @todo Unify file/stream treatment
+    std::ifstream m_file; //!< Input file
+    std::istream* m_stream; // For ctor when reading from stdin
+    bool m_isstream; // toggles usage of m_file or m_stream
+ 
     vector<GenVertexPtr>   m_vertex_cache;        //!< Vertex cache
     vector<int>            m_vertex_barcodes;     //!< Old vertex barcodes
 
     vector<GenParticlePtr> m_particle_cache;      //!< Particle cache
     vector<int>            m_end_vertex_barcodes; //!< Old end vertex barcodes
+
+    GenEvent*              m_event_ghost;                      //!< To save particle and verstex attributes.
+    vector<GenParticlePtr> m_particle_cache_ghost;//!< Particle cache for attributes
+    vector<GenVertexPtr>   m_vertex_cache_ghost;        //!< Vertex cache for attributes
 };
 
 } // namespace HepMC

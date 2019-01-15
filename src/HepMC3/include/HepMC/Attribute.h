@@ -24,7 +24,10 @@
 #include <limits>
 #include <sstream>
 #include <iomanip>
+
 #include "HepMC/Common.h"
+#include "HepMC/Data/SmartPointer.h"
+
 using std::string;
 
 namespace HepMC {
@@ -35,13 +38,17 @@ class GenEvent;
 /** @brief Forward declaration of GenRunInfo. */
 class GenRunInfo;
 
+/** @brief Forward declaration of GenParticle. */
+// class GenParticle;
+
 class Attribute {
 //
 // Constructors
 //
 public:
     /** @brief Default constructor */
-    Attribute():m_is_parsed(true) {}
+    //Note: m_event should be set to nullptr in case event is deleted!
+    Attribute():m_is_parsed(true) {    m_event=nullptr; }
 
     /** @brief Virtual destructor */
     virtual ~Attribute() {}
@@ -55,8 +62,12 @@ protected:
      *
      *  @note There should be no need for user class to ever use this constructor
      */
-    Attribute(const string &st):m_is_parsed(false),m_string(st) {}
+    //Note: m_event should be set to nullptr in case event is deleted!
+    Attribute(const string &st):m_is_parsed(false),m_string(st) { m_event=nullptr; }
 
+    /** @brief GenEvent is a friend */
+    friend class GenEvent;
+    
 //
 // Virtual Functions
 //
@@ -65,13 +76,10 @@ public:
      */
     virtual bool from_string(const string & att) = 0;
 
-    /** @brief Optionally initialize the attribute after from_string
-     *
-     * Is passed a reference to the GenEvent object to which the
-     * Attribute belongs.
+    /** @brief Optionally initialize the attribute after from_string.
      */
-  virtual bool init(const GenEvent & /*geneve*/) {
-	return true;
+    virtual bool init() {
+        return true;
     }
 
     /** @brief Optionally initialize the attribute after from_string
@@ -79,7 +87,7 @@ public:
      * Is passed a reference to the GenRunInfo object to which the
      * Attribute belongs.
      */
-  virtual bool init(const GenRunInfo & /*genrun*/) {
+    virtual bool init(const GenRunInfo & ) {
 	return true;
     }
 
@@ -91,10 +99,25 @@ public:
 //
 public:
     /** @brief Check if this attribute is parsed */
-    bool is_parsed() { return m_is_parsed; }
+    bool is_parsed() const { return m_is_parsed; }
 
     /** @brief Get unparsed string */
     const string& unparsed_string() const { return m_string; }
+
+    /** return the GenEvent to which this Attribute belongs, if at all. */
+    const GenEvent * event() const {
+        return m_event;
+    }
+
+    /** return the GenParticle to which this Attribute belongs, if at all. */
+    GenParticlePtr particle() const {
+        return m_particle;
+    }
+
+    /** return the GenVertex to which this Attribute belongs, if at all. */
+    GenVertexPtr vertex() const {
+        return m_vertex;
+    }
 
 protected:
     /** @brief Set is_parsed flag */
@@ -107,8 +130,12 @@ protected:
 // Fields
 //
 private:
-    bool   m_is_parsed; //!< Is this attribute parsed?
-    string m_string;    //!< Raw (unparsed) string
+    bool   m_is_parsed;             //!< Is this attribute parsed?
+    string m_string;                //!< Raw (unparsed) string
+    const GenEvent * m_event;       //!< Possibility to be aware of the
+                                    //!  controlling GenEvent object.
+    GenParticlePtr m_particle; //!< Particle to which assigned.
+    GenVertexPtr m_vertex;      //!< Vertex to which assigned.
 };
 
 /**
@@ -128,11 +155,7 @@ public:
 
     /** @brief Implementation of Attribute::from_string */
     bool from_string(const string &att) {
-#ifdef HEPMC_HAS_CXX11
-        m_val = std::stoi(att);
-#else
         m_val = atoi( att.c_str() );
-#endif
         return true;
     }
 
@@ -154,7 +177,7 @@ public:
     }
 
     /** @brief set the value associated to this Attribute. */
-    void set_value(int i) {
+    void set_value(const int& i) {
 	m_val = i;
     }
 
@@ -163,7 +186,7 @@ private:
 };
 
 /**
- *  @class HepMC::IntAttribute
+ *  @class HepMC::LongAttribute
  *  @brief Attribute that holds an Integer implemented as an int
  *
  *  @ingroup attributes
@@ -179,11 +202,7 @@ public:
 
     /** @brief Implementation of Attribute::from_string */
     bool from_string(const string &att) {
-#ifdef HEPMC_HAS_CXX11
-        m_val = std::stoi(att);
-#else
         m_val = atoi( att.c_str() );
-#endif
         return true;
     }
 
@@ -205,7 +224,7 @@ public:
     }
 
     /** @brief set the value associated to this Attribute. */
-    void set_value(long l) {
+    void set_value(const long& l) {
 	m_val = l;
     }
 
@@ -232,11 +251,7 @@ public:
 
     /** @brief Implementation of Attribute::from_string */
     bool from_string(const string &att) {
-#ifdef HEPMC_HAS_CXX11
-        m_val = std::stod(att);
-#else
         m_val = atof( att.c_str() );
-#endif
         return true;
     }
 
@@ -255,7 +270,7 @@ public:
     }
 
     /** @brief set the value associated to this Attribute. */
-    void set_value(double d) {
+    void set_value(const double& d) {
 	m_val = d;
     }
 
@@ -281,11 +296,7 @@ public:
 
     /** @brief Implementation of Attribute::from_string */
     bool from_string(const string &att) {
-#ifdef HEPMC_HAS_CXX11
-        m_val = std::stof(att);
-#else
         m_val = float(atof( att.c_str() ));
-#endif
         return true;
     }
 
@@ -304,7 +315,7 @@ public:
     }
 
     /** @brief set the value associated to this Attribute. */
-    void set_value(float f) {
+    void set_value(const float& f) {
 	m_val = f;
     }
 
@@ -355,7 +366,7 @@ public:
     }
 
     /** @brief set the value associated to this Attribute. */
-    void set_value(string s) {
+    void set_value(const string& s) {
 	set_unparsed_string(s);
     }
 

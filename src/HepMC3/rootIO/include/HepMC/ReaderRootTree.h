@@ -66,12 +66,13 @@ private:
 // Fields
 //
 private:
-    TFile m_file;         //!< File handler
+    TFile* m_file;         //!< File handler
 public:
     TTree* m_tree;//!< Tree handler. Public to allow simple access, e.g. custom branches.
 private:
     int   m_events_count; //!< Events count. Needed to read the tree
     GenEventData* m_event_data;
+    GenRunInfoData* m_run_info_data;
     std::string m_tree_name;
     std::string m_branch_name;
 };

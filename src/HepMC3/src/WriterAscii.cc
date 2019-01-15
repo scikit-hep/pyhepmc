@@ -15,7 +15,7 @@
 #include "HepMC/GenVertex.h"
 #include "HepMC/Units.h"
 #include <cstring>
-
+#include <algorithm>//min max for VS2017
 namespace HepMC {
 
 
@@ -23,8 +23,8 @@ WriterAscii::WriterAscii(const std::string &filename, shared_ptr<GenRunInfo> run
   : m_file(filename),
     m_stream(&m_file),
     m_precision(16),
-    m_buffer(NULL),
-    m_cursor(NULL),
+    m_buffer(nullptr),
+    m_cursor(nullptr),
     m_buffer_size( 256*1024 )
 {
     set_run_info(run);
@@ -32,7 +32,7 @@ WriterAscii::WriterAscii(const std::string &filename, shared_ptr<GenRunInfo> run
         ERROR( "WriterAscii: could not open output file: "<<filename )
     } else {
         m_file << "HepMC::Version " << HepMC::version() << std::endl;
-        m_file << "HepMC::IO_GenEvent-START_EVENT_LISTING" << std::endl;
+        m_file << "HepMC::Asciiv3-START_EVENT_LISTING" << std::endl;
 	    if ( run_info() ) write_run_info();
     }
 }
@@ -42,18 +42,20 @@ WriterAscii::WriterAscii(std::ostream &stream, shared_ptr<GenRunInfo> run)
   : m_file(),
     m_stream(&stream),
     m_precision(16),
-    m_buffer(NULL),
-    m_cursor(NULL),
+    m_buffer(nullptr),
+    m_cursor(nullptr),
     m_buffer_size( 256*1024 )
+
 {
     set_run_info(run);
+    
     // if ( !m_file.is_open() ) {
     //     ERROR( "WriterAscii: could not open output file: "<<filename )
 	// } else {
         // m_file << "HepMC::Version " << HepMC::version() << std::endl;
         // m_file << "HepMC::IO_GenEvent-START_EVENT_LISTING" << std::endl;
     (*m_stream) << "HepMC::Version " << HepMC::version() << std::endl;
-    (*m_stream) << "HepMC::IO_GenEvent-START_EVENT_LISTING" << std::endl;
+    (*m_stream) << "HepMC::Asciiv3-START_EVENT_LISTING" << std::endl;
 	if ( run_info() ) write_run_info();
     // }
 }
@@ -68,7 +70,6 @@ WriterAscii::~WriterAscii() {
 void WriterAscii::write_event(const GenEvent &evt) {
 
     // if ( !m_file.is_open() ) return;
-
     allocate_buffer();
     if ( !m_buffer ) return;
 
@@ -79,10 +80,14 @@ void WriterAscii::write_event(const GenEvent &evt) {
 	set_run_info(evt.run_info());
 	write_run_info();
     } else {
-	if ( evt.run_info() && run_info() != evt.run_info() )
+	if ( evt.run_info() && run_info() != evt.run_info() ) {
 	    WARNING( "WriterAscii::write_event: GenEvents contain "
 		     "different GenRunInfo objects from - only the "
 		     "first such object will be serialized." )
+	}
+	// else {
+	//write_run_info();
+    //    }
     }
 
     // Write event info
@@ -113,7 +118,7 @@ void WriterAscii::write_event(const GenEvent &evt) {
     if ( evt.weights().size() ) {
       m_cursor += sprintf(m_cursor, "W");
       FOREACH (double w, evt.weights())
-        m_cursor += sprintf(m_cursor, " %e", w);
+        m_cursor += sprintf(m_cursor, " %.*e",std::min(3*m_precision,22), w);
       m_cursor += sprintf(m_cursor, "\n");
       flush();
     }
@@ -188,12 +193,11 @@ void WriterAscii::allocate_buffer() {
         ERROR( "WriterAscii::allocate_buffer: could not allocate buffer!" )
         return;
     }
-
     m_cursor = m_buffer;
 }
 
 
-string WriterAscii::escape(const string s) {
+string WriterAscii::escape(const string& s)  const {
     string ret;
     ret.reserve( s.length()*2 );
     for ( string::const_iterator it = s.begin(); it != s.end(); ++it ) {
@@ -351,14 +355,9 @@ inline void WriterAscii::write_string( const string &str ) {
 
 void WriterAscii::close() {
   std::ofstream* ofs = dynamic_cast<std::ofstream*>(m_stream);
-  // if ( !m_file.is_open() ) return;
   if (ofs && !ofs->is_open()) return;
-
   forced_flush();
-  // m_file << "HepMC::IO_GenEvent-END_EVENT_LISTING" << endl << endl;
-  (*m_stream) << "HepMC::IO_GenEvent-END_EVENT_LISTING" << endl << endl;
-
-  // m_file.close();
+  (*m_stream) << "HepMC::Asciiv3-END_EVENT_LISTING" << endl << endl;
   if (ofs) ofs->close();
 }
 

@@ -24,7 +24,11 @@
 #include "HepMC/Data/GenRunInfoData.h"
 
 // ROOT header files
+#ifdef __CINT__
 #include "TFile.h"
+#else
+class TFile;
+#endif
 
 namespace HepMC {
 
@@ -62,8 +66,8 @@ public:
 // Fields
 //
 private:
-    TFile m_file;         //!< File handler
-    int   m_events_count; //!< Events count. Needed to generate unique object name
+    TFile* m_file;         //!< File handler
+    int    m_events_count; //!< Events count. Needed to generate unique object name
 };
 
 } // namespace HepMC

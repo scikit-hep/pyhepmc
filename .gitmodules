@@ -1,0 +1,4 @@
+[submodule "src/HepMC3"]
+	path = src/HepMC3
+	url = https://gitlab.cern.ch/hdembins/HepMC3.git
+	branch = pyhepmc_ng

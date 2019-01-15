@@ -55,7 +55,7 @@ public:
     shared_ptr<Attribute> get_global(std::string name);
 
     /// @brief Unsecape '\' and '\n' characters in string
-    std::string unescape(const std::string s);
+    std::string unescape(const std::string& s);
 
     /// @name Read helpers
     //@{

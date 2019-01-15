@@ -304,6 +304,7 @@ average = event_norm ! Normalize events to sum or average to the X sect.
    2212   2212 0.40000000E+04 0.40000000E+04 -1 -1  21100  21100 -4   1
  0.50109086E+02 0.89185414E-01 0.50109093E+02     66
   <weightinfo name="test" muf="2.0" />
+  <xsecinfo totxsec="0.50109093E+02" neve="59" />
   <initrwgt>                                     
     <weightgroup type="scale_variation" combine="envelope">               
       <weight id="1001"> muR=0.10000E+01 muF=0.10000E+01 </weight>        
@@ -321,6 +322,10 @@ Just some random garbage...
 <generator name="SomeGen1" version="1.2.3"> some additional comments </generator>
 <generator name="SomeGen2" version="a.x.3"> some other comments </generator>
 <generator name="SomeGen3" version="+.#.@"> more comments </generator>
+<eventfiles>
+  <eventfile name="LHEF_example_1.plhe" neve="59"/>
+  <eventfile name="LHEF_example_2.plhe"/>
+</eventfiles> 
   </init>
   <event npLO=" -1 " npNLO=" 1 ">
   5     66 0.50109093E+02 0.14137688E+03 0.75563862E-02 0.12114027E+00
@@ -370,7 +375,7 @@ Just some random garbage...
    <wgt id="1008"> 0.42208E+02 </wgt>
    <wgt id="1009"> 0.56435E+02 </wgt>
   </rwgt>
-  <scales pt_1="90.1" pt_2="90.2" pt_4="90.3" pt_5="90.4"> random stuff </scales>
+  <scales pt_start_1="90.1" pt_start_2="90.2" pt_start_4="90.3" pt_start_5="90.4"> random stuff </scales>
   </event>
   <event>
   6     66 0.50109093E+02 0.88344569E+02 0.75563862E-02 0.12114027E+00
@@ -395,9 +400,14 @@ Just some random garbage...
    <wgt id="1008"> 0.43255E+02 </wgt>
    <wgt id="1009"> 0.55234E+02 </wgt>
   </rwgt>
-  <scales pt_1="0.1" pt_2="0.2" pt_5="0.3" pt_6="0.4"> random stuff </scales>
+  <scales>
+  <scale stype="start" pos="1">0.1</scale>
+  <scale stype="start" pos="2">0.2</scale>
+  <scale stype="start" pos="5 1 2">0.3</scale>
+  <scale stype="start" pos="6 1 2">0.4</scale>
+  </scales>
   </event>
-  <event>
+  <event ntries="2">
   5     66 0.50109093E+02 0.34743976E+02 0.75563862E-02 0.12114027E+00
         2 -1    0    0  502    0 0.00000000E+00 0.00000000E+00 0.18567734E+03 0.18567764E+03 0.33000000E+00 0.0000E+00 0.0000E+00
         5 -1    0    0  501    0 0.00000000E+00 0.00000000E+00 -.92971073E+02 0.93094900E+02 0.48000000E+01 0.0000E+00 0.0000E+00

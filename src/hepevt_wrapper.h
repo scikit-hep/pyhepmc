@@ -1,3 +1,6 @@
+#ifndef PYHEPMC_NG_HEPEVT_WRAPPER_H
+#define PYHEPMC_NG_HEPEVT_WRAPPER_H
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include "HepMC/FourVector.h"
@@ -103,3 +106,5 @@ bool fill_genevent_from_hepevt(HepMC::GenEvent& evt,
 
     return true;
 }
+
+#endif

@@ -67,9 +67,9 @@ bool HEPEUPAttribute::to_string(string &att) const {
   return true;
 }
 
-bool HEPEUPAttribute::init(const GenEvent & geneve) {
+bool HEPEUPAttribute::init() {
     shared_ptr<HEPRUPAttribute> hepr =
-	geneve.attribute<HEPRUPAttribute>("HEPRUP");
+      event()->attribute<HEPRUPAttribute>("HEPRUP");
     bool found = false;
     for ( int i = 0, N = tags.size(); i < N; ++i )
 	if ( tags[i]->name == "event" || tags[i]->name == "eventgroup" ) {

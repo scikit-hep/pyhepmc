@@ -49,32 +49,32 @@ struct pair_GenVertexPtr_int_greater
 /* The code below is usefull mainly for debug. Assures strong ordering.*/
         std::vector<int> lx_id_in;
         std::vector<int> rx_id_in;
-        for (std::vector<GenParticlePtr>::const_iterator pp=lx.first->particles_in().begin(); pp!=lx.first->particles_in().end(); pp++ ) lx_id_in.push_back((*pp)->pid());
-        for (std::vector<GenParticlePtr>::const_iterator pp=rx.first->particles_in().begin(); pp!=rx.first->particles_in().end(); pp++ ) rx_id_in.push_back((*pp)->pid());
+        for (std::vector<GenParticlePtr>::const_iterator pp=lx.first->particles_in().begin(); pp!=lx.first->particles_in().end(); ++pp ) lx_id_in.push_back((*pp)->pid());
+        for (std::vector<GenParticlePtr>::const_iterator pp=rx.first->particles_in().begin(); pp!=rx.first->particles_in().end(); ++pp ) rx_id_in.push_back((*pp)->pid());
         std::sort(lx_id_in.begin(),lx_id_in.end());
         std::sort(rx_id_in.begin(),rx_id_in.end());
         for (unsigned int i=0; i<lx_id_in.size(); i++) if (lx_id_in[i]!=rx_id_in[i]) return  (lx_id_in[i]<rx_id_in[i]);
 
         std::vector<int> lx_id_out;
         std::vector<int> rx_id_out;
-        for (std::vector<GenParticlePtr>::const_iterator pp=lx.first->particles_in().begin(); pp!=lx.first->particles_in().end(); pp++ ) lx_id_out.push_back((*pp)->pid());
-        for (std::vector<GenParticlePtr>::const_iterator pp=rx.first->particles_in().begin(); pp!=rx.first->particles_in().end(); pp++ ) rx_id_out.push_back((*pp)->pid());
+        for (std::vector<GenParticlePtr>::const_iterator pp=lx.first->particles_in().begin(); pp!=lx.first->particles_in().end(); ++pp ) lx_id_out.push_back((*pp)->pid());
+        for (std::vector<GenParticlePtr>::const_iterator pp=rx.first->particles_in().begin(); pp!=rx.first->particles_in().end(); ++pp ) rx_id_out.push_back((*pp)->pid());
         std::sort(lx_id_out.begin(),lx_id_out.end());
         std::sort(rx_id_out.begin(),rx_id_out.end());
         for (unsigned int i=0; i<lx_id_out.size(); i++) if (lx_id_out[i]!=rx_id_out[i]) return  (lx_id_out[i]<rx_id_out[i]);
 
         std::vector<double> lx_mom_in;
         std::vector<double> rx_mom_in;
-        for (std::vector<GenParticlePtr>::const_iterator pp=lx.first->particles_in().begin(); pp!=lx.first->particles_in().end(); pp++ ) lx_mom_in.push_back((*pp)->momentum().e());
-        for (std::vector<GenParticlePtr>::const_iterator pp=rx.first->particles_in().begin(); pp!=rx.first->particles_in().end(); pp++ ) rx_mom_in.push_back((*pp)->momentum().e());
+        for (std::vector<GenParticlePtr>::const_iterator pp=lx.first->particles_in().begin(); pp!=lx.first->particles_in().end(); ++pp ) lx_mom_in.push_back((*pp)->momentum().e());
+        for (std::vector<GenParticlePtr>::const_iterator pp=rx.first->particles_in().begin(); pp!=rx.first->particles_in().end(); ++pp ) rx_mom_in.push_back((*pp)->momentum().e());
         std::sort(lx_mom_in.begin(),lx_mom_in.end());
         std::sort(rx_mom_in.begin(),rx_mom_in.end());
         for (unsigned int i=0; i<lx_mom_in.size(); i++) if (lx_mom_in[i]!=rx_mom_in[i]) return  (lx_mom_in[i]<rx_mom_in[i]);
 
         std::vector<double> lx_mom_out;
         std::vector<double> rx_mom_out;
-        for (std::vector<GenParticlePtr>::const_iterator pp=lx.first->particles_in().begin(); pp!=lx.first->particles_in().end(); pp++ ) lx_mom_out.push_back((*pp)->momentum().e());
-        for (std::vector<GenParticlePtr>::const_iterator pp=rx.first->particles_in().begin(); pp!=rx.first->particles_in().end(); pp++ ) rx_mom_out.push_back((*pp)->momentum().e());
+        for (std::vector<GenParticlePtr>::const_iterator pp=lx.first->particles_in().begin(); pp!=lx.first->particles_in().end(); ++pp ) lx_mom_out.push_back((*pp)->momentum().e());
+        for (std::vector<GenParticlePtr>::const_iterator pp=rx.first->particles_in().begin(); pp!=rx.first->particles_in().end(); ++pp ) rx_mom_out.push_back((*pp)->momentum().e());
         std::sort(lx_mom_out.begin(),lx_mom_out.end());
         std::sort(rx_mom_out.begin(),rx_mom_out.end());
         for (unsigned int i=0; i<lx_mom_out.size(); i++) if (lx_mom_out[i]!=rx_mom_out[i]) return  (lx_mom_out[i]<rx_mom_out[i]);
@@ -87,7 +87,7 @@ struct pair_GenVertexPtr_int_greater
 void calculate_longest_path_to_top( GenVertexPtr v,std::map<GenVertexPtr,int>& pathl)
 {
     int p=0;
-    for (std::vector<GenParticlePtr>::const_iterator pp=v->particles_in().begin(); pp!=v->particles_in().end(); pp++ )
+    for (std::vector<GenParticlePtr>::const_iterator pp=v->particles_in().begin(); pp!=v->particles_in().end(); ++pp )
         {
             GenVertexPtr v2=(*pp)->production_vertex();
             if (v2==v) continue; //LOOP! THIS SHOULD NEVER HAPPEN FOR A PROPER EVENT!
@@ -129,8 +129,8 @@ bool HEPEVT_Wrapper::HEPEVT_to_GenEvent( GenEvent* evt )
     /* The part above is always correct as it is a raw information without any topology.*/
 
     /* In this way we trust mother information TODO: implement "Trust daughters"*/
-    for (std::map<GenParticlePtr,int >::iterator it1= hepevt_particles.begin(); it1!= hepevt_particles.end(); it1++)
-        for (std::map<GenParticlePtr,int >::iterator it2= hepevt_particles.begin(); it2!= hepevt_particles.end(); it2++)
+    for (std::map<GenParticlePtr,int >::iterator it1= hepevt_particles.begin(); it1!= hepevt_particles.end(); ++it1)
+        for (std::map<GenParticlePtr,int >::iterator it2= hepevt_particles.begin(); it2!= hepevt_particles.end(); ++it2)
             if   (HEPEVT_Wrapper::first_parent(it2->second)<=it1->second&&it1->second<=HEPEVT_Wrapper::last_parent(it2->second)) /*I'm you father, Luck!*/
                 hepevt_vertices[it2->first->production_vertex()].first.insert(it1->second);
     /* Now all incoming sets are correct for all vertices. But we have duplicates.*/
@@ -140,27 +140,27 @@ bool HEPEVT_Wrapper::HEPEVT_to_GenEvent( GenEvent* evt )
 
     /*Fill container with vertices with unique sets of incoming particles. Merge the outcoming particle sets.*/
     std::map<GenVertexPtr,std::pair<std::set<int>,std::set<int> > > final_vertices_map;
-    for (std::map<GenVertexPtr,std::pair<std::set<int>,std::set<int> > >::iterator vs= hepevt_vertices.begin(); vs!= hepevt_vertices.end(); vs++)
+    for (std::map<GenVertexPtr,std::pair<std::set<int>,std::set<int> > >::iterator vs= hepevt_vertices.begin(); vs!= hepevt_vertices.end(); ++vs)
         {
             if ((final_vertices_map.size()==0)||(vs->second.first.size()==0&&vs->second.second.size()!=0)) { final_vertices_map.insert(*vs);  continue; } /*Always insert particles out of nowhere*/
             std::map<GenVertexPtr,std::pair<std::set<int>,std::set<int> > >::iterator  v2;
-            for (v2=final_vertices_map.begin(); v2!=final_vertices_map.end(); v2++) if (vs->second.first==v2->second.first) {v2->second.second.insert(vs->second.second.begin(),vs->second.second.end()); break;}
+            for (v2=final_vertices_map.begin(); v2!=final_vertices_map.end(); ++v2) if (vs->second.first==v2->second.first) {v2->second.second.insert(vs->second.second.begin(),vs->second.second.end()); break;}
             if (v2==final_vertices_map.end()) final_vertices_map.insert(*vs);
         }
 
     std::vector<GenParticlePtr> final_particles;
     std::set<int> used;
-    for (std::map<GenVertexPtr,std::pair<std::set<int>,std::set<int> > >:: iterator it=final_vertices_map.begin(); it!=final_vertices_map.end(); it++)
+    for (std::map<GenVertexPtr,std::pair<std::set<int>,std::set<int> > >:: iterator it=final_vertices_map.begin(); it!=final_vertices_map.end(); ++it)
         {
             GenVertexPtr v=it->first;
             std::set<int> in=it->second.first;
             std::set<int> out=it->second.second;
             used.insert(in.begin(),in.end());
             used.insert(out.begin(),out.end());
-            for (std::set<int>::iterator el=in.begin(); el!=in.end(); el++) v->add_particle_in(particles_index[*el]);
-            if (in.size()!=0) for (std::set<int>::iterator el=out.begin(); el!=out.end(); el++) v->add_particle_out(particles_index[*el]);
+            for (std::set<int>::iterator el=in.begin(); el!=in.end(); ++el) v->add_particle_in(particles_index[*el]);
+            if (in.size()!=0) for (std::set<int>::iterator el=out.begin(); el!=out.end(); ++el) v->add_particle_out(particles_index[*el]);
         }
-    for (std::set<int>::iterator el=used.begin(); el!=used.end(); el++) final_particles.push_back(particles_index[*el]);
+    for (std::set<int>::iterator el=used.begin(); el!=used.end(); ++el) final_particles.push_back(particles_index[*el]);
     /* One can put here a check on the number of particles/vertices*/
 
     evt->add_tree(final_particles);
@@ -191,14 +191,14 @@ bool HEPEVT_Wrapper::GenEvent_to_HEPEVT( const GenEvent* evt )
     std::vector<GenParticlePtr> sorted_particles;
     std::vector<GenParticlePtr> stable_particles;
     /*For a valid "Trust mothers" HEPEVT record we must  keep mothers together*/
-    for (std::vector<std::pair<GenVertexPtr,int> >::iterator it=sorted_paths.begin(); it!=sorted_paths.end(); it++)
+    for (std::vector<std::pair<GenVertexPtr,int> >::iterator it=sorted_paths.begin(); it!=sorted_paths.end(); ++it)
         {
             std::vector<GenParticlePtr> Q;
             copy(it->first->particles_in().begin(),it->first->particles_in().end(),back_inserter(Q));
             sort(Q.begin(),Q.end(),GenParticlePtr_greater_order());
             copy(Q.begin(),Q.end(),std::back_inserter(sorted_particles));
             /*For each vertex put all outgoing particles w/o end vertex. Ordering of particles to produces reproduceable record*/
-            for (std::vector<GenParticlePtr>::const_iterator pp=it->first->particles_out().begin(); pp!=it->first->particles_out().end(); pp++ )
+            for (std::vector<GenParticlePtr>::const_iterator pp=it->first->particles_out().begin(); pp!=it->first->particles_out().end(); ++pp )
                 if(!((*pp)->end_vertex())) stable_particles.push_back(*pp);
         }
     sort(stable_particles.begin(),stable_particles.end(),GenParticlePtr_greater_order());
@@ -226,7 +226,7 @@ bool HEPEVT_Wrapper::GenEvent_to_HEPEVT( const GenEvent* evt )
                     mothers.clear();
                     for (std::vector<GenParticlePtr>::const_iterator
                             it=sorted_particles[i-1]->production_vertex()->particles_in().begin();
-                            it!=sorted_particles[i-1]->production_vertex()->particles_in().end(); it++)
+                            it!=sorted_particles[i-1]->production_vertex()->particles_in().end(); ++it)
                         for ( int j = 1; j <= particle_counter; ++j )
                             if (sorted_particles[j-1]==(*it))
                                 mothers.push_back(j);

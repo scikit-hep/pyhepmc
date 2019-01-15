@@ -8,6 +8,7 @@
 #include "HepMC/GenEvent.h"
 #include "HepMC/GenParticle.h"
 #include "HepMC/GenVertex.h"
+#include "HepMC/AssociatedParticle.h"
 #include <iomanip>
 
 using namespace HepMC;
@@ -110,6 +111,11 @@ int main(int /*argc*/, char ** /*argv*/) {
             wts.push_back(hepe->hepeup.weights[i].first);
         ev.weights() = wts;
 
+        // Let's see if we can associate p1 and p2.
+        ev.add_attribute("OtherIncoming",
+                         make_shared<AssociatedParticle>(p2), p1->id()); 
+        
+
         // And then we are done and can write out the GenEvent.
         output.write_event(ev);
 
@@ -130,6 +136,12 @@ int main(int /*argc*/, char ** /*argv*/) {
         // Read in the next event.
         GenEvent ev(Units::GEV, Units::MM);
         if ( !input.read_event(ev) || ev.event_number() == 0 ) break;
+
+        // Check that the first incoming particle still refers to the second.
+        shared_ptr<AssociatedParticle> assoc =
+          ev.attribute<AssociatedParticle>("OtherIncoming", 1);
+        if ( !assoc || !assoc->associated() ||
+             assoc->associated() != ev.particles()[1] ) return 3;
 
         // Make sure the weight names are the same.
         if ( input.run_info()->weight_names() != weightnames ) return 2;
@@ -153,6 +165,10 @@ int main(int /*argc*/, char ** /*argv*/) {
 
             // Then we write out the HEPRUP object.
             writer.heprup = hepr->heprup;
+            if ( writer.heprup.eventfiles.size() >= 2 ) {
+              writer.heprup.eventfiles[0].filename = "LHEF_example_1_out.plhe";
+              writer.heprup.eventfiles[1].filename = "LHEF_example_2_out.plhe";
+            }
             writer.init();
 
         }

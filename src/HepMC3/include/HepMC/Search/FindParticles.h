@@ -30,9 +30,9 @@ enum FilterType {
     FIND_FIRST,
     FIND_LAST
 };
-/// Compatibility name
-using FilterEvent = FilterType;
 
+
+typedef     FilterType FilterEvent;
 
 class FindParticles {
 //
