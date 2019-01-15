@@ -201,11 +201,11 @@ def test_pythonic_read_write():
     evt1 = prepare_event()
 
     oss = hep.stringstream()
-    with hep.WriterAscii(oss) as f:
+    with hep.open(oss, "w") as f:
         f.write(evt1)
 
     evt2 = None
-    with hep.ReaderAscii(oss) as f:
+    with hep.open(oss) as f:
         evt2 = f.read()
 
     assert evt1.particles == evt2.particles

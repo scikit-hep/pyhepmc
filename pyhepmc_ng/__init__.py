@@ -3,6 +3,44 @@ import ctypes
 import numpy as np
 
 
+class WriterWrapper:
+    def __init__(self, filename, precision=None):
+        self._handle = (filename, precision)
+
+    def write(self, object):
+        if isinstance(self._handle, WriterAscii):
+            self._handle.write(object)
+            return
+        filename, precision = self._handle  
+        if isinstance(object, GenRunInfo):          
+            self._handle = WriterAscii(filename, object)
+            if precision is not None:
+                self._handle.precision = precision
+            self._handle.write_run_info()
+        else:
+            self._handle = WriterAscii(filename)
+            if precision is not None:
+                self._handle.precision = precision
+            self.write(object)
+
+    def close(self):
+        self._handle.close()
+
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, type, value, tb):
+        self.close()
+        return False
+
+
+def open(filename, mode="r", precision=None):
+    if mode == "r":
+        return ReaderAscii(filename)
+    elif mode == "w":
+        return WriterWrapper(filename, precision)
+
+
 def fill_genevent_from_hepevent_ptr(evt, ptr_as_int, max_size,
                                     int_type=ctypes.c_int,
                                     float_type=ctypes.c_double,
