@@ -1,11 +1,37 @@
 from test_basic import prepare_event
 from pyhepmc_ng.view import to_dot
 
-def test_dot():
+def test_dot(tmpdir):
+    import os
+    os.chdir(str(tmpdir))
     evt = prepare_event()
     d = to_dot(evt)
-    print(d)
-    d.render(view=True)
-
-if __name__ == '__main__':
-    test_dot()
+    assert str(d) == """digraph "event 1" {
+	node [shape=point]
+	-1
+	-2
+	-3
+	-4
+	in_0 [style=invis]
+	in_0 -> -1 [label="p+
+7 GeV"]
+	in_1 [style=invis]
+	in_1 -> -2 [label="p+
+7 GeV"]
+	-1 -> -3 [label="d
+0.032 GeV"]
+	-2 -> -3 [label="ubar
+0.058 GeV"]
+	-3 -> -4 [label="W-
+0.086 GeV"]
+	out_0 [style=invis]
+	-3 -> out_0 [label="gamma
+0.0042 GeV"]
+	out_1 [style=invis]
+	-4 -> out_1 [label="d
+0.03 GeV"]
+	out_2 [style=invis]
+	-4 -> out_2 [label="ubar
+0.056 GeV"]
+}"""
+    # d.render(view=True)
