@@ -366,6 +366,11 @@ PYBIND11_MODULE(cpp, m) {
         METH(is_generated_mass_set, GenParticle)
         METH(unset_generated_mass, GenParticle)
         .def(py::self == py::self)
+        .def("__repr__", [](const GenParticlePtr& self) {
+          std::ostringstream os;
+          Print::line(os, self);
+          return os.str();
+        })
         ;
 
     py::class_<GenVertex, GenVertexPtr>(m, "GenVertex")
@@ -386,6 +391,11 @@ PYBIND11_MODULE(cpp, m) {
         PROP(position, GenVertex)
         METH(has_set_position, GenVertex)
         .def(py::self == py::self)
+        .def("__repr__", [](const GenVertexPtr& self) {
+          std::ostringstream os;
+          Print::line(os, self);
+          return os.str();
+        })
         ;
 
     // py::class_<GenParticleData>(m, "GenParticleData");

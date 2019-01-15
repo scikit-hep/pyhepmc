@@ -16,7 +16,10 @@ def to_dot(evt, style=None):
     vi = 0
     vo = 0
     for p in evt.particles:
-        pname = pdg.name(p.pid)
+        try:
+            pname = pdg.name(p.pid)
+        except:
+            pname = "Unknown(%i)" % p.pid
         label = '%s\n%.2g GeV'%(pname, p.momentum.e/1e3)
         if not p.parents:
             vid = 'in_%i'%vi
