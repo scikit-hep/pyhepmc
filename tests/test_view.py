@@ -1,13 +1,12 @@
 import pytest
-graphviz = pytest.importorskip("graphviz")
 from test_basic import prepare_event
-from pyhepmc_ng.view import to_dot
+view = pytest.importorskip("pyhepmc_ng.view") # depends on graphviz
 
 def test_dot(tmpdir):
     import os
     os.chdir(str(tmpdir))
     evt = prepare_event()
-    d = to_dot(evt)
+    d = view.to_dot(evt)
     assert str(d) == """digraph "event 1" {
 	node [shape=point]
 	-1

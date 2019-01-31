@@ -30,6 +30,7 @@ matrix:
 
 install:
   - pip install .
+  - pip install graphviz
 
 script:
   - pytest
