@@ -1,7 +1,7 @@
 """
-pyhepmc-ng is an alternative wrapper of the HepMC-v3 C++ library.
+pyhepmc-ng is a wrapper of the HepMC-v3 C++ library.
 
-The official wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
+Another wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
 Why should you use this one?
 
 **pyhepmc-ng is easy to install**
@@ -15,25 +15,18 @@ pybind11 is automatically installed as a requirement by pip. You don't need an
 external installation of the HepMC library, either. A copy of this
 light-weight library is included.
 
-The original pyhepmc package is not easy to install. It uses SWIG to create
-the bindings, which has to be installed separately. It also requires you to
-install the C++ library HepMC separately. When you try a pip-install, it will
-in general not work out-of-the-box. Instead you will get intimidating error
-messages, which are difficult to decipher.
+**pyhepmc-ng is actively developed**
 
-**pyhepmc-ng is actively developed and maintained**
-
-The last release of pyhepmc was May 2013.
+pyhepmc-ng is part of the Scikit-HEP project, which aims to provide all tools needed by particle physicists to do data analysis in Python.
 
 **pyhepmc-ng is unit tested**
 
-Everything in pyhepmc-ng is unit tested. A few bugs were already found in
-HepMC3 in this way, notably in the `HEPEVT_Wrapper` class.
+Everything in pyhepmc-ng is unit tested.
 
 **pyhepmc-ng supports Pythonic code**
 
-pyhepmc-ng is not a blind mapping of C++ code to Python. It uses Python idioms
-where it is appropriate.
+pyhepmc-ng is a hand-crafted mapping of C++ code to Python. It supports Python idioms
+where appropriate.
 
 - C++ methods which act like properties are represented as properties,
   e.g. GenParticle::set_status and GenParticle::status are mapped to a single
@@ -42,7 +35,7 @@ where it is appropriate.
 - ReaderAscii and WriterAscii support the context manager protocol
 
 License: pyhepmc-ng is covered by the BSD license, but the license only
-applies to the binding code. The HepMC code is covered by the GPL-v3 license.
+applies to the binding code. The HepMC3 code is covered by the GPL-v3 license.
 """
 from setuptools import setup, Extension, find_packages
 from distutils.command.build_ext import build_ext

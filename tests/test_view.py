@@ -1,3 +1,5 @@
+import pytest
+graphviz = pytest.importorskip("graphviz")
 from test_basic import prepare_event
 from pyhepmc_ng.view import to_dot
 
