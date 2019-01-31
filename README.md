@@ -5,7 +5,7 @@ An alternative wrapper of the HepMC-v3 C++ library.
 [![PyPI version](https://badge.fury.io/py/pyhepmc_ng.svg)](https://badge.fury.io/py/pyhepmc_ng)
 [![Build Status](https://travis-ci.org/HDembinski/pyhepmc.svg?branch=master)](https://travis-ci.org/HDembinski/pyhepmc)
 
-The official wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
+The other inofficial wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
 Why should you use this one?
 
 **pyhepmc-ng is easy to install**
