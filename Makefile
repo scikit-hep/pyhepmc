@@ -3,16 +3,16 @@
 build: pyhepmc_ng/cpp.so
 
 pyhepmc_ng/cpp.so: src/*.cpp setup.py
-	python setup.py build_ext -i
+	python3 setup.py build_ext -i
 
 clean:
-	rm -rf build/*/src/*.o pyhepmc_ng/*.so
+	rm -rf build pyhepmc_ng/*.so
 
 distclean:
-	rm -rf build dist *.so
+	rm -rf build dist *.so pyhepmc_ng.egg-info
 
 test: build
-	@pytest tests -sv
+	@python3 -m pytest tests -sv
 
 dist: setup.py src/*.*
 	rm -rf dist
