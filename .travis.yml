@@ -31,6 +31,7 @@ matrix:
 install:
   - pip install .
   - pip install graphviz
+  - pip install --upgrade attrs
 
 script:
   - pytest
