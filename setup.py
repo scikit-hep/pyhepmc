@@ -107,27 +107,26 @@ def has_flag(compiler, flagname):
     return True
 
 
-def cpp_flag(compiler, *flags):
+def flag_filter(compiler, *flags):
+    result = []
     for flag in flags:
-        if not flag:
-            return []
         if has_flag(compiler, flag):
-            return [flag]
-    raise StandardError("cpp flags failed: {0}".format(flags))
+            result.append(flag)
+    return result
 
 
 class BuildExt(build_ext):
-    compile_flags = {
-        "msvc": ['/EHsc'],
-        "unix": ['-std=c++11', '-fvisibility=hidden', '-stdlib=libc++']
-    }
-
-    # compile_flags['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
+    # these flags are not checked and always added
+    compile_flags = {"msvc": ['/EHsc'], "unix": ["-std=c++11"]}
 
     def build_extensions(self):
         ct = self.compiler.compiler_type
         opts = self.compile_flags.get(ct, [])
         if ct == 'unix':
+            # only add flags which pass the flag_filter
+            opts += flag_filter(self.compiler,
+                                '-fvisibility=hidden', '-stdlib=libc++', '-std=c++14',
+                                '-Wno-deprecated-register')
             opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
