@@ -69,11 +69,12 @@ bool operator==(const GenVertex& a, const GenVertex& b) {
                        const GenParticlePtr& b) { return a->id() == b->id(); };
     return a.id() == b.id() && a.status() == b.status() &&
         is_close(a.position(), b.position()) &&
+        a.particles_in_size() == b.particles_in_size() &&
+        a.particles_out_size() == b.particles_out_size() &&
         std::equal(a.particles_in().begin(), a.particles_in().end(),
-                   b.particles_in().begin(), b.particles_in().end(),
-                   equal_id) &&
+                   b.particles_in().begin(), equal_id) &&
         std::equal(a.particles_out().begin(), a.particles_out().end(),
-                   b.particles_out().begin(), b.particles_out().end(),
+                   b.particles_out().begin(),
                    equal_id);
 }
 
@@ -112,8 +113,8 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
         a_tools = a.run_info()->tools();
     if (b.run_info())
         b_tools = b.run_info()->tools();
-    if (!std::equal(a_tools.begin(), a_tools.end(),
-                    b_tools.begin(), b_tools.end()))
+    if (a_tools.size() != b_tools.size() ||
+        !std::equal(a_tools.begin(), a_tools.end(), b_tools.begin()))
         return false;
 
     return a.vertices() == b.vertices() && a.particles() == b.particles();
@@ -128,7 +129,7 @@ using namespace py::literals;
 #define PROP_RO(name, cls) .def_property_readonly(#name, &cls::name)
 #define PROP(name, cls) .def_property(#name, &cls::name, &cls::set_##name)
 #define METH(name, cls) .def(#name, &cls::name)
-#define METH_OL(name, cls, args) .def(#name, py::overload_cast<args>(&cls::name))
+#define METH_OL(name, cls, rval, args) .def(#name, (rval (cls::*)(args)) &cls::name)
 
 PYBIND11_MODULE(cpp, m) {
     using namespace HepMC;
@@ -326,10 +327,10 @@ PYBIND11_MODULE(cpp, m) {
         .def_property("cross_section", &GenEvent::cross_section, (void (GenEvent::*)(const GenCrossSectionPtr&))&GenEvent::set_cross_section)
         METH(event_pos, GenEvent)
         METH(beams, GenEvent)
-        METH_OL(add_vertex, GenEvent, GenVertexPtr)
-        METH_OL(add_particle, GenEvent, GenParticlePtr)
-        METH_OL(remove_vertex, GenEvent, GenVertexPtr)
-        METH_OL(remove_particle, GenEvent, GenParticlePtr)
+        METH_OL(add_vertex, GenEvent, void, GenVertexPtr)
+        METH_OL(add_particle, GenEvent, void, GenParticlePtr)
+        METH_OL(remove_vertex, GenEvent, void, GenVertexPtr)
+        METH_OL(remove_particle, GenEvent, void, GenParticlePtr)
         .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0)
         METH(clear, GenEvent)
         .def(py::self == py::self)
@@ -381,10 +382,10 @@ PYBIND11_MODULE(cpp, m) {
         PROP_RO(id, GenVertex)
         PROP(status, GenVertex)
         // PROP_RO(data, GenVertex)
-        METH_OL(add_particle_in, GenVertex, GenParticlePtr)
-        METH_OL(add_particle_out, GenVertex, GenParticlePtr)
-        METH_OL(remove_particle_in, GenVertex, GenParticlePtr)
-        METH_OL(remove_particle_out, GenVertex, GenParticlePtr)
+        METH_OL(add_particle_in, GenVertex, void, GenParticlePtr)
+        METH_OL(add_particle_out, GenVertex, void, GenParticlePtr)
+        METH_OL(remove_particle_in, GenVertex, void, GenParticlePtr)
+        METH_OL(remove_particle_out, GenVertex, void, GenParticlePtr)
         // METH(particles, GenVertex)
         PROP_RO(particles_in, GenVertex)
         PROP_RO(particles_out, GenVertex)

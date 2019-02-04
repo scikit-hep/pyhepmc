@@ -1,6 +1,5 @@
 from graphviz import Digraph
-from particletools.tables import PYTHIAParticleData
-pdg = PYTHIAParticleData()
+from particle import Particle
 
 
 def to_dot(evt, style=None):
@@ -17,7 +16,15 @@ def to_dot(evt, style=None):
     vo = 0
     for p in evt.particles:
         try:
-            pname = pdg.name(p.pid)
+            p_db = Particle.from_pdgid(p.pid)
+            pname = p_db.name
+            if abs(p.pid) in {1, 2, 3, 4, 5, 6, 12, 14, 16, 2212, 2112}:
+                if p_db.bar:
+                    pname += "~"
+            elif p.pid in {21, 22, 23}:
+                pass
+            else:
+                pname += {2: "++", 1: "+", 0: "0", -1: "-", -2: "--"}.get(p_db.three_charge / 3)
         except:
             pname = "Unknown(%i)" % p.pid
         label = '%s\n%.2g GeV'%(pname, p.momentum.e/1e3)

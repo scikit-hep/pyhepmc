@@ -117,17 +117,18 @@ def cpp_flag(compiler, *flags):
 
 
 class BuildExt(build_ext):
-    compile_flags = dict(msvc=['/EHsc'], unix=[])
+    compile_flags = {
+        "msvc": ['/EHsc'],
+        "unix": ['-std=c++11', '-fvisibility=hidden', '-stdlib=libc++']
+    }
+
     # compile_flags['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
 
     def build_extensions(self):
         ct = self.compiler.compiler_type
         opts = self.compile_flags.get(ct, [])
         if ct == 'unix':
-            opts += ['-DVERSION_INFO="%s"' % self.distribution.get_version()]
-            opts += cpp_flag(self.compiler, '-std=c++14')
-            opts += cpp_flag(self.compiler, '-fvisibility=hidden')
-            opts += cpp_flag(self.compiler, '-stdlib=libc++', '')
+            opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
         for ext in self.extensions:
@@ -140,7 +141,7 @@ setup(
     version=__version__,
     author='Hans Dembinski',
     author_email='hans.dembinski@gmail.com',
-    url='https://github.com/hdembinski/pyhepmc',
+    url='https://github.com/scikit-hep/pyhepmc',
     description='Next-generation Python interface to the HepMC high-energy physics event record API',
     long_description=__doc__,
     long_description_content_type='text/markdown',
@@ -164,7 +165,7 @@ setup(
     ],
     keywords='generator montecarlo simulation data hep physics particle',
     packages=find_packages(),
-    install_requires=['pybind11>=2.2'],
+    install_requires=['pybind11>=2.2', 'particle'],
     tests_require=['pytest', 'graphviz'],
     ext_modules=ext_modules,
     cmdclass=dict(build_ext=BuildExt),
