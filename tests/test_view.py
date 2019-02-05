@@ -2,6 +2,12 @@ import pytest
 from test_basic import prepare_event
 view = pytest.importorskip("pyhepmc_ng.view") # depends on graphviz
 
+from particle import Particle
+proton = Particle.from_pdgid(2212)
+assert proton.name == "p"
+assert proton.three_charge = 3
+assert parton.bar == False
+
 def test_dot(tmpdir):
     import os
     os.chdir(str(tmpdir))
