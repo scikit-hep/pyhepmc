@@ -31,7 +31,7 @@ matrix:
 install:
   - pip install .
   - pip install graphviz
-  - pip install --upgrade attrs
+  - pip install --upgrade attrs # hot fix, to be removed once this is fixed in particle
 
 script:
   - pytest
