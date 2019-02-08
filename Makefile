@@ -29,3 +29,5 @@ test_install:
 
 upload: dist
 	twine upload --username hdembins dist/*
+
+.PHONY: dist
