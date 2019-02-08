@@ -44,7 +44,7 @@ import sys
 import os
 import glob
 
-__version__ = '0.2.1'
+__version__ = '0.3.0'
 
 
 class lazy_get_pybind_include:
@@ -99,8 +99,9 @@ def has_flag(compiler, flagname):
     import tempfile
     from distutils.errors import CompileError
     with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
-        f.write('int main (int argc, char **argv) { return 0; }')
+        f.write('int main() {}')
         try:
+            print("testing flag: " + flagname)
             compiler.compile([f.name], extra_postargs=[flagname])
         except CompileError:
             return False
@@ -108,10 +109,17 @@ def has_flag(compiler, flagname):
 
 
 def flag_filter(compiler, *flags):
-    result = []
-    for flag in flags:
-        if has_flag(compiler, flag):
-            result.append(flag)
+    key = " ".join((compiler.compiler[0],) + flags)
+    import shelve
+    with shelve.open(".flag_filter_cache") as sh:
+        if key in sh:
+            result = sh[key]
+        else:
+            result = []
+            for flag in flags:
+                if has_flag(compiler, flag):
+                    result.append(flag)
+            sh[key] = result
     return result
 
 

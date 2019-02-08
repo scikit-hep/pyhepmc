@@ -103,7 +103,8 @@ def prepare_hepevt(evt):
         pid[i] = p.pid
         iparent = [q.id for q in p.parents]
         par[i] = (min(iparent), max(iparent)) if iparent else (0, 0)
-        ichildren = [q.id for q in p.children]
+        children = p.children
+        ichildren = [q.id for q in children]
         chi[i] = (min(ichildren), max(ichildren)) if ichildren else (0, 0)
         pm[i,:4] = p.momentum
         pm[i,4] = p.generated_mass
@@ -151,13 +152,18 @@ def test_hepevt():
 
 def test_sequence_access():
     evt = hep.GenEvent()
-    evt.particles = (hep.GenParticle(),)
+    evt.add_particle(hep.GenParticle())
     evt.particles[0].momentum = (1, 2, 3, 4)
     evt.particles[0].pid = 5
-    evt.vertices = (hep.GenVertex(),)
+    evt.add_vertex(hep.GenVertex())
     evt.vertices[0].position = (1, 2, 3, 4)
-    assert evt.particles == [hep.GenParticle((1, 2, 3, 4), 5),]
-    assert evt.vertices == [hep.GenVertex((1, 2, 3, 4)),]
+    assert len(evt.particles) == 1
+    assert evt.particles[0].id == 1
+    assert evt.particles[0].pid == 5
+    assert evt.particles[0].momentum == (1, 2, 3, 4)
+    assert len(evt.vertices) == 1
+    assert evt.vertices[0].id == -1
+    assert evt.vertices[0].position == (1, 2, 3, 4)
 
 
 def test_read_write_stream():
@@ -167,7 +173,7 @@ def test_read_write_stream():
     with hep.WriterAscii(oss) as f:
         f.write_event(evt1)
 
-    assert str(oss) == """HepMC::Version 3.0.0
+    assert str(oss) == """HepMC::Version 3.01.00
 HepMC::Asciiv3-START_EVENT_LISTING
 E 1 4 8
 U GEV MM
@@ -193,6 +199,9 @@ HepMC::Asciiv3-END_EVENT_LISTING
     with hep.ReaderAscii(oss) as f:
         f.read_event(evt2)
 
+    assert evt1.event_number == evt2.event_number
+    assert evt1.momentum_unit == evt2.momentum_unit
+    assert evt1.length_unit == evt2.length_unit
     assert evt1.particles == evt2.particles
     assert evt1.vertices == evt2.vertices
     assert evt1 == evt2

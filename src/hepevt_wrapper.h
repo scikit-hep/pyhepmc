@@ -3,16 +3,15 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include "HepMC/FourVector.h"
-#include "HepMC/Data/SmartPointer.h"
-#include "HepMC/GenEvent.h"
-#include "HepMC/GenParticle.h"
-#include "HepMC/GenVertex.h"
+#include "HepMC3/FourVector.h"
+#include "HepMC3/GenEvent.h"
+#include "HepMC3/GenParticle.h"
+#include "HepMC3/GenVertex.h"
 #include <map>
 #include <utility>
 
 template <typename RealType>
-bool fill_genevent_from_hepevt(HepMC::GenEvent& evt,
+bool fill_genevent_from_hepevt(HepMC3::GenEvent& evt,
                                int event_number,
                                pybind11::array_t<RealType> p_array, // N x 4
                                pybind11::array_t<RealType> m_array, // N
@@ -24,7 +23,7 @@ bool fill_genevent_from_hepevt(HepMC::GenEvent& evt,
                                pybind11::array_t<int> vertex_status_array, // N
                                RealType momentum_scaling,
                                RealType length_scaling) {
-    using namespace HepMC;
+    using namespace HepMC3;
     namespace py = pybind11;
 
     evt.clear();
