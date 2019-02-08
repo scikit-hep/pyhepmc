@@ -111,15 +111,16 @@ def has_flag(compiler, flagname):
 def flag_filter(compiler, *flags):
     key = " ".join((compiler.compiler[0],) + flags)
     import shelve
-    with shelve.open(".flag_filter_cache") as sh:
-        if key in sh:
-            result = sh[key]
-        else:
-            result = []
-            for flag in flags:
-                if has_flag(compiler, flag):
-                    result.append(flag)
-            sh[key] = result
+    sh = shelve.open(".flag_filter_cache")
+    if key in sh:
+        result = sh[key]
+    else:
+        result = []
+        for flag in flags:
+            if has_flag(compiler, flag):
+                result.append(flag)
+        sh[key] = result
+    sh.close()
     return result
 
 

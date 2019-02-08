@@ -2,6 +2,10 @@ sudo: false
 
 language: python
 
+git:
+  depth: 10
+  submodules_depth: 10
+
 matrix:
   include:
     - os: linux
