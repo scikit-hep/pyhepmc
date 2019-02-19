@@ -8,28 +8,12 @@ git:
 
 matrix:
   include:
+    - os: osx
+
     - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env:
-        - CC=gcc-6
-        - CXX=g++-6
       python: "2.7"
 
     - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env:
-        - CC=gcc-6
-        - CXX=g++-6
       python: "3.6"
 
 install:
