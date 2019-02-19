@@ -134,7 +134,8 @@ class BuildExt(build_ext):
         if ct == 'unix':
             # only add flags which pass the flag_filter
             opts += flag_filter(self.compiler,
-                                '-fvisibility=hidden', '-stdlib=libc++', '-std=c++14',
+                                '-fvisibility=hidden', '-stdlib=libc++',
+                                '-std=c++14',
                                 '-Wno-deprecated-register')
             opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
         elif ct == 'msvc':

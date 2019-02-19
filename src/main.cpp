@@ -27,10 +27,9 @@
 #include "hepevt_wrapper.h"
 // #include "GzReaderAscii.h"
 
-template <class Iterator, class Streamer = std::function<void(std::ostream&, Iterator)>>
+template <class Iterator, class Streamer>
 std::ostream& ostream_range(std::ostream& os,
-  Iterator begin, Iterator end,
-  Streamer streamer = [](std::ostream& os, Iterator it) { os << *it; },
+  Iterator begin, Iterator end, Streamer streamer,
   const char bracket_left = '[',
   const char bracket_right=']') {
   os << bracket_left;
@@ -47,7 +46,8 @@ std::ostream& ostream_range(std::ostream& os,
 namespace std {
   template <class T, class A>
   ostream& operator<<(ostream& os, const vector<T, A>& v) {
-    return ostream_range(os, v.begin(), v.end());
+    return ostream_range(os, v.begin(), v.end(),
+      [](ostream& os, typename vector<T, A>::const_iterator it) { os << *it; });
   }
   
   template <class K, class V, class... Ts>
