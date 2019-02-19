@@ -9,6 +9,7 @@ git:
 matrix:
   include:
     - os: osx
+      osx_image: xcode8.3
       python: "3.6"
 
     - os: linux
