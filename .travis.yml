@@ -9,6 +9,7 @@ git:
 matrix:
   include:
     - os: osx
+      python: "3.6"
 
     - os: linux
       python: "2.7"
