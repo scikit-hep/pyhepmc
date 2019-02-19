@@ -60,11 +60,6 @@ namespace std {
 
 namespace HepMC3 {
 
-template <class T>
-bool operator!=(const T& a, const T& b) {
-  return !operator==(a, b);
-}
-
 using GenRunInfoPtr = std::shared_ptr<GenRunInfo>;
 
 // equality comparions used by unit tests
@@ -84,6 +79,10 @@ bool operator==(const GenParticle& a, const GenParticle& b) {
         a.status() == b.status() && is_close(a.momentum(), b.momentum());
 }
 
+bool operator!=(const GenParticle& a, const GenParticle& b) {
+  return !operator==(a, b);
+}
+
 bool operator==(const GenVertex& a, const GenVertex& b) {
     auto equal_id = [](ConstGenParticlePtr a,
                        ConstGenParticlePtr b) { return a->id() == b->id(); };
@@ -98,11 +97,19 @@ bool operator==(const GenVertex& a, const GenVertex& b) {
                    equal_id);
 }
 
+bool operator!=(const GenVertex& a, const GenVertex& b) {
+  return !operator==(a, b);
+}
+
 bool operator==(const GenRunInfo::ToolInfo& a,
                 const GenRunInfo::ToolInfo& b) {
     return a.name == b.name &&
         a.version == b.version &&
         a.description == b.description;
+}
+
+bool operator!=(const GenRunInfo::ToolInfo& a, const GenRunInfo::ToolInfo& b) {
+  return !operator==(a, b);
 }
 
 bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
@@ -125,6 +132,10 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
       b.second->to_string(sb);        
       return sa == sb;
     });
+}
+
+bool operator!=(const GenRunInfo& a, const GenRunInfo& b) {
+  return !operator==(a, b);
 }
 
 bool operator==(const GenEvent& a, const GenEvent& b) {
@@ -162,6 +173,10 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
       [](decltype(*av.begin()) a, decltype(*bv.begin()) b) {
         return *a == *b;
       });
+}
+
+bool operator!=(const GenEvent& a, const GenEvent& b) {
+  return !operator==(a, b);
 }
 
 std::ostream& operator<<(std::ostream& os, const Attribute& a) {
