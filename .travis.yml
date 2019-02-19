@@ -27,7 +27,7 @@ matrix:
       python: "3.6"
       install: pip install .[tests]
 
-script: python -m pytest -rsv
+script: pytest -rsv
 
 notifications:
   email: false
