@@ -186,7 +186,10 @@ inline std::ostream& operator<<(std::ostream& os, const HepMC3::GenRunInfo::Tool
 template <class T, class A>
 std::ostream& operator<<(std::ostream& os, const std::vector<T, A>& v) {
   return ostream_range(os, v.begin(), v.end(),
-    [](std::ostream& os, typename std::vector<T, A>::const_iterator it) { os << *it; });
+    [](std::ostream& os, typename std::vector<T, A>::const_iterator it) {
+      using repr::operator<<;
+      os << *it; 
+    });
 }
 
 template <class K, class V, class... Ts>
