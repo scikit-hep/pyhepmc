@@ -2,10 +2,6 @@ sudo: false
 
 language: python
 
-git:
-  depth: 10
-  submodules_depth: 100
-
 matrix:
   include:
     - os: osx
