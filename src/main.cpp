@@ -288,22 +288,7 @@ using namespace py::literals;
 #define METH_OL(name, cls, rval, args) .def(#name, (rval (cls::*)(args)) &cls::name)
 
 PYBIND11_MODULE(cpp, m) {
-    using HepMC3::Units;
-    using HepMC3::FourVector;
-    using HepMC3::GenEvent;
-    using HepMC3::GenParticle;
-    using HepMC3::GenParticlePtr;
-    using HepMC3::ConstGenParticlePtr;
-    using HepMC3::GenVertex;
-    using HepMC3::GenVertexPtr;
-    using HepMC3::ConstGenVertexPtr;
-    using HepMC3::HEPEVT_Wrapper;
-    using HepMC3::ReaderAscii;
-    using HepMC3::ReaderAsciiHepMC2;
-    using HepMC3::WriterAscii;
-    using HepMC3::GenRunInfo;
-    using HepMC3::GenRunInfoPtr;
-  
+    
     // m.doc() = R"pbdoc(
     //     _pyhepmc_ng plugin
     //     --------------
@@ -326,6 +311,7 @@ PYBIND11_MODULE(cpp, m) {
     //     Some other explanation about the dummy function.
     // )pbdoc");
 
+    using HepMC3::Units;
     py::class_<Units> clsUnits(m, "Units");
 
     py::enum_<Units::MomentumUnit>(clsUnits, "MomentumUnit")
@@ -338,6 +324,7 @@ PYBIND11_MODULE(cpp, m) {
         .value("MM", Units::LengthUnit::MM)
         .export_values();
 
+    using HepMC3::FourVector;
     py::class_<FourVector>(m, "FourVector")
         .def(py::init<>())
         .def(py::init<double, double, double, double>(),
@@ -409,7 +396,7 @@ PYBIND11_MODULE(cpp, m) {
         .def(py::self -= py::self)
         .def(py::self *= double())
         .def(py::self /= double())
-        .def("__repr__", [](const HepMC3::FourVector& self) {
+        .def("__repr__", [](const FourVector& self) {
           std::ostringstream os;
           using repr::operator<<;
           os << self;
@@ -427,18 +414,20 @@ PYBIND11_MODULE(cpp, m) {
     FUNC(HepMC3::delta_r2_rap);
     FUNC(HepMC3::delta_r_rap);
 
-    py::class_<HepMC3::GenRunInfo, HepMC3::GenRunInfoPtr> clsGenRunInfo(m, "GenRunInfo");
+    using HepMC3::GenRunInfo;
+    using HepMC3::GenRunInfoPtr;
+    py::class_<GenRunInfo, GenRunInfoPtr> clsGenRunInfo(m, "GenRunInfo");
     clsGenRunInfo
         .def(py::init<>())
         .def_property("tools",
-                (std::vector<HepMC3::GenRunInfo::ToolInfo>&(HepMC3::GenRunInfo::*)()) &HepMC3::GenRunInfo::tools,
-                [](HepMC3::GenRunInfo& self, py::sequence seq) {
-                    self.tools() = py::cast<std::vector<HepMC3::GenRunInfo::ToolInfo>>(seq);
+                (std::vector<GenRunInfo::ToolInfo>&(GenRunInfo::*)()) &GenRunInfo::tools,
+                [](GenRunInfo& self, py::sequence seq) {
+                    self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
                 }
             )
-        PROP(weight_names, HepMC3::GenRunInfo)
-        PROP_RO(attributes, HepMC3::GenRunInfo)
-        .def("__repr__", [](const HepMC3::GenRunInfo& self) {
+        PROP(weight_names, GenRunInfo)
+        PROP_RO(attributes, GenRunInfo)
+        .def("__repr__", [](const GenRunInfo& self) {
           std::ostringstream os;
           using repr::operator<<;
           os << self;
@@ -447,17 +436,17 @@ PYBIND11_MODULE(cpp, m) {
         .def(py::self == py::self)
         ;
 
-    py::class_<HepMC3::GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo")
+    py::class_<GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo")
         .def(py::init<std::string, std::string, std::string>(),
              "name"_a, "version"_a, "description"_a)
         .def(py::init([](py::sequence seq) {
-                return new HepMC3::GenRunInfo::ToolInfo({
+                return new GenRunInfo::ToolInfo({
                     py::cast<std::string>(seq[0]),
                     py::cast<std::string>(seq[1]),
                     py::cast<std::string>(seq[2])
                 });
             }))
-        .def("__repr__", [](const HepMC3::GenRunInfo::ToolInfo& self) {
+        .def("__repr__", [](const GenRunInfo::ToolInfo& self) {
           std::ostringstream os;
           using repr::operator<<;
           os << self;
@@ -466,13 +455,15 @@ PYBIND11_MODULE(cpp, m) {
         .def(py::self == py::self)
         ;
 
-    py::implicitly_convertible<py::sequence, HepMC3::GenRunInfo::ToolInfo>();
+    py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
 
-    py::class_<HepMC3::GenHeavyIon, HepMC3::GenHeavyIonPtr>(m, "GenHeavyIon")
+    using HepMC3::GenHeavyIon;
+    using HepMC3::GenHeavyIonPtr;
+    py::class_<GenHeavyIon, GenHeavyIonPtr>(m, "GenHeavyIon")
         .def(py::init([](int nh, int np, int nt, int nc, int ns, int nsp,
                          int nnw=0, int nwn=0, int nwnw=0,
                          float im=0., float pl=0., float ec=0., float s=0., float cent=0.) {
-                auto x = HepMC3::GenHeavyIonPtr(new HepMC3::GenHeavyIon());
+                auto x = GenHeavyIonPtr(new GenHeavyIon());
                 x->set(nh, np, nt, nc, ns, nsp, nnw, nwn, nwnw, im, pl, ec, s, cent);
                 return x;
             }),
@@ -488,8 +479,16 @@ PYBIND11_MODULE(cpp, m) {
             "centrality"_a = 0.f)
         ;
 
+    using HepMC3::GenEvent;
+    using HepMC3::GenParticle;
+    using HepMC3::GenParticlePtr;
+    using HepMC3::ConstGenParticlePtr;
+    using HepMC3::GenVertex;
+    using HepMC3::GenVertexPtr;
+    using HepMC3::ConstGenVertexPtr;
+    
     py::class_<GenEvent>(m, "GenEvent")
-        .def(py::init<std::shared_ptr<HepMC3::GenRunInfo>, Units::MomentumUnit, Units::LengthUnit>(),
+        .def(py::init<std::shared_ptr<GenRunInfo>, Units::MomentumUnit, Units::LengthUnit>(),
              "run"_a, "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
         .def(py::init<Units::MomentumUnit, Units::LengthUnit>(),
              "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
@@ -511,7 +510,7 @@ PYBIND11_MODULE(cpp, m) {
         PROP_RO(length_unit, GenEvent)
         METH(set_units, GenEvent)
         .def_property("heavy_ion",
-          (HepMC3::GenHeavyIonPtr (GenEvent::*)()) &GenEvent::heavy_ion,
+          (GenHeavyIonPtr (GenEvent::*)()) &GenEvent::heavy_ion,
           &GenEvent::set_heavy_ion)
         .def_property("pdf_info",
           (HepMC3::GenPdfInfoPtr (GenEvent::*)()) &GenEvent::pdf_info,
@@ -600,6 +599,7 @@ PYBIND11_MODULE(cpp, m) {
     // py::class_<GenVertexData>(m, "GenVertexData");
 
     // this class is here to allow unit testing of HEPEVT converters
+    using HepMC3::HEPEVT_Wrapper;
     py::class_<HEPEVT>(m, "HEPEVT")
         .def(py::init<>())
         .def_readwrite("event_number", &HEPEVT::nevhep)
@@ -657,6 +657,7 @@ PYBIND11_MODULE(cpp, m) {
         METH(read, std::stringstream)
         ;
 
+    using HepMC3::ReaderAscii;
     py::class_<ReaderAscii>(m, "ReaderAscii")
         .def(py::init<const std::string>(), "filename"_a)
         .def(py::init<std::stringstream&>())
@@ -680,6 +681,7 @@ PYBIND11_MODULE(cpp, m) {
             })
         ;
 
+    using HepMC3::ReaderAsciiHepMC2;
     py::class_<ReaderAsciiHepMC2>(m, "ReaderAsciiHepMC2")
         .def(py::init<const std::string>(), "filename"_a)
         METH(read_event, ReaderAsciiHepMC2)
@@ -702,6 +704,7 @@ PYBIND11_MODULE(cpp, m) {
             })
         ;
 
+    using HepMC3::WriterAscii;
     py::class_<WriterAscii>(m, "WriterAscii")
         .def(py::init<const std::string&, GenRunInfoPtr>(),
              "filename"_a, "run"_a = nullptr)
