@@ -37,6 +37,7 @@ where appropriate.
 License: pyhepmc-ng is covered by the BSD license, but the license only
 applies to the binding code. The HepMC3 code is covered by the GPL-v3 license.
 """
+from __future__ import print_function
 from setuptools import setup, Extension, find_packages
 from distutils.command.build_ext import build_ext
 from setuptools import distutils
