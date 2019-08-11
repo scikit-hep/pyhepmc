@@ -2,15 +2,12 @@ sudo: false
 
 language: python
 
+install: pip install .[tests]
+script: pytest -rsv
+
 matrix:
   include:
     - os: osx
-      language: sh
-      install:
-        # pip install virtualenv
-        # virtualenv build
-        # source build/bin/activate
-        pip install .[tests]
     
     - os: windows
       language: sh
@@ -18,20 +15,17 @@ matrix:
         - choco install python3
         - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
       install:
-        # pip install virtualenv
-        # virtualenv build
-        # build/Scripts/activate.bat
         pip install .[tests]
     
     - os: linux
       python: "2.7"
-      install: pip install .[tests]
 
     - os: linux
-      python: "3.6"
-      install: pip install .[tests]
+      python: "3.7"
 
-script: pytest -rsv
-
+  allow_failures:
+    - os: windows
+  fast_finish: true
+  
 notifications:
   email: false
