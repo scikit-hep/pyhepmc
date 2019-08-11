@@ -2,7 +2,7 @@
 
 A Python wrapper for the HepMC3 C++ library.
 
-[![PyPI version](https://badge.fury.io/py/pyhepmc_ng.svg)](https://badge.fury.io/py/pyhepmc_ng)
+[![PyPI version](https://badge.fury.io/py/pyhepmc-ng.svg)](https://badge.fury.io/py/pyhepmc-ng)
 [![Build Status](https://travis-ci.org/scikit-hep/pyhepmc.svg?branch=master)](https://travis-ci.org/scikit-hep/pyhepmc)
 
 Another wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
