@@ -4,7 +4,7 @@ language: python
 
 git:
   depth: 10
-  submodules_depth: 10
+  submodules_depth: 100
 
 matrix:
   include:
