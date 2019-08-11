@@ -164,6 +164,7 @@ def test_sequence_access():
     assert len(evt.vertices) == 1
     assert evt.vertices[0].id == -1
     assert evt.vertices[0].position == (1, 2, 3, 4)
+    assert repr(evt) == "GenEvent(momentum_unit=1, length_unit=0, event_number=0, particles=[GenParticle(FourVector(1, 2, 3, 4), status=0, id=1, production_vertex=0, end_vertex=-1)], vertices=[GenVertex(FourVector(1, 2, 3, 4), status=0, id=-1, particles_in=[], particles_out=[])], run_info=None)"
 
 
 def test_read_write_stream():
@@ -173,11 +174,10 @@ def test_read_write_stream():
     with hep.WriterAscii(oss) as f:
         f.write_event(evt1)
 
-    assert str(oss) == """HepMC::Version 3.01.00
+    assert str(oss) == """HepMC::Version 3.01.01
 HepMC::Asciiv3-START_EVENT_LISTING
 E 1 4 8
 U GEV MM
-W 1.0000000000000000000000e+00
 P 1 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 7.0000000000000000e+03 7.0000000000000000e+03 9.3799999999999994e-01 1
 P 2 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 -7.0000000000000000e+03 7.0000000000000000e+03 9.3799999999999994e-01 2
 V -1 0 [1] @ 1.0000000000000000e+00 1.0000000000000000e+00 1.0000000000000000e+00 1.0000000000000000e+00
