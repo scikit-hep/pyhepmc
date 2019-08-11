@@ -7,8 +7,9 @@ matrix:
     - os: osx
       language: sh
       install:
-        virtualenv build
-        source build/bin/activate
+        # pip install virtualenv
+        # virtualenv build
+        # source build/bin/activate
         pip install .[tests]
     
     - os: windows
@@ -17,8 +18,9 @@ matrix:
         - choco install python3
         - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
       install:
-        virtualenv build
-        build/Scripts/activate.bat
+        # pip install virtualenv
+        # virtualenv build
+        # build/Scripts/activate.bat
         pip install .[tests]
     
     - os: linux
