@@ -43,21 +43,6 @@ std::ostream& ostream_range(std::ostream& os,
   return os;
 }
 
-namespace std {
-  template <class T, class A>
-  ostream& operator<<(ostream& os, const vector<T, A>& v) {
-    return ostream_range(os, v.begin(), v.end(),
-      [](ostream& os, typename vector<T, A>::const_iterator it) { os << *it; });
-  }
-  
-  template <class K, class V, class... Ts>
-  ostream& operator<<(ostream& os, const map<K, V, Ts...>& m) {
-    return ostream_range(os, m.begin(), m.end(), [](ostream& os, typename map<K, V, Ts...>::const_iterator it) {
-      os << it->first << ": " << it->second;
-    }, '{', '}');
-  }
-}
-
 namespace HepMC3 {
 
 using GenRunInfoPtr = std::shared_ptr<GenRunInfo>;
@@ -179,32 +164,36 @@ bool operator!=(const GenEvent& a, const GenEvent& b) {
   return !operator==(a, b);
 }
 
-std::ostream& operator<<(std::ostream& os, const Attribute& a) {
+template <class T>
+std::ostream& repr(std::ostream& os, const std::shared_ptr<T>& x) {
+  if (x)
+    repr(os, *x.get());
+  else
+    os << "None";
+  return os;
+}
+
+inline std::ostream& repr(std::ostream& os, const std::string& s) {
+  os << "'" << s << "'";
+  return os;
+}
+
+inline std::ostream& repr(std::ostream& os, const HepMC3::Attribute& a) {
   std::string s;
   a.to_string(s);
   os << s;
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const GenRunInfo::ToolInfo& x) {
-  os << "ToolInfo(name="
-     << x.name
-     << ", version=" << x.version
-     << ", description=" << x.description
-     << ")";
+inline std::ostream& repr(std::ostream& os, const HepMC3::GenRunInfo::ToolInfo& x) {
+  os << "ToolInfo(name=";
+  repr(os, x.name) << ", version=";
+  repr(os, x.version) << ", description=";
+  repr(os, x.description) << ")";
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const GenRunInfo& x) {
-  os << "GenRunInfo(tools="
-     << x.tools()<< ", weight_names="
-     << x.weight_names() << ", attributes="
-     << x.attributes()
-     << ")";
-  return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const FourVector& x) {
+inline std::ostream& repr(std::ostream& os, const HepMC3::FourVector& x) {
   os << "FourVector("
      << x.x() << ", "
      << x.y() << ", "
@@ -213,9 +202,33 @@ std::ostream& operator<<(std::ostream& os, const FourVector& x) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const GenParticle& x) {
-  os << "GenParticle("
-     << x.momentum();
+template <class T, class A>
+std::ostream& repr(std::ostream& os, const std::vector<T, A>& v) {
+  return ostream_range(os, v.begin(), v.end(),
+    [](std::ostream& os, typename std::vector<T, A>::const_iterator it) {
+      repr(os, *it);
+    });
+}
+
+template <class K, class V, class... Ts>
+std::ostream& repr(std::ostream& os, const std::map<K, V, Ts...>& m) {
+  return ostream_range(os, m.begin(), m.end(), [](std::ostream& os, typename std::map<K, V, Ts...>::const_iterator it) {
+    os << it->first << ": ";
+    repr(os, it->second);
+  }, '{', '}');
+}
+
+inline std::ostream& repr(std::ostream& os, const HepMC3::GenRunInfo& x) {
+  os << "GenRunInfo(tools=";
+  repr(os, x.tools()) << ", weight_names=";
+  repr(os, x.weight_names()) << ", attributes=";
+  repr(os, x.attributes()) << ")";
+  return os;
+}
+
+inline std::ostream& repr(std::ostream& os, const HepMC3::GenParticle& x) {
+  os << "GenParticle(";
+  repr(os, x.momentum());
   if (x.is_generated_mass_set())
     os << ", mass=" << x.data().mass;
   os << ", status="
@@ -228,10 +241,10 @@ std::ostream& operator<<(std::ostream& os, const GenParticle& x) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const GenVertex& x) {
-  os << "GenVertex("
-     << x.position()
-     << ", status="
+inline std::ostream& repr(std::ostream& os, const HepMC3::GenVertex& x) {
+  os << "GenVertex(";
+  repr(os, x.position());
+  os << ", status="
      << x.status() << ", id="
      << x.id();
   ostream_range(os << ", particles_in=",
@@ -250,17 +263,7 @@ std::ostream& operator<<(std::ostream& os, const GenVertex& x) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, ConstGenParticlePtr x) {
-  os << *x.get();
-  return os;
-}
-
-std::ostream& operator<<(std::ostream& os, ConstGenVertexPtr x) {
-  os << *x.get();
-  return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const GenEvent& x) {
+inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   // incomplete:
   // missing comparison of GenHeavyIon, GenPdfInfo, GenCrossSection
 
@@ -268,12 +271,12 @@ std::ostream& operator<<(std::ostream& os, const GenEvent& x) {
      << "momentum_unit=" << x.momentum_unit() << ", "
      << "length_unit=" << x.length_unit() << ", "
      << "event_number=" << x.event_number() << ", "
-     << "particles=" << x.particles() << ", "
-     << "vertices=" << x.vertices() << ", "
-     << "run_info=" << x.run_info() << ")";
+     << "particles=";
+  repr(os, x.particles()) << ", vertices=";
+  repr(os, x.vertices()) << ", run_info=";
+  repr(os, x.run_info()) << ")";
   return os;
 }
-
 } // namespace HepMC3
 
 namespace py = pybind11;
@@ -397,7 +400,7 @@ PYBIND11_MODULE(cpp, m) {
         .def(py::self /= double())
         .def("__repr__", [](const FourVector& self) {
           std::ostringstream os;
-          os << self;
+          repr(os, self);
           return os.str();
         })
         ;
@@ -425,7 +428,7 @@ PYBIND11_MODULE(cpp, m) {
         PROP_RO(attributes, GenRunInfo)
         .def("__repr__", [](const GenRunInfo& self) {
           std::ostringstream os;
-          os << self;
+          repr(os, self);
           return os.str();
         })
         .def(py::self == py::self)
@@ -443,7 +446,7 @@ PYBIND11_MODULE(cpp, m) {
             }))
         .def("__repr__", [](const GenRunInfo::ToolInfo& self) {
           std::ostringstream os;
-          os << self;
+          repr(os, self);
           return os.str();
         })
         .def(py::self == py::self)
@@ -497,10 +500,10 @@ PYBIND11_MODULE(cpp, m) {
           (GenHeavyIonPtr (GenEvent::*)()) &GenEvent::heavy_ion,
           &GenEvent::set_heavy_ion)
         .def_property("pdf_info",
-          (GenPdfInfoPtr (GenEvent::*)()) &GenEvent::pdf_info,
+          (HepMC3::GenPdfInfoPtr (GenEvent::*)()) &GenEvent::pdf_info,
           &GenEvent::set_pdf_info)
         .def_property("cross_section",
-          (GenCrossSectionPtr (GenEvent::*)()) &GenEvent::cross_section,
+          (HepMC3::GenCrossSectionPtr (GenEvent::*)()) &GenEvent::cross_section,
           &GenEvent::set_cross_section)
         METH(event_pos, GenEvent)
         PROP_RO_OL(beams, GenEvent, std::vector<ConstGenParticlePtr>)
@@ -514,12 +517,12 @@ PYBIND11_MODULE(cpp, m) {
         .def(py::self == py::self)
         .def("__repr__", [](GenEvent& self) {
           std::ostringstream os;
-          os << self;
+          repr(os, self);
           return os.str();
         })
         .def("__str__", [](GenEvent& self) {
           std::ostringstream os;
-          Print::listing(os, self, 2);
+          HepMC3::Print::listing(os, self, 2);
           return os.str();
         })
         ;
@@ -547,7 +550,7 @@ PYBIND11_MODULE(cpp, m) {
         .def(py::self == py::self)
         .def("__repr__", [](const GenParticlePtr& self) {
           std::ostringstream os;
-          os << self;
+          repr(os, self);
           return os.str();
         })
         ;
@@ -572,7 +575,7 @@ PYBIND11_MODULE(cpp, m) {
         .def(py::self == py::self)
         .def("__repr__", [](const GenVertexPtr& self) {
           std::ostringstream os;
-          os << self;
+          repr(os, self);
           return os.str();
         })
         ;
@@ -712,13 +715,13 @@ PYBIND11_MODULE(cpp, m) {
 
     m.def("content", [](const GenEvent& event) {
       std::ostringstream os;
-      Print::content(os, event);
+      HepMC3::Print::content(os, event);
       return os.str();
     });
 
     m.def("listing", [](const GenEvent& event, unsigned short precision = 2) {
       std::ostringstream os;
-      Print::listing(os, event, precision);
+      HepMC3::Print::listing(os, event, precision);
       return os.str();
     });
 

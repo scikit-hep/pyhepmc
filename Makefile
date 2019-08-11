@@ -12,7 +12,7 @@ distclean: clean
 	rm -rf dist pyhepmc_ng.egg-info
 
 test: build
-	@python3 -m pytest tests -sv
+	@python3 -m pytest tests -svv
 
 dist: setup.py src/*.*
 	rm -rf dist
