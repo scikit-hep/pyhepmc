@@ -175,7 +175,7 @@ setup(
     ],
     keywords='generator montecarlo simulation data hep physics particle',
     packages=find_packages(),
-    install_requires=['pybind11>=2.2'],
+    install_requires=['pybind11>=2.2', 'numpy'],
     extras_require={
         "tests": ['pytest', 'graphviz', 'particle'],
     },
