@@ -36,6 +36,10 @@ where appropriate.
 - ReaderAscii and WriterAscii support the context manager protocol
 - A convenient `open` function is provided for reading and writing HepMC files 
 
+## Documentation
+
+pyhepmc-ng currently has no separate documentation, but it mirrors the C++ interface of the HepMC3 library, which is documented here: http://hepmc.web.cern.ch/hepmc.
+
 ## For developers
 
 ### Repository management
