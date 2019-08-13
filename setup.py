@@ -1,7 +1,3 @@
-"""
-License: pyhepmc-ng is covered by the BSD license, but the license only
-applies to the binding code. The HepMC3 code is covered by the GPL-v3 license.
-"""
 from setuptools import setup, find_packages, Extension
 import sys
 import os
@@ -56,6 +52,17 @@ def get_version():
     return vars['version']
 
 
+def get_description():
+    descr = []
+    for line in open("README.md").readlines():
+        if line.startswith("##"):
+            break
+        if line.startswith("#"):
+            continue
+        descr.append(line)
+    return "".join(descr)
+
+
 setup(
     name='pyhepmc_ng',
     version=get_version(),
@@ -63,7 +70,7 @@ setup(
     author_email='hans.dembinski@gmail.com',
     url='https://github.com/scikit-hep/pyhepmc',
     description='Next-generation Python interface to the HepMC high-energy physics event record API',
-    long_description=__doc__,
+    long_description=get_description(),
     long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 4 - Beta',
