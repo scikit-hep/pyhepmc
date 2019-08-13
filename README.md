@@ -14,20 +14,17 @@ The command `pip install pyhepmc-ng` just works! You only need a compiler that
 supports C++11, everything else is handled by pip.
 
 Under the hood, the bindings are build with the excellent
-[pybind11](http://pybind11.readthedocs.io/en/stable/) library.
-pybind11 is automatically installed as a requirement by pip. You don't need an
-external installation of the HepMC3 library, either. A copy of this
-light-weight library is included.
+[pybind11](http://pybind11.readthedocs.io/en/stable/) library. External installations of pybind11 or HepMC3 are not required to build pyhepmc-ng, it includes the lightweight source code of both libraries as submodules.
 
 **pyhepmc-ng is actively developed**
 
-pyhepmc-ng is part of the Scikit-HEP project, which aims to provide all tools needed by particle physicists to do data analysis in Python.
+pyhepmc-ng is part of the Scikit-HEP project, which aims to provide all tools needed by particle physicists to do data analysis in Python. It is also gets official support from the HepMC3 project.
 
 **pyhepmc-ng is unit tested**
 
 Everything in pyhepmc-ng is unit tested.
 
-**pyhepmc-ng supports Pythonic code**
+**pyhepmc-ng is Pythonic**
 
 pyhepmc-ng is a hand-crafted mapping of C++ code to Python. It supports Python idioms
 where appropriate.
@@ -36,7 +33,9 @@ where appropriate.
   e.g. GenParticle::set_status and GenParticle::status are mapped to a single
   GenParticle.status field in Python
 - Tuples and lists are implicitly convertible to FourVectors
+- Vectors of objects on the C++ side are mapped to Python lists
 - ReaderAscii and WriterAscii support the context manager protocol
+- A convenient `open` function is provided for reading and writing HepMC files 
 
 ## For developers
 
