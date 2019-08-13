@@ -112,8 +112,5 @@ The `--user` option is not necessary when you are inside a virtualenv if you hav
 ## License
 
 pyhepmc-ng is covered by the BSD 3-clause license, but the license only
-applies to the binding code. The HepMC3 code is covered by the GPL-v3 license.
+applies to the binding code. The BSD 3-clause license text can be found in the `LICENSE` file. The connected external libraries HepMC3 and pybind11 are covered by other licenses, as described in the respective `LICENSE` files of these repositories.
 
-The BSD 3-clause license text can be found in the `LICENSE` file.
-
-The HepMC3 code is covered by the GPL-v3 license, which can be found in `src/HepMC3/LICENSE`.
