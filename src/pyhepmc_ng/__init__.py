@@ -1,4 +1,5 @@
-from . cpp import *
+from ._bindings import *
+from ._version import version as __version__
 import ctypes
 import numpy as np
 
@@ -11,8 +12,8 @@ class WriterWrapper:
         if isinstance(self._handle, WriterAscii):
             self._handle.write(object)
             return
-        filename, precision = self._handle  
-        if isinstance(object, GenRunInfo):          
+        filename, precision = self._handle
+        if isinstance(object, GenRunInfo):
             self._handle = WriterAscii(filename, object)
             if precision is not None:
                 self._handle.precision = precision
@@ -28,7 +29,7 @@ class WriterWrapper:
 
     def __enter__(self):
         return self
-        
+
     def __exit__(self, type, value, tb):
         self.close()
         return False

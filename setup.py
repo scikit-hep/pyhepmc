@@ -1,60 +1,13 @@
 """
-pyhepmc-ng is a wrapper of the HepMC-v3 C++ library.
-
-Another wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
-Why should you use this one?
-
-**pyhepmc-ng is easy to install**
-
-The command `pip install pyhepmc-ng` just works! You only need a compiler that
-supports C++11, everything else is handled by pip.
-
-Under the hood, the bindings are build with the excellent
-[pybind11](http://pybind11.readthedocs.io/en/stable/) library.
-pybind11 is automatically installed as a requirement by pip. You don't need an
-external installation of the HepMC library, either. A copy of this
-light-weight library is included.
-
-**pyhepmc-ng is actively developed**
-
-pyhepmc-ng is part of the Scikit-HEP project, which aims to provide all tools needed by particle physicists to do data analysis in Python.
-
-**pyhepmc-ng is unit tested**
-
-Everything in pyhepmc-ng is unit tested.
-
-**pyhepmc-ng supports Pythonic code**
-
-pyhepmc-ng is a hand-crafted mapping of C++ code to Python. It supports Python idioms
-where appropriate.
-
-- C++ methods which act like properties are represented as properties,
-  e.g. GenParticle::set_status and GenParticle::status are mapped to a single
-  GenParticle.status field in Python
-- Tuples and lists are implicitly convertible to FourVectors
-- ReaderAscii and WriterAscii support the context manager protocol
-
 License: pyhepmc-ng is covered by the BSD license, but the license only
 applies to the binding code. The HepMC3 code is covered by the GPL-v3 license.
 """
-from __future__ import print_function
-from setuptools import setup, Extension, find_packages
+from setuptools import setup, find_packages, Extension
 from distutils.command.build_ext import build_ext
 from setuptools import distutils
 import sys
 import os
 import glob
-
-__version__ = '0.4.2'
-
-
-class lazy_get_pybind_include:
-    def __init__(self, user=False):
-        self.user = user
-
-    def __str__(self): # delay import of pybind11 until requirements are installed
-        import pybind11
-        return pybind11.get_include(self.user)
 
 
 def lazy_compile(self, sources, output_dir=None, macros=None,
@@ -79,17 +32,17 @@ import distutils.ccompiler
 distutils.ccompiler.CCompiler.compile = lazy_compile
 
 
-hepmc_source = glob.glob('src/HepMC3/src/*.cc') + glob.glob('src/HepMC3/src/Search/*.cc')
-hepmc_include = 'src/HepMC3/include'
+hepmc_source = glob.glob('extern/HepMC3/src/*.cc') + glob.glob('extern/HepMC3/src/Search/*.cc')
+hepmc_include = 'extern/HepMC3/include'
+pybind11_include = 'extern/pybind11/include'
 ext_modules = [
     Extension(
-        'pyhepmc_ng.cpp',
-        ['src/main.cpp'] + hepmc_source,
+        'pyhepmc_ng._bindings',
+        ['src/bindings.cpp'] + hepmc_source,
         include_dirs=[
             hepmc_include,
+            pybind11_include,
             'src',
-            lazy_get_pybind_include(user=True),
-            lazy_get_pybind_include(),
         ],
         language='c++'
     ),
@@ -97,15 +50,15 @@ ext_modules = [
 
 
 def has_flag(compiler, flagname):
+    sys.stdout.write("TESTING compiler flag: %s\n" % flagname)
     import tempfile
     from distutils.errors import CompileError
-    with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
-        f.write('int main() {}')
-        try:
-            print("testing flag: " + flagname)
-            compiler.compile([f.name], extra_postargs=[flagname])
-        except CompileError:
-            return False
+    try:
+        with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
+            f.write('int main() {}')
+            compiler.compile([f.name], extra_postargs=[flagname], quiet=True)
+    except CompileError:
+        return False
     return True
 
 
@@ -135,20 +88,28 @@ class BuildExt(build_ext):
         if ct == 'unix':
             # only add flags which pass the flag_filter
             opts += flag_filter(self.compiler,
-                                '-fvisibility=hidden', '-stdlib=libc++',
+                                '-fvisibility=hidden',
+                                '-stdlib=libc++',
                                 '-std=c++14',
-                                '-Wno-deprecated-register')
-            opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
-        elif ct == 'msvc':
-            opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
+                                # ignore warnings raised by HepMC3 code
+                                '-Wno-deprecated-register',
+                                '-Wno-strict-aliasing',
+                                '-Wno-sign-compare'
+                                '-Wno-reorder')
         for ext in self.extensions:
             ext.extra_compile_args = opts
         build_ext.build_extensions(self)
 
 
+def get_version():
+    vars = {}
+    exec(open("src/pyhepmc_ng/_version.py").read(), vars)
+    return vars['version']
+
+
 setup(
     name='pyhepmc_ng',
-    version=__version__,
+    version=get_version(),
     author='Hans Dembinski',
     author_email='hans.dembinski@gmail.com',
     url='https://github.com/scikit-hep/pyhepmc',
@@ -174,12 +135,12 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='generator montecarlo simulation data hep physics particle',
-    packages=find_packages(),
-    install_requires=['pybind11>=2.2', 'numpy'],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     extras_require={
-        "tests": ['pytest', 'graphviz', 'particle'],
+        "tests": ['pytest', 'numpy', 'graphviz', 'particle'],
     },
     ext_modules=ext_modules,
-    cmdclass=dict(build_ext=BuildExt),
+    cmdclass={'build_ext': BuildExt},
     zip_safe=False,
 )
