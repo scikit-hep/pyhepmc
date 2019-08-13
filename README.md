@@ -11,7 +11,7 @@ Why should you use this one?
 **pyhepmc-ng is easy to install**
 
 The command `pip install pyhepmc-ng` just works! You only need a compiler that
-supports C++14, everything else is handled by pip.
+supports C++11, everything else is handled by pip.
 
 Under the hood, the bindings are build with the excellent
 [pybind11](http://pybind11.readthedocs.io/en/stable/) library.
