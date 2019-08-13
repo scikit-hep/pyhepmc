@@ -5,8 +5,7 @@ A Python wrapper for the HepMC3 C++ library.
 [![PyPI version](https://badge.fury.io/py/pyhepmc-ng.svg)](https://badge.fury.io/py/pyhepmc-ng)
 [![Build Status](https://travis-ci.org/scikit-hep/pyhepmc.svg?branch=master)](https://travis-ci.org/scikit-hep/pyhepmc)
 
-Another wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/).
-Why should you use this one?
+Another wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/). Why should you use this one?
 
 **pyhepmc-ng is easy to install**
 
@@ -14,7 +13,7 @@ The command `pip install pyhepmc-ng` just works! You only need a compiler that
 supports C++11, everything else is handled by pip.
 
 Under the hood, the bindings are build with the excellent
-[pybind11](http://pybind11.readthedocs.io/en/stable/) library. External installations of pybind11 or HepMC3 are not required to build pyhepmc-ng, it includes the lightweight source code of both libraries as submodules.
+[pybind11](http://pybind11.readthedocs.io/en/stable/) library. External installations of pybind11 or HepMC3 are not required, pyhepmc-ng includes the lightweight source code of both libraries with the submodule feature of `git`.
 
 **pyhepmc-ng is actively developed**
 
@@ -41,24 +40,21 @@ where appropriate.
 
 ### Repository management
 
-If you want to contribute to the source code, please follow these instructions. You should start by forking this repository. In the following instructions, replace `YourName` with your Github username.
-
-Start from scratch by cloning your fork. Then `cd` to the project folder.
+If you want to contribute to the source code, please follow these instructions. Start by forking the scikit-hep repository, then clone your fork to your local compute with these commands (replace `YourName` with your Github username):
 ```
 git clone --recursive git@github.com:YourName/pyhepmc.git
-cd pyhepmc
 ```
-The first command clones the pyhepmc-ng repository and its nested sub-repositories. If you already cloned the fork without the `--recursive` option, you need to manually initialize the nested sub-repository. `cd` to the project folder and do:
+Now `cd` to the project folder (the rest assumes you are in the project folder). The command clones the pyhepmc-ng repository and its nested sub-repositories. If you already cloned the fork without the `--recursive` option, you need to manually initialize the nested sub-repositories:
 ```
 git submodule update --init
 ```
-To keep in sync with the master from the scikit-hep repository, add another remote called *upstream*:
+Add a remote endpoint called *upstream* to keep in sync with the master of the scikit-hep repository:
 ```
 git remote add upstream https://github.com/scikit-hep/pyhepmc.git
 ```
 This concludes the initial set up.
 
-To develop a feature or a fix, create a branch from your master (make sure your master is in sync with the scikit-hep master)
+To develop a feature or a fix, create a branch from your master (make sure your master is in sync with the scikit-hep master):
 ```
 git checkout -b my_cool_feature master
 ```
@@ -70,19 +66,19 @@ git checkout master
 git pull upstream master
 git submodule update # update the nested sub-repositories if necessary
 ```
-If you have followed the rule to never commit to the master, then these commands always work. To rebase your feature branch onto the updated master, do:
+If you have followed the rule to never commit to the master, then these commands always work. Rebase your feature branch onto the updated master:
 ```
 git checkout my_cool_feature
 git rebase master
 ```
-If there are conflicts between your changes and those in the master, you need to resolve them. Follow the instructions printed by git.
+If conflicts between your changes and those in the master appear, you need to resolve them. Follow the instructions printed by git.
 
 ### Build the package
 
-pyhepmc-ng depends on other Python packages. We recommend to setup a virtual environment for development, so that your build environment is isolated from your system-wide Python installation. In the project folder, install a virtual environment:
+pyhepmc-ng depends on other Python packages. We recommend to use a virtual environment for development which is isolated from your system-wide Python installation. Install a virtual environment in the project folder:
 ```
 pip install --user virtualenv # only needed if you don't have virtualenv already
-virtualenv py37 -p python3.7 # set up a virtualenv for Python3.7 (or use another Python version)
+virtualenv py37 -p python3.7 # or use another Python version
 ```
 Activate the virtualenv and install the required packages for development:
 ```
@@ -93,7 +89,7 @@ Now build the package in develop mode.
 ```
 python setup.py develop
 ```
-This should work since pyhepmc-ng is continously tested on recent versions of gcc, clang and msvc. If it does not, please submit an issue with the build log and your compiler version. Finally, run the unit tests from the project folder.
+This should work since pyhepmc-ng is continously tested on recent versions of gcc, clang and msvc. If it does not, please submit an issue with the build log and your compiler version. You can now change the source code. Run the previous command again to build the project after you made changes. Finally, run the unit tests:
 ```
 pytest tests
 ```
@@ -111,6 +107,5 @@ The `--user` option is not necessary when you are inside a virtualenv if you hav
 
 ## License
 
-pyhepmc-ng is covered by the BSD 3-clause license, but the license only
-applies to the binding code. The BSD 3-clause license text can be found in the `LICENSE` file. The connected external libraries HepMC3 and pybind11 are covered by other licenses, as described in the respective `LICENSE` files of these repositories.
+pyhepmc-ng is covered by the BSD 3-clause license, see the `LICENSE` file for details. This license only applies to the pyhepmc-ng code. The connected external libraries HepMC3 and pybind11 are covered by other licenses, as described in their respective `LICENSE` files.
 
