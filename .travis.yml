@@ -3,7 +3,7 @@ sudo: false
 language: python
 
 install: pip install .[tests]
-script: pytest -rsv
+script: pytest -rsv tests
 
 matrix:
   include:
@@ -23,6 +23,6 @@ matrix:
 
     - os: linux
       python: "3.7"
-  
+
 notifications:
   email: false

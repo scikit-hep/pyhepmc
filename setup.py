@@ -6,8 +6,9 @@ from setuptools import setup, find_packages, Extension
 import sys
 import os
 import glob
-import subprocess as subp
 import tempfile
+import shutil
+import subprocess as subp
 
 
 compile_flags = {
@@ -15,10 +16,9 @@ compile_flags = {
         '-fvisibility=hidden',
         '-stdlib=libc++',
         # ignore warnings raised by HepMC3 code
-        '-Wno-deprecated-register',
         '-Wno-strict-aliasing',
         '-Wno-sign-compare',
-        '-Wno-reorder'
+        '-Wno-reorder',
     )
 }
 
@@ -29,7 +29,8 @@ def patched_compile(self, sources, **kwargs):
         self.my_extra_flags = []
         cmd = self.compiler[0]
         with open(os.devnull, 'w') as devnull:
-            with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir = tempfile.mkdtemp()
+            try:
                 with open(tmpdir + "/main.cpp", "w") as f:
                     f.write('int main() {}')
                 for flag in compile_flags.get(self.compiler_type, []):
@@ -38,6 +39,8 @@ def patched_compile(self, sources, **kwargs):
                                         stderr=devnull)
                     if retcode == 0:
                         self.my_extra_flags.append(flag)
+            finally:
+                shutil.rmtree(tmpdir)
     kwargs['extra_preargs'] = kwargs.get('extra_preargs', []) + self.my_extra_flags
     return self.original_compile(sources, **kwargs)
 
