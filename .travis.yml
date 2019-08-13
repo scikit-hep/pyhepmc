@@ -15,8 +15,6 @@ matrix:
       before_install:
         - choco install python3
         - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
-      install:
-        pip install .[tests]
 
     - os: linux
       python: "2.7"
