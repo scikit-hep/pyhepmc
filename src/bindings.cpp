@@ -114,7 +114,7 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
         return true;
       std::string sa, sb;
       a.second->to_string(sa);
-      b.second->to_string(sb);        
+      b.second->to_string(sb);
       return sa == sb;
     });
 }
@@ -290,7 +290,7 @@ using namespace py::literals;
 #define METH(name, cls) .def(#name, &cls::name)
 #define METH_OL(name, cls, rval, args) .def(#name, (rval (cls::*)(args)) &cls::name)
 
-PYBIND11_MODULE(cpp, m) {
+PYBIND11_MODULE(_bindings, m) {
     using namespace HepMC3;
 
     // m.doc() = R"pbdoc(
@@ -724,10 +724,4 @@ PYBIND11_MODULE(cpp, m) {
       HepMC3::Print::listing(os, event, precision);
       return os.str();
     });
-
-#ifdef VERSION_INFO
-    m.attr("__version__") = VERSION_INFO;
-#else
-    m.attr("__version__") = "dev";
-#endif
 }

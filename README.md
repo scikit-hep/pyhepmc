@@ -65,7 +65,7 @@ git checkout master
 git pull upstream master
 git submodule update # update the nested HepMC3 repo if that has moved
 ```
-If you never commit to your master and only commit to new branches, these commands always work. To rebase your feature branch onto the new master, do:
+You should never commit to your master, only to feature branches. If you follow that rule, then these commands always work. To rebase your feature branch onto the new master, do:
 ```
 git checkout my_cool_feature
 git rebase master
@@ -82,7 +82,7 @@ virtualenv py37 -p python3.7 # set up a virtualenv for Python3.7 (or use another
 Activate the virtualenv and install the requirements.
 ```
 . py37/bin/activate
-pip install -r requirements.txt # install the dependencies
+pip install -r requirements.txt # install the dependencies for developers
 ```
 Now build the package in developer mode.
 ```
@@ -90,7 +90,7 @@ python setup.py develop
 ```
 This should work, pyhepmc-ng is continously tested on recent versions of gcc, clang and msvc. If it doesn't, please submit an issue with the build log and your compiler version. Finally, run the unit tests from the project folder.
 ```
-pytest
+pytest tests
 ```
 These should all pass. If you add new features, don't forget to add unit tests for them.
 
@@ -98,7 +98,7 @@ To leave the virtualenv, call `deactivate` or close the shell.
 
 ### Install your local version
 
-If you want to use your local version productively, pip-install it:
+If you want to use your local version productively, pip-install it from the project folder:
 ```
 pip install --user --upgrade -e .
 ```

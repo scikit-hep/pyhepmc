@@ -1,5 +1,6 @@
 include *.md
 include LICENSE
-recursive-include src/HepMC3/src *
-recursive-include src/HepMC3/include *
+recursive-include extern/HepMC3/src *
+recursive-include extern/HepMC3/include *
+recursive-include extern/pybind11/include *
 include src/*.*
