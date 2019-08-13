@@ -49,33 +49,23 @@ ext_modules = [
 ]
 
 
-def has_flag(compiler, flagname):
-    sys.stdout.write("TESTING compiler flag: %s\n" % flagname)
-    import tempfile
-    from distutils.errors import CompileError
-    try:
-        with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
-            f.write('int main() {}')
-            compiler.compile([f.name], extra_postargs=[flagname], quiet=True)
-    except CompileError:
-        return False
-    return True
-
-
 def flag_filter(compiler, *flags):
-    key = " ".join((compiler.compiler[0],) + flags)
-    import shelve
-    sh = shelve.open(".flag_filter_cache")
-    if key in sh:
-        result = sh[key]
-    else:
-        result = []
+    import subprocess as subp
+    import tempfile
+    import os
+    cmd = compiler.compiler[0]
+    accepted = []
+    devnull = open(os.devnull, 'w')
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with open(tmpdir + "/main.cpp", "w") as f:
+            f.write('int main() {}')
         for flag in flags:
-            if has_flag(compiler, flag):
-                result.append(flag)
-        sh[key] = result
-    sh.close()
-    return result
+            retcode = subp.call((cmd, flag, "main.cpp"),
+                                cwd=tmpdir,
+                                stderr=devnull)
+            if retcode == 0:
+                accepted.append(flag)
+    return accepted
 
 
 class BuildExt(build_ext):
@@ -90,11 +80,10 @@ class BuildExt(build_ext):
             opts += flag_filter(self.compiler,
                                 '-fvisibility=hidden',
                                 '-stdlib=libc++',
-                                '-std=c++14',
                                 # ignore warnings raised by HepMC3 code
                                 '-Wno-deprecated-register',
                                 '-Wno-strict-aliasing',
-                                '-Wno-sign-compare'
+                                '-Wno-sign-compare',
                                 '-Wno-reorder')
         for ext in self.extensions:
             ext.extra_compile_args = opts
