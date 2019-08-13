@@ -13,6 +13,7 @@ import subprocess as subp
 
 compile_flags = {
     'unix': (
+        '-std=c++11',
         '-fvisibility=hidden',
         '-stdlib=libc++',
         # ignore warnings raised by HepMC3 code
