@@ -44,33 +44,39 @@ where appropriate.
 
 If you want to contribute to the source code, please follow these instructions. You should start by forking this repository. In the following instructions, replace `YourName` with your Github username.
 
-To start a clone from scratch use this command:
+Start from scratch by cloning your fork. Then `cd` to the project folder.
 ```
 git clone --recursive git@github.com:YourName/pyhepmc.git
+cd pyhepmc
 ```
-This clones the pyhepmc-ng repository and the nested HepMC3 repository. If you have already cloned in the usual way, you need to initialize and update the nested HepMC3 repository from inside your project folder:
+The first command clones the pyhepmc-ng repository and its nested sub-repositories. If you already cloned the fork without the `--recursive` option, you need to manually initialize the nested sub-repository. `cd` to the project folder and do:
 ```
 git submodule update --init
 ```
+To keep in sync with the master from the scikit-hep repository, add another remote called *upstream*:
+```
+git remote add upstream https://github.com/scikit-hep/pyhepmc.git
+```
+This concludes the initial set up.
+
 To develop a feature or a fix, create a branch from your master (make sure your master is in sync with the scikit-hep master)
 ```
 git checkout -b my_cool_feature master
 ```
-Commit to your branch and initiate a pull request when you feel the feature is ready to be reviewed.
+Commit to your branch and initiate a pull request from the Github web page when you feel the feature is ready to be reviewed. Note: Never commit to the master, only to feature branches.
 
-In the meantime, the scikit-hep master may move forward. Keep the local master in your fork in sync with these commands:
+The scikit-hep master may have moved forward in the meantime. Keep your local master branch in sync with these commands:
 ```
-git remote add upstream https://github.com/scikit-hep/pyhepmc.git # only needed once
 git checkout master
 git pull upstream master
-git submodule update # update the nested HepMC3 repo if that has moved
+git submodule update # update the nested sub-repositories if necessary
 ```
-You should never commit to your master, only to feature branches. If you follow that rule, then these commands always work. To rebase your feature branch onto the new master, do:
+If you have followed the rule to never commit to the master, then these commands always work. To rebase your feature branch onto the updated master, do:
 ```
 git checkout my_cool_feature
 git rebase master
 ```
-If there are conflicts between your changes and those in the master, you need to resolve them.
+If there are conflicts between your changes and those in the master, you need to resolve them. Follow the instructions printed by git.
 
 ### Build the package
 
@@ -79,16 +85,16 @@ pyhepmc-ng depends on other Python packages. We recommend to setup a virtual env
 pip install --user virtualenv # only needed if you don't have virtualenv already
 virtualenv py37 -p python3.7 # set up a virtualenv for Python3.7 (or use another Python version)
 ```
-Activate the virtualenv and install the requirements.
+Activate the virtualenv and install the required packages for development:
 ```
 . py37/bin/activate
-pip install -r requirements.txt # install the dependencies for developers
+pip install -r requirements.txt
 ```
-Now build the package in developer mode.
+Now build the package in develop mode.
 ```
 python setup.py develop
 ```
-This should work, pyhepmc-ng is continously tested on recent versions of gcc, clang and msvc. If it doesn't, please submit an issue with the build log and your compiler version. Finally, run the unit tests from the project folder.
+This should work since pyhepmc-ng is continously tested on recent versions of gcc, clang and msvc. If it does not, please submit an issue with the build log and your compiler version. Finally, run the unit tests from the project folder.
 ```
 pytest tests
 ```
@@ -98,11 +104,11 @@ To leave the virtualenv, call `deactivate` or close the shell.
 
 ### Install your local version
 
-If you want to use your local version productively, pip-install it from the project folder:
+If you want to use your local version for productive work, pip-install it from within the local project folder:
 ```
-pip install --user --upgrade -e .
+pip install --user --upgrade .
 ```
-The `--user` option is not necessary when you are inside a virtualenv if you have write-permission to the system-wise Python directories. The `--upgrade` option is only needed if you already have a pyhepmc-ng version installed. The `-e` option installs the package in develop mode: the installed package remains linked to the source and changes in the project folder are immediately visible in the installed package. If you don't want your installed version to be linked, drop the `-e` option.
+The `--user` option is not necessary when you are inside a virtualenv if you have write-permission to the system-wise Python directories. The `--upgrade` option is only needed if you already have a pyhepmc-ng version installed.
 
 ## License
 
