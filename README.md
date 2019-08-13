@@ -79,7 +79,7 @@ pyhepmc-ng depends on other Python packages. We recommend to setup a virtual env
 pip install --user virtualenv # only needed if you don't have virtualenv already
 virtualenv py37 -p python3.7 # set up a virtualenv for Python3.7 (or use another Python version)
 ```
-Now activate the environment and install the requirements.
+Activate the virtualenv and install the requirements.
 ```
 . py37/bin/activate
 pip install -r requirements.txt # install the dependencies
@@ -88,18 +88,21 @@ Now build the package in developer mode.
 ```
 python setup.py develop
 ```
-This should work, pyhepmc-ng is continously tested on recent versions of gcc, clang and msvc. If it doesn't, please submit an issue with the build log and your compiler version. Finally, you can run the unit tests.
+This should work, pyhepmc-ng is continously tested on recent versions of gcc, clang and msvc. If it doesn't, please submit an issue with the build log and your compiler version. Finally, run the unit tests from the project folder.
 ```
 pytest
 ```
+These should all pass. If you add new features, don't forget to add unit tests for them.
 
-### Install the modified version
+To leave the virtualenv, call `deactivate` or close the shell.
 
-If you want to use your local version of pyhepmc-ng productively, you can simply do from the project folder:
+### Install your local version
+
+If you want to use your local version productively, pip-install it:
 ```
-pip install -e .
+pip install --user --upgrade -e .
 ```
-The `-e` option installs the package in developer mode, which means that the installed package remains linked to the source and changes in the project folder are immediately visible for the installed package. If you don't want your installed version to be linked, simply drop the `-e` option.
+The `--user` option is not necessary when you are inside a virtualenv if you have write-permission to the system-wise Python directories. The `--upgrade` option is only needed if you already have a pyhepmc-ng version installed. The `-e` option installs the package in develop mode: the installed package remains linked to the source and changes in the project folder are immediately visible in the installed package. If you don't want your installed version to be linked, drop the `-e` option.
 
 ## License
 
