@@ -1,10 +1,12 @@
 # pyhepmc-ng
-
+<!-- begin of description -->
 A Python wrapper for the HepMC3 C++ library.
+<!-- end of description -->
 
 [![PyPI version](https://badge.fury.io/py/pyhepmc-ng.svg)](https://badge.fury.io/py/pyhepmc-ng)
 [![Build Status](https://travis-ci.org/scikit-hep/pyhepmc.svg?branch=master)](https://travis-ci.org/scikit-hep/pyhepmc)
 
+<!-- begin of description -->
 Another wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/). Why should you use this one?
 
 **pyhepmc-ng is easy to install**
@@ -34,7 +36,12 @@ where appropriate.
 - Tuples and lists are implicitly convertible to FourVectors
 - Vectors of objects on the C++ side are mapped to Python lists
 - ReaderAscii and WriterAscii support the context manager protocol
-- A convenient `open` function is provided for reading and writing HepMC files 
+- A convenient `open` function is provided for reading and writing HepMC files
+
+## Documentation
+
+pyhepmc-ng currently has no separate documentation, but it mirrors the C++ interface of the HepMC3 library, which is documented here: http://hepmc.web.cern.ch/hepmc.
+<!-- end of description -->
 
 ## Documentation
 
@@ -112,4 +119,3 @@ The `--user` option is not necessary when you are inside a virtualenv if you hav
 ## License
 
 pyhepmc-ng is covered by the BSD 3-clause license, see the `LICENSE` file for details. This license only applies to the pyhepmc-ng code. The connected external libraries HepMC3 and pybind11 are covered by other licenses, as described in their respective `LICENSE` files.
-

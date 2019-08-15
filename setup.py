@@ -1,7 +1,3 @@
-"""
-License: pyhepmc-ng is covered by the BSD license, but the license only
-applies to the binding code. The HepMC3 code is covered by the GPL-v3 license.
-"""
 from setuptools import setup, find_packages, Extension
 import sys
 import os
@@ -36,8 +32,8 @@ def patched_compile(self, sources, **kwargs):
                     f.write('int main() {}')
                 for flag in compile_flags.get(self.compiler_type, []):
                     retcode = subp.call((cmd, flag, "main.cpp"),
-                                        cwd=tmpdir,
-                                        stderr=devnull)
+                                         cwd=tmpdir,
+                                         stderr=devnull)
                     if retcode == 0:
                         self.my_extra_flags.append(flag)
             finally:
@@ -56,14 +52,32 @@ def get_version():
     return vars['version']
 
 
+def get_description():
+    content = open("README.md").read()
+    range = []
+    idx = 0
+    while idx >= 0:
+        r = [0, 0]
+        for imarker, marker in enumerate(("begin", "end")):
+            tag = "<!-- %s of description -->" % marker
+            idx = content.find(tag, idx)
+            if idx == -1:
+                break
+            if imarker == 0:
+                idx += len(tag)
+            r[imarker] = idx
+        range.append(r)
+    return "".join([content[a:b] for (a, b) in range])
+
+
 setup(
     name='pyhepmc_ng',
     version=get_version(),
     author='Hans Dembinski',
     author_email='hans.dembinski@gmail.com',
     url='https://github.com/scikit-hep/pyhepmc',
-    description='Next-generation Python interface to the HepMC high-energy physics event record API',
-    long_description=__doc__,
+    description='Next-generation Python interface to the HepMC3 C++ library',
+    long_description=get_description(),
     long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -92,7 +106,8 @@ setup(
     },
     ext_modules=[
         Extension('pyhepmc_ng._bindings',
-            ['src/bindings.cpp'] + glob.glob('extern/HepMC3/src/*.cc')
+            ['src/bindings.cpp']
+            + glob.glob('extern/HepMC3/src/*.cc')
             + glob.glob('extern/HepMC3/src/Search/*.cc'),
             include_dirs=[
                 'extern/HepMC3/include',
