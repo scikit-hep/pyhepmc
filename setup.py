@@ -61,7 +61,9 @@ def get_description():
         for imarker, marker in enumerate(("begin", "end")):
             tag = "<!-- %s of description -->" % marker
             idx = content.find(tag, idx)
-            if idx >= 0 and imarker == 0:
+            if idx == -1:
+                break
+            if imarker == 0:
                 idx += len(tag)
             r[imarker] = idx
         range.append(r)
