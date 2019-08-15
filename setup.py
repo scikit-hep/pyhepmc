@@ -32,8 +32,8 @@ def patched_compile(self, sources, **kwargs):
                     f.write('int main() {}')
                 for flag in compile_flags.get(self.compiler_type, []):
                     retcode = subp.call((cmd, flag, "main.cpp"),
-                                        cwd=tmpdir,
-                                        stderr=devnull)
+                                         cwd=tmpdir,
+                                         stderr=devnull)
                     if retcode == 0:
                         self.my_extra_flags.append(flag)
             finally:
@@ -53,14 +53,13 @@ def get_version():
 
 
 def get_description():
-    descr = []
-    for line in open("README.md").readlines():
-        if line.startswith("##"):
-            break
-        if line.startswith("#"):
-            continue
-        descr.append(line)
-    return "".join(descr)
+    content = open("README.md").read()
+    range = [0, 0]
+    for imarker, marker in enumerate(("begin", "end")):
+        tag = "\n<!-- %s of description -->\n" % marker
+        idx = content.index(tag)
+        range[imarker] = idx + (len(tag) if imarker == 0 else 0)
+    return content[range[0]:range[1]]
 
 
 setup(
@@ -69,7 +68,7 @@ setup(
     author='Hans Dembinski',
     author_email='hans.dembinski@gmail.com',
     url='https://github.com/scikit-hep/pyhepmc',
-    description='Next-generation Python interface to the HepMC high-energy physics event record API',
+    description='Next-generation Python interface to the HepMC3 C++ library',
     long_description=get_description(),
     long_description_content_type='text/markdown',
     classifiers=[
@@ -99,7 +98,8 @@ setup(
     },
     ext_modules=[
         Extension('pyhepmc_ng._bindings',
-            ['src/bindings.cpp'] + glob.glob('extern/HepMC3/src/*.cc')
+            ['src/bindings.cpp']
+            + glob.glob('extern/HepMC3/src/*.cc')
             + glob.glob('extern/HepMC3/src/Search/*.cc'),
             include_dirs=[
                 'extern/HepMC3/include',
