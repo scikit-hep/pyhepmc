@@ -1,8 +1,7 @@
 # pyhepmc-ng
-
 <!-- begin of description -->
-
 A Python wrapper for the HepMC3 C++ library.
+<!-- end of description -->
 
 [![PyPI version](https://badge.fury.io/py/pyhepmc-ng.svg)](https://badge.fury.io/py/pyhepmc-ng)
 [![Build Status](https://travis-ci.org/scikit-hep/pyhepmc.svg?branch=master)](https://travis-ci.org/scikit-hep/pyhepmc)
@@ -41,7 +40,6 @@ where appropriate.
 ## Documentation
 
 pyhepmc-ng currently has no separate documentation, but it mirrors the C++ interface of the HepMC3 library, which is documented here: http://hepmc.web.cern.ch/hepmc.
-
 <!-- end of description -->
 
 ## Documentation

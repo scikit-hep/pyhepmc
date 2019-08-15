@@ -54,12 +54,18 @@ def get_version():
 
 def get_description():
     content = open("README.md").read()
-    range = [0, 0]
-    for imarker, marker in enumerate(("begin", "end")):
-        tag = "\n<!-- %s of description -->\n" % marker
-        idx = content.index(tag)
-        range[imarker] = idx + (len(tag) if imarker == 0 else 0)
-    return content[range[0]:range[1]]
+    range = []
+    idx = 0
+    while idx >= 0:
+        r = [0, 0]
+        for imarker, marker in enumerate(("begin", "end")):
+            tag = "<!-- %s of description -->" % marker
+            idx = content.find(tag, idx)
+            if idx >= 0 and imarker == 0:
+                idx += len(tag)
+            r[imarker] = idx
+        range.append(r)
+    return "".join([content[a:b] for (a, b) in range])
 
 
 setup(
