@@ -61,7 +61,7 @@ def patched_compile(self, sources, output_dir=None, macros=None,
             jobs.append((obj, src))
 
     p = ThreadPool(4)
-    p.map(lambda args: self._compile(*args, ext, cc_args, extra_postargs, pp_opts), jobs)
+    p.map(lambda args: self._compile(args[0], args[1], ext, cc_args, extra_postargs, pp_opts), jobs)
 
     return objects
 
