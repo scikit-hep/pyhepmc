@@ -114,7 +114,7 @@ If you want to use your local version for productive work, pip-install it from w
 ```
 pip install --user --upgrade .
 ```
-The `--user` option is not necessary when you are inside a virtualenv if you have write-permission to the system-wise Python directories. The `--upgrade` option is only needed if you already have a pyhepmc-ng version installed.
+The `--user` option is not necessary when you are inside a virtualenv or if you have write-permission to the system-wise Python directories. The `--upgrade` option makes sure that an already existing pyhepmc-ng version is replaced.
 
 ## License
 
