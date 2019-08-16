@@ -5,6 +5,7 @@ import glob
 import tempfile
 import shutil
 import subprocess as subp
+from multiprocessing.pool import ThreadPool
 
 
 compile_flags = {
@@ -20,8 +21,17 @@ compile_flags = {
 }
 
 
-# override class method to inject platform-specific compiler flags
-def patched_compile(self, sources, **kwargs):
+# override class method to inject platform-specific compiler flags, build in parallel and
+# skip already compiled object files if they are newer than the source files
+def patched_compile(self, sources, output_dir=None, macros=None,
+                    include_dirs=None, debug=0, extra_preargs=None,
+                    extra_postargs=None, depends=None):
+
+    macros, objects, extra_postargs, pp_opts, build = \
+        self._setup_compile(output_dir, macros, include_dirs, sources,
+                            depends, extra_postargs)
+    cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
+
     if not hasattr(self, "my_extra_flags"):
         self.my_extra_flags = []
         cmd = self.compiler[0]
@@ -38,8 +48,22 @@ def patched_compile(self, sources, **kwargs):
                         self.my_extra_flags.append(flag)
             finally:
                 shutil.rmtree(tmpdir)
-    kwargs['extra_preargs'] = kwargs.get('extra_preargs', []) + self.my_extra_flags
-    return self.original_compile(sources, **kwargs)
+
+    cc_args += self.my_extra_flags
+
+    jobs = []
+    for obj in objects:
+        try:
+            src, ext = build[obj]
+        except KeyError:
+            continue
+        if not os.path.exists(obj) or os.stat(obj).st_mtime < os.stat(src).st_mtime:
+            jobs.append((obj, src))
+
+    p = ThreadPool(4)
+    p.map(lambda args: self._compile(*args, ext, cc_args, extra_postargs, pp_opts), jobs)
+
+    return objects
 
 import distutils.ccompiler
 distutils.ccompiler.CCompiler.original_compile = distutils.ccompiler.CCompiler.compile
@@ -106,13 +130,13 @@ setup(
     },
     ext_modules=[
         Extension('pyhepmc_ng._bindings',
-            ['src/bindings.cpp']
+            ['src/bindings.cpp', 'src/io.cpp']
             + glob.glob('extern/HepMC3/src/*.cc')
             + glob.glob('extern/HepMC3/src/Search/*.cc'),
             include_dirs=[
+                'src',
                 'extern/HepMC3/include',
                 'extern/pybind11/include',
-                'src',
             ],
             language='c++')
     ],

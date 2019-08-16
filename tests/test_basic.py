@@ -211,22 +211,20 @@ def test_pythonic_read_write():
     evt1 = prepare_event()
 
     oss = hep.stringstream()
-    with hep.open(oss, "w") as f:
+    with hep.WriterAscii(oss) as f:
         f.write(evt1)
 
-    evt2 = None
-    with hep.open(oss) as f:
-        evt2 = f.read()
-
-    assert evt1.particles == evt2.particles
-    assert evt1.vertices == evt2.vertices
-    assert evt1 == evt2
+    with hep.ReaderAscii(oss) as f:
+        for i, evt2 in enumerate(f):
+            assert i == 0
+            assert evt1.particles == evt2.particles
+            assert evt1.vertices == evt2.vertices
+            assert evt1 == evt2
 
 
 def test_failed_read_file():
-    with pytest.raises(IOError):
-        with hep.ReaderAscii("test_failed_read_file.dat") as f:
-            f.read()
+    with hep.ReaderAscii("test_failed_read_file.dat") as f:
+        assert f.read() is None
 
 
 def test_read_empty_stream():
@@ -255,6 +253,21 @@ def test_read_write_file():
 
     import os
     os.unlink("test_read_write_file.dat")
+
+
+def test_open():
+    evt1 = prepare_event()
+
+    with hep.WriterAscii("test_read_write_file.dat") as f:
+        f.write_event(evt1)
+
+    with hep.open("test_read_write_file.dat") as f:
+        evt2 = f.read()
+        assert evt1 == evt2
+
+    import os
+    os.unlink("test_read_write_file.dat")
+
 
 
 def test_fill_genevent_from_hepevt():

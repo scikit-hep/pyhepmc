@@ -1,45 +1,84 @@
 from ._bindings import *
+from ._io import _enter, _exit, _iter, _read
 from ._version import version as __version__
 import ctypes
-import numpy as np
+
+original_open = open
+
+ReaderAscii.__enter__ = _enter
+ReaderAscii.__exit__ = _exit
+ReaderAscii.__iter__ = _iter
+ReaderAscii.read = _read
+
+ReaderAsciiHepMC2.__enter__ = _enter
+ReaderAsciiHepMC2.__exit__ = _exit
+ReaderAsciiHepMC2.__iter__ = _iter
+ReaderAsciiHepMC2.read = _read
+
+ReaderLHEF.__enter__ = _enter
+ReaderLHEF.__exit__ = _exit
+ReaderLHEF.__iter__ = _iter
+ReaderLHEF.read = _read
+
+WriterAscii.__enter__ = _enter
+WriterAscii.__exit__ = _exit
+WriterAscii.write = WriterAscii.write_event
+
+WriterAsciiHepMC2.__enter__ = _enter
+WriterAsciiHepMC2.__exit__ = _exit
+WriterAsciiHepMC2.write = WriterAsciiHepMC2.write_event
+
+WriterHEPEVT.__enter__ = _enter
+WriterHEPEVT.__exit__ = _exit
+WriterHEPEVT.write = WriterHEPEVT.write_event
 
 
-class WriterWrapper:
+class WrappedAsciiWriter:
+
     def __init__(self, filename, precision=None):
-        self._handle = (filename, precision)
+        self._writer = (filename, precision)
 
     def write(self, object):
-        if isinstance(self._handle, WriterAscii):
-            self._handle.write(object)
-            return
-        filename, precision = self._handle
+        if isinstance(self._writer, tuple):
+            filename, precision = self._writer
+            if isinstance(object, GenRunInfo):
+                self._writer = self.WriterAscii(filename, object)
+                if precision is not None:
+                    self._writer.precision = precision
+                self._writer.write_run_info()
+                return
+            else:
+                self._writer = WriterAscii(filename)
+                if precision is not None:
+                    self._writer.precision = precision
+
         if isinstance(object, GenRunInfo):
-            self._handle = WriterAscii(filename, object)
-            if precision is not None:
-                self._handle.precision = precision
-            self._handle.write_run_info()
-        else:
-            self._handle = WriterAscii(filename)
-            if precision is not None:
-                self._handle.precision = precision
-            self.write(object)
+            raise RuntimeError("GenRunInfo must be written first")
+
+        self._writer.write_event(object)
 
     def close(self):
-        self._handle.close()
+        self._writer.close()
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, tb):
-        self.close()
-        return False
+WrappedAsciiWriter.__enter__ = _enter
+WrappedAsciiWriter.__exit__ = _exit
 
 
 def open(filename, mode="r", precision=None):
     if mode == "r":
-        return ReaderAscii(filename)
+        with original_open(filename, "r") as f:
+            header = f.read(256)
+        if "HepMC::Asciiv3" in header:
+            return ReaderAscii(filename)
+        if "HepMC::IO_GenEvent" in header:
+            return ReaderAsciiHepMC2(filename)
+        if "<LesHouchesEvents" in header:
+            return ReaderLHEF(filename)
+        else:
+            raise IOError("file format not recognized")
+
     elif mode == "w":
-        return WriterWrapper(filename, precision)
+        return WrappedAsciiWriter(filename, precision)
 
 
 def fill_genevent_from_hepevent_ptr(evt, ptr_as_int, max_size,
@@ -48,7 +87,6 @@ def fill_genevent_from_hepevent_ptr(evt, ptr_as_int, max_size,
                                     hep_status_decoder=None,
                                     momentum_unit = 1,
                                     length_unit = 1):
-
     # struct HEPEVT                      // Fortran common block HEPEVT
     # {
     #     int        nevhep;             // Event number
@@ -85,6 +123,9 @@ def fill_genevent_from_hepevent_ptr(evt, ptr_as_int, max_size,
 
     event_number = h.event_number
     n = h.nentries
+
+    import numpy as np
+
     status = np.asarray(h.status)[:n]
     pm = np.asarray(h.pm)
 

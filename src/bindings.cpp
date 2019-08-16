@@ -1,6 +1,5 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/operators.h>
-#include <pybind11/stl.h>
+#include "pybind.h"
+
 #include "HepMC3/FourVector.h"
 #include "HepMC3/GenHeavyIon.h"
 #include "HepMC3/GenPdfInfo.h"
@@ -11,10 +10,8 @@
 #include "HepMC3/GenVertex.h"
 #include "HepMC3/Units.h"
 #include "HepMC3/Print.h"
-#include "HepMC3/WriterAscii.h"
-#include "HepMC3/ReaderAscii.h"
-#include "HepMC3/ReaderAsciiHepMC2.h"
 #include "HepMC3/HEPEVT_Wrapper.h"
+
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -26,6 +23,8 @@
 
 #include "hepevt_wrapper.h"
 // #include "GzReaderAscii.h"
+
+void register_io(py::module& m);
 
 template <class Iterator, class Streamer>
 std::ostream& ostream_range(std::ostream& os,
@@ -278,17 +277,6 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   return os;
 }
 } // namespace HepMC3
-
-namespace py = pybind11;
-using namespace py::literals;
-
-#define FUNC(name) m.def(#name, name)
-#define PROP_RO(name, cls) .def_property_readonly(#name, &cls::name)
-#define PROP_RO_OL(name, cls, rval) .def_property_readonly(#name, (rval (cls::*)() const) &cls::name)
-#define PROP(name, cls) .def_property(#name, &cls::name, &cls::set_##name)
-#define PROP_OL(name, cls, rval) .def_property(#name, (rval (cls::*)() const) &cls::name, &cls::set_##name)
-#define METH(name, cls) .def(#name, &cls::name)
-#define METH_OL(name, cls, rval, args) .def(#name, (rval (cls::*)(args)) &cls::name)
 
 PYBIND11_MODULE(_bindings, m) {
     using namespace HepMC3;
@@ -631,83 +619,6 @@ PYBIND11_MODULE(_bindings, m) {
         .def_property_readonly_static("max_size", [](py::object){ return NMXHEP; } )
         ;
 
-    // this class is here to simplify unit testing of Reader- and WriterAscii
-    py::class_<std::stringstream>(m, "stringstream")
-        .def(py::init<>())
-        .def(py::init<std::string>())
-        .def("__str__", (std::string (std::stringstream::*)() const) &std::stringstream::str)
-        METH(flush, std::stringstream)
-        METH(write, std::stringstream)
-        METH(read, std::stringstream)
-        ;
-
-    py::class_<ReaderAscii>(m, "ReaderAscii")
-        .def(py::init<const std::string>(), "filename"_a)
-        .def(py::init<std::stringstream&>())
-        METH(read_event, ReaderAscii)
-        METH(failed, ReaderAscii)
-        METH(close, ReaderAscii)
-        .def("read", [](ReaderAscii& self) {
-                py::object obj = py::cast(GenEvent());
-                bool ok = self.read_event(py::cast<GenEvent&>(obj));
-                if (!ok) {
-                    PyErr_SetString(PyExc_IOError, "error reading event");
-                    throw py::error_already_set();
-                }
-                return obj;
-            })
-        // support contextmanager protocoll
-        .def("__enter__", [](py::object self) { return self; })
-        .def("__exit__", [](ReaderAscii& self, py::object type, py::object value, py::object tb) {
-                self.close();
-                return false;
-            })
-        ;
-
-    py::class_<ReaderAsciiHepMC2>(m, "ReaderAsciiHepMC2")
-        .def(py::init<const std::string>(), "filename"_a)
-        METH(read_event, ReaderAsciiHepMC2)
-        METH(failed, ReaderAsciiHepMC2)
-        METH(close, ReaderAsciiHepMC2)
-        .def("read", [](ReaderAsciiHepMC2& self) {
-                py::object obj = py::cast(GenEvent());
-                bool ok = self.read_event(py::cast<GenEvent&>(obj));
-                if (!ok) {
-                    PyErr_SetString(PyExc_IOError, "error reading event");
-                    throw py::error_already_set();
-                }
-                return obj;
-            })
-        // support contextmanager protocoll
-        .def("__enter__", [](py::object self) { return self; })
-        .def("__exit__", [](ReaderAsciiHepMC2& self, py::object type, py::object value, py::object tb) {
-                self.close();
-                return false;
-            })
-        ;
-
-    py::class_<WriterAscii>(m, "WriterAscii")
-        .def(py::init<const std::string&, GenRunInfoPtr>(),
-             "filename"_a, "run"_a = nullptr)
-        .def(py::init<std::stringstream&, GenRunInfoPtr>(),
-             "ostringstream"_a, "run"_a = nullptr,
-             py::keep_alive<1, 2>())
-        METH(write_event, WriterAscii)
-        METH(write_run_info, WriterAscii)
-        .def("write", [](WriterAscii& self, const GenEvent& evt) {
-                self.write_event(evt);
-            })
-        METH(failed, WriterAscii)
-        METH(close, WriterAscii)
-        PROP(precision, WriterAscii)
-        // support contextmanager protocoll
-        .def("__enter__", [](py::object self) { return self; })
-        .def("__exit__", [](WriterAscii& self, py::object type, py::object value, py::object tb) {
-                self.close();
-                return false;
-            })
-        ;
-
     m.def("fill_genevent_from_hepevt", fill_genevent_from_hepevt<double>,
           "evt"_a, "event_number"_a, "p"_a, "m"_a, "v"_a, "pid"_a, "parents"_a,
           "children"_a, "particle_status"_a, "vertex_status"_a,
@@ -724,4 +635,6 @@ PYBIND11_MODULE(_bindings, m) {
       HepMC3::Print::listing(os, event, precision);
       return os.str();
     });
+
+    register_io(m);
 }
