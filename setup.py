@@ -1,55 +1,50 @@
 from setuptools import setup, find_packages, Extension
+from distutils.filelist import findall
 import sys
 import os
-import glob
-import tempfile
-import shutil
-import subprocess as subp
 from multiprocessing.pool import ThreadPool
 
 
-compile_flags = {
-    'unix': (
-        '-std=c++11',
-        '-fvisibility=hidden',
-        '-stdlib=libc++',
-        # ignore warnings raised by HepMC3 code
-        '-Wno-strict-aliasing',
-        '-Wno-sign-compare',
-        '-Wno-reorder',
-    )
-}
-
-
-# override class method to inject platform-specific compiler flags, build in parallel and
+# patch UnixCCompiler to inject platform-specific compiler flags, build in parallel and
 # skip already compiled object files if they are newer than the source files
-def patched_compile(self, sources, output_dir=None, macros=None,
-                    include_dirs=None, debug=0, extra_preargs=None,
-                    extra_postargs=None, depends=None):
+def compile(self, sources, output_dir=None, macros=None,
+            include_dirs=None, debug=0, extra_preargs=None,
+            extra_postargs=None, depends=None):
 
     macros, objects, extra_postargs, pp_opts, build = \
         self._setup_compile(output_dir, macros, include_dirs, sources,
                             depends, extra_postargs)
     cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
+    cc_args += ["-std=c++11"]
 
-    if not hasattr(self, "my_extra_flags"):
-        self.my_extra_flags = []
+    extra_compile_flags =(
+        "-fvisibility=hidden",
+        # ignore warnings raised by HepMC3 code
+        '-Wno-strict-aliasing',
+        '-Wno-sign-compare',
+        '-Wno-reorder'
+    )
+
+    extra_flags_file = output_dir + "/extra_flags"
+    if not os.path.exists(extra_flags_file):
+        import tempfile, shutil, subprocess as subp
         cmd = self.compiler[0]
-        with open(os.devnull, 'w') as devnull:
-            tmpdir = tempfile.mkdtemp()
-            try:
-                with open(tmpdir + "/main.cpp", "w") as f:
-                    f.write('int main() {}')
-                for flag in compile_flags.get(self.compiler_type, []):
-                    retcode = subp.call((cmd, flag, "main.cpp"),
-                                         cwd=tmpdir,
-                                         stderr=devnull)
-                    if retcode == 0:
-                        self.my_extra_flags.append(flag)
-            finally:
-                shutil.rmtree(tmpdir)
+        with open(extra_flags_file, "w") as of:
+            with open(os.devnull, 'w') as devnull:
+                tmpdir = tempfile.mkdtemp()
+                try:
+                    with open(tmpdir + "/main.cpp", "w") as f:
+                        f.write('int main() {}')
+                    for flag in extra_compile_flags:
+                        retcode = subp.call((cmd, flag, "main.cpp"),
+                                             cwd=tmpdir,
+                                             stderr=devnull)
+                        if retcode == 0:
+                            of.write(flag + "\n")
+                finally:
+                    shutil.rmtree(tmpdir)
 
-    cc_args += self.my_extra_flags
+    cc_args += open(extra_flags_file).read().strip().split("\n")
 
     jobs = []
     for obj in objects:
@@ -65,9 +60,9 @@ def patched_compile(self, sources, output_dir=None, macros=None,
 
     return objects
 
-import distutils.ccompiler
-distutils.ccompiler.CCompiler.original_compile = distutils.ccompiler.CCompiler.compile
-distutils.ccompiler.CCompiler.compile = patched_compile
+
+import distutils.unixccompiler
+distutils.unixccompiler.UnixCCompiler.compile = compile
 
 
 def get_version():
@@ -130,9 +125,8 @@ setup(
     },
     ext_modules=[
         Extension('pyhepmc_ng._bindings',
-            ['src/bindings.cpp', 'src/io.cpp']
-            + glob.glob('extern/HepMC3/src/*.cc')
-            + glob.glob('extern/HepMC3/src/Search/*.cc'),
+            [x for x in findall('src') if x.endswith(".cpp")] +
+            [x for x in findall('extern/HepMC3/src') if x.endswith(".cc")],
             include_dirs=[
                 'src',
                 'extern/HepMC3/include',
