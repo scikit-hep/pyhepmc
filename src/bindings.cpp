@@ -633,25 +633,23 @@ PYBIND11_MODULE(_bindings, m) {
                 HEPEVT_Wrapper::set_hepevt_address((char*)&self);
                 HEPEVT_Wrapper::zero_everything();
             })
-        // GenEvent_to_HEPEVT is broken: sometimes produces wrong connections
-        // .def("fill_from_genevent", [](HEPEVT& self, const GenEvent& evt) {
-        //         HepMC::HEPEVT_Wrapper::set_hepevt_address((char*)&self);
-        //         HepMC::HEPEVT_Wrapper::GenEvent_to_HEPEVT(&evt);
-        //     })
+        .def("from_genevent", [](HEPEVT& self, const GenEvent& evt) {
+                HEPEVT_Wrapper::set_hepevt_address((char*)&self);
+                HEPEVT_Wrapper::GenEvent_to_HEPEVT(&evt);
+            })
+        .def("to_genevent", [](const HEPEVT& self, GenEvent& evt) {
+                HEPEVT_Wrapper::set_hepevt_address((char*)&self);
+                HEPEVT_Wrapper::HEPEVT_to_GenEvent(&evt);
+            })
         .def("__str__", [](const HEPEVT& self) {
                 HEPEVT_Wrapper::set_hepevt_address((char*)&self);
                 std::ostringstream os;
                 HEPEVT_Wrapper::print_hepevt(os);
                 return os.str();
             })
-        .def_property_readonly("ptr", [](const HEPEVT& self) { return (std::intptr_t)&self; })
+        .def_property_readonly("ptr", [](const HEPEVT& self) { return (std::uintptr_t)&self; })
         .def_property_readonly_static("max_size", [](py::object){ return NMXHEP; } )
         ;
-
-    m.def("fill_genevent_from_hepevt", fill_genevent_from_hepevt<double>,
-          "evt"_a, "event_number"_a, "p"_a, "m"_a, "v"_a, "pid"_a, "parents"_a,
-          "children"_a, "particle_status"_a, "vertex_status"_a,
-          "momentum_scaling"_a = 1.0, "length_scaling"_a = 1.0);
 
     m.def("content", [](const GenEvent& event) {
       std::ostringstream os;

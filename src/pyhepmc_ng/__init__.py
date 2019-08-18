@@ -88,72 +88,72 @@ def open(filename, mode="r", precision=None):
 
     elif mode == "w":
         return WrappedAsciiWriter(filename, precision)
+    raise ValueError("mode must be r or w")
 
 
-def fill_genevent_from_hepevent_ptr(evt, ptr_as_int, max_size,
-                                    int_type=ctypes.c_int,
-                                    float_type=ctypes.c_double,
-                                    hep_status_decoder=None,
-                                    momentum_unit = 1,
-                                    length_unit = 1):
-    # struct HEPEVT                      // Fortran common block HEPEVT
-    # {
-    #     int        nevhep;             // Event number
-    #     int        nhep;               // Number of entries in the event
-    #     int        isthep[NMXHEP];     // Status code
-    #     int        idhep [NMXHEP];     // PDG ID
-    #     int        jmohep[NMXHEP][2];  // Idx of first and last mother
-    #     int        jdahep[NMXHEP][2];  // Idx of first and last daughter
-    #     momentum_t phep  [NMXHEP][5];  // Momentum: px, py, pz, e, m
-    #     momentum_t vhep  [NMXHEP][4];  // Vertex: x, y, z, t
-    # };
+_hepevt_buffer = HEPEVT()
 
-    IntArray = int_type * max_size
-    Int2 = int_type * 2
-    Int2Array = Int2 * max_size
-    Float4 = float_type * 4
-    Float5 = float_type * 5
-    Float4Array = Float4 * max_size
-    Float5Array = Float5 * max_size
+def fill_genevent_from_hepevt(evt, **kwargs):
+    """
+    Fills GenEvent from HEPEVT data.
 
-    class HEPEVT(ctypes.Structure):
-        _fields_ = (
-                ("event_number", int_type),
-                ("nentries", int_type),
-                ("status", IntArray),
-                ("pid", IntArray),
-                ("parents", Int2Array),
-                ("children", Int2Array),
-                ("pm", Float5Array),
-                ("v", Float4Array)
-            )
+    Parameters
+    ----------
+    event_number : int
+        Current Event Number. Starts with 1.
+    p : array(float) N x 4
+        Array of 4-vectors (px, py, py, e).
+    m : array(float) N
+        Array of generated masses (virtual masses).
+    v : array(float) N x 4
+        Array of 4-vectors (x, y, z, t).
+    pid : array(int) N
+        Array of PDG IDs.
+    parents : array(int) N x 2
+        Array of (parent first index, parent last index). Indices start at 1.
+    children : array(int) N x 2 (optional)
+        Array of (child first index, child last index). Indices start at 1. May be none.
+    status : array(int) N
+        Array of particle status. See HEPMC3 docs for definition.
+    momentum_scaling : float (optional)
+        Momentum coordinates are stored in units of this number.
+    vertex_scaling : float (optional)
+        Vertex coordinates are stored in units of this number.
 
-    h = ctypes.cast(ptr_as_int, ctypes.POINTER(HEPEVT))[0]
+    Notes
+    -----
+    The current implementation copies the input into an internal buffer. This is not as efficient as possible, but currently the only way to use the HepMC3 C++ code with input data which does not have exactly the memory layout of the HEPEVT struct defined in HepMC3/HEPEVT_Wrapper.h.
 
-    event_number = h.event_number
-    n = h.nentries
+    Calling this function is not thread-safe.
+    """
+    event_number = kwargs["event_number"]
+    p = kwargs["p"]
+    m = kwargs["m"]
+    v = kwargs["v"]
+    pid = kwargs["pid"]
+    parents = kwargs["parents"]
+    children = kwargs.get("children", 0)
+    status = kwargs["status"]
+    momentum_scaling = kwargs.get("momentum_scaling", 1.0)
+    vertex_scaling = kwargs.get("vertex_scaling", 1.0)
 
-    import numpy as np
+    global _hepevt_buffer
+    n = pid.shape[0]
+    if n > _hepevt_buffer.max_size:
+        raise ValueError(
+            ('Number of particles in event (%i) exceeds HepMC3 buffer size (%i).\n'
+             'Change the line `define_macros={"HEPMC3_HEPEVT_NMXHEP": 50000}` in setup.py\n'
+             'to a larger value and (re)compile pyhepmc_ng from scratch.') %
+             (n, _hepevt_buffer.max_size))
+    _hepevt_buffer.event_number = event_number
+    _hepevt_buffer.nentries = n
+    _hepevt_buffer.pm()[:n, :4] = p / momentum_scaling
+    _hepevt_buffer.pm()[:n, 4] = m / momentum_scaling
+    _hepevt_buffer.v()[:n] = v / vertex_scaling
+    _hepevt_buffer.pid()[:n] = pid
+    _hepevt_buffer.parents()[:n] = parents
+    _hepevt_buffer.children()[:n] = children
+    _hepevt_buffer.status()[:n] = status
 
-    status = np.asarray(h.status)[:n]
-    pm = np.asarray(h.pm)
-
-    if hep_status_decoder is None:
-        particle_status = status
-        vertex_status = np.zeros_like(status)
-    else:
-        particle_status, vertex_status = hep_status_decoder(status)
-
-    fill_genevent_from_hepevt(evt,
-                              event_number,
-                              pm[:n,:4],
-                              pm[:n,4],
-                              h.v[:n],
-                              h.pid[:n],
-                              h.parents[:n],
-                              h.children[:n],
-                              particle_status,
-                              vertex_status,
-                              momentum_unit,
-                              length_unit)
-    return evt
+    evt.clear()
+    _hepevt_buffer.to_genevent(evt)
