@@ -1,9 +1,11 @@
 import pytest
 import pyhepmc_ng as hep
 import numpy as np
+import os
 
 
-def prepare_event():
+@pytest.fixture()
+def evt():
     #
     # In this example we will place the following event into HepMC "by hand"
     #
@@ -28,6 +30,10 @@ def prepare_event():
     #   /            p6                                #
     # p2                                               #
     #                                                  #
+
+    #
+    # Finally, the event gets a weight.
+    #
     evt = hep.GenEvent(hep.Units.GEV, hep.Units.MM)
     evt.event_number = 1
 
@@ -84,6 +90,10 @@ def prepare_event():
     v4.add_particle_out(p8)
     evt.add_vertex(v4)
 
+    evt.weights = [1.0]
+    evt.run_info = hep.GenRunInfo()
+    evt.run_info.weight_names = ["0"]
+
     return evt
 
 
@@ -112,8 +122,7 @@ def prepare_hepevt(evt):
     return h
 
 
-def test_hepevt():
-    evt = prepare_event()
+def test_hepevt(evt):
     particles = evt.particles
 
     h = prepare_hepevt(evt)
@@ -167,112 +176,24 @@ def test_sequence_access():
     assert repr(evt) == "GenEvent(momentum_unit=1, length_unit=0, event_number=0, particles=[GenParticle(FourVector(1, 2, 3, 4), status=0, id=1, production_vertex=0, end_vertex=-1)], vertices=[GenVertex(FourVector(1, 2, 3, 4), status=0, id=-1, particles_in=[], particles_out=[])], run_info=None)"
 
 
-def test_read_write_stream():
-    evt1 = prepare_event()
-
-    oss = hep.stringstream()
-    with hep.WriterAscii(oss) as f:
-        f.write_event(evt1)
-
-    assert str(oss) == """HepMC::Version 3.01.01
-HepMC::Asciiv3-START_EVENT_LISTING
-E 1 4 8
-U GEV MM
-P 1 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 7.0000000000000000e+03 7.0000000000000000e+03 9.3799999999999994e-01 1
-P 2 0 2212 0.0000000000000000e+00 0.0000000000000000e+00 -7.0000000000000000e+03 7.0000000000000000e+03 9.3799999999999994e-01 2
-V -1 0 [1] @ 1.0000000000000000e+00 1.0000000000000000e+00 1.0000000000000000e+00 1.0000000000000000e+00
-P 3 -1 1 7.5000000000000000e-01 -1.5690000000000000e+00 3.2191000000000003e+01 3.2238000000000000e+01 0.0000000000000000e+00 3
-V -2 0 [2] @ 2.0000000000000000e+00 2.0000000000000000e+00 2.0000000000000000e+00 2.0000000000000000e+00
-P 4 -2 -2 -3.0470000000000002e+00 -1.9000000000000000e+01 -5.4628999999999998e+01 5.7920000000000002e+01 0.0000000000000000e+00 4
-V -3 0 [3,4] @ 3.0000000000000000e+00 3.0000000000000000e+00 3.0000000000000000e+00 3.0000000000000000e+00
-P 5 -3 -24 1.5169999999999999e+00 -2.0680000000000000e+01 -2.0605000000000000e+01 8.5924999999999997e+01 8.0799000000000007e+01 5
-P 6 -3 22 -3.8130000000000002e+00 1.1300000000000000e-01 -1.8330000000000000e+00 4.2329999999999997e+00 0.0000000000000000e+00 6
-V -4 0 [5] @ 4.0000000000000000e+00 4.0000000000000000e+00 4.0000000000000000e+00 4.0000000000000000e+00
-P 7 -4 1 -2.4449999999999998e+00 2.8815999999999999e+01 6.0819999999999999e+00 2.9552000000000000e+01 1.0000000000000000e-02 7
-P 8 -4 -2 3.9620000000000002e+00 -4.9497999999999998e+01 -2.6687000000000001e+01 5.6372999999999998e+01 6.0000000000000001e-03 8
-HepMC::Asciiv3-END_EVENT_LISTING
-
-"""
-
-    evt2 = hep.GenEvent()
-    assert evt1 != evt2
-    with hep.ReaderAscii(oss) as f:
-        f.read_event(evt2)
-
-    assert evt1.event_number == evt2.event_number
-    assert evt1.momentum_unit == evt2.momentum_unit
-    assert evt1.length_unit == evt2.length_unit
-    assert evt1.particles == evt2.particles
-    assert evt1.vertices == evt2.vertices
-    assert evt1 == evt2
+def test_weights():
+    evt = hep.GenEvent()
+    assert evt.weights == []
+    with pytest.raises(RuntimeError, match=".*requires the event to have a GenRunInfo"):
+        evt.weight_names
+    evt.run_info = hep.GenRunInfo()
+    evt.run_info.weight_names = ["a", "b"]
+    evt.weights = [2, 3]
+    assert evt.weight(1) == 3
+    assert evt.weight("a") == 2
+    with pytest.raises(IndexError):
+        evt.weight(2)
+    with pytest.raises(RuntimeError, match="no weight with given name"):
+        evt.set_weight("c", 4)
 
 
-def test_pythonic_read_write():
-    evt1 = prepare_event()
-
-    oss = hep.stringstream()
-    with hep.WriterAscii(oss) as f:
-        f.write(evt1)
-
-    with hep.ReaderAscii(oss) as f:
-        for i, evt2 in enumerate(f):
-            assert i == 0
-            assert evt1.particles == evt2.particles
-            assert evt1.vertices == evt2.vertices
-            assert evt1 == evt2
-
-
-def test_failed_read_file():
-    with hep.ReaderAscii("test_failed_read_file.dat") as f:
-        assert f.read() is None
-
-
-def test_read_empty_stream():
-    oss = hep.stringstream()
-    with hep.ReaderAscii(oss) as f:
-        evt = hep.GenEvent()
-        ok = f.read_event(evt)
-        assert ok == True # reading empty stream is ok in HepMC
-
-
-def test_read_write_file():
-    evt1 = prepare_event()
-
-    with hep.WriterAscii("test_read_write_file.dat") as f:
-        f.write_event(evt1)
-
-    evt2 = hep.GenEvent()
-    assert evt1 != evt2
-    with hep.ReaderAscii("test_read_write_file.dat") as f:
-        ok = f.read_event(evt2)
-        assert ok
-
-    assert evt1.particles == evt2.particles
-    assert evt1.vertices == evt2.vertices
-    assert evt1 == evt2
-
-    import os
-    os.unlink("test_read_write_file.dat")
-
-
-def test_open():
-    evt1 = prepare_event()
-
-    with hep.WriterAscii("test_read_write_file.dat") as f:
-        f.write_event(evt1)
-
-    with hep.open("test_read_write_file.dat") as f:
-        evt2 = f.read()
-        assert evt1 == evt2
-
-    import os
-    os.unlink("test_read_write_file.dat")
-
-
-
-def test_fill_genevent_from_hepevt():
-    evt1 = prepare_event()
-    h = prepare_hepevt(evt1)
+def test_fill_genevent_from_hepevt(evt):
+    h = prepare_hepevt(evt)
     evt2 = hep.GenEvent()
     hep.fill_genevent_from_hepevt(evt2,
                                   h.event_number,
@@ -285,16 +206,15 @@ def test_fill_genevent_from_hepevt():
                                   h.status(),             # particle status
                                   np.zeros_like(h.pid()), # vertex status
                                   2, 5)
-    assert evt1.particles == evt2.particles
-    assert evt1.vertices == evt2.vertices
-    assert evt1 == evt2
+    # hepevt has no run_info, so we add it articially
+    evt2.run_info = evt.run_info
+    assert evt == evt2
 
 
-def test_fill_genevent_from_hepevt_ptr():
-    evt1 = prepare_event()
-    h = prepare_hepevt(evt1)
+def test_fill_genevent_from_hepevt_ptr(evt):
+    h = prepare_hepevt(evt)
     evt2 = hep.GenEvent()
     hep.fill_genevent_from_hepevent_ptr(evt2, h.ptr, h.max_size)
-    assert evt1.particles == evt2.particles
-    assert evt1.vertices == evt2.vertices
-    assert evt1 == evt2
+    # hepevt has no run_info, so we add it articially
+    evt2.run_info = evt.run_info
+    assert evt == evt2

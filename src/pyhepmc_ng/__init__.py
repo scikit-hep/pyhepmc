@@ -3,8 +3,12 @@ from ._io import _enter, _exit, _iter, _read
 from ._version import version as __version__
 import ctypes
 
-original_open = open
 
+# save original open because it is overwritten
+builtin_open = open
+
+
+# add pythonic interface to IO classes
 ReaderAscii.__enter__ = _enter
 ReaderAscii.__exit__ = _exit
 ReaderAscii.__iter__ = _iter
@@ -20,6 +24,11 @@ ReaderLHEF.__exit__ = _exit
 ReaderLHEF.__iter__ = _iter
 ReaderLHEF.read = _read
 
+ReaderHEPEVT.__enter__ = _enter
+ReaderHEPEVT.__exit__ = _exit
+ReaderHEPEVT.__iter__ = _iter
+ReaderHEPEVT.read = _read
+
 WriterAscii.__enter__ = _enter
 WriterAscii.__exit__ = _exit
 WriterAscii.write = WriterAscii.write_event
@@ -33,6 +42,7 @@ WriterHEPEVT.__exit__ = _exit
 WriterHEPEVT.write = WriterHEPEVT.write_event
 
 
+# pythonic wrapper for AsciiWriter, to be used by `open`
 class WrappedAsciiWriter:
 
     def __init__(self, filename, precision=None):
@@ -60,13 +70,13 @@ class WrappedAsciiWriter:
     def close(self):
         self._writer.close()
 
-WrappedAsciiWriter.__enter__ = _enter
-WrappedAsciiWriter.__exit__ = _exit
+    __enter__ = _enter
+    __exit__ = _exit
 
 
 def open(filename, mode="r", precision=None):
     if mode == "r":
-        with original_open(filename, "r") as f:
+        with builtin_open(filename, "r") as f:
             header = f.read(256)
         if "HepMC::Asciiv3" in header:
             return ReaderAscii(filename)
@@ -74,8 +84,7 @@ def open(filename, mode="r", precision=None):
             return ReaderAsciiHepMC2(filename)
         if "<LesHouchesEvents" in header:
             return ReaderLHEF(filename)
-        else:
-            raise IOError("file format not recognized")
+        return ReaderHEPEVT(filename)
 
     elif mode == "w":
         return WrappedAsciiWriter(filename, precision)

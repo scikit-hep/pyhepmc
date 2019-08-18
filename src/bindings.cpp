@@ -58,8 +58,9 @@ bool is_close(const FourVector& a, const FourVector& b,
         is_close(a.t(), b.t());
 }
 
+// compares all real qualities of two particles, but ignores the .id() field
 bool operator==(const GenParticle& a, const GenParticle& b) {
-    return a.id() == b.id() && a.pid() == b.pid() &&
+    return a.pid() == b.pid() &&
         a.status() == b.status() && is_close(a.momentum(), b.momentum());
 }
 
@@ -67,22 +68,50 @@ bool operator!=(const GenParticle& a, const GenParticle& b) {
   return !operator==(a, b);
 }
 
+// compares all real qualities of both particle sets,
+// but ignores the .id() fields and the particle order
+bool equal_particle_set(const std::vector<ConstGenParticlePtr>& a,
+                        const std::vector<ConstGenParticlePtr>& b) {
+  if (a.size() != b.size())
+    return false;
+  auto unmatched = b;
+  for (auto&& ai : a) {
+    auto it = std::find_if(unmatched.begin(), unmatched.end(),
+      [ai](ConstGenParticlePtr x) { return *ai == *x; });
+    if (it == unmatched.end())
+      return false;
+    unmatched.erase(it);
+  }
+  return unmatched.empty();
+}
+
+// compares all real qualities of two vertices, but ignores the .id() field
 bool operator==(const GenVertex& a, const GenVertex& b) {
-    auto equal_id = [](ConstGenParticlePtr a,
-                       ConstGenParticlePtr b) { return a->id() == b->id(); };
-    return a.id() == b.id() && a.status() == b.status() &&
+    return a.status() == b.status() &&
         is_close(a.position(), b.position()) &&
-        a.particles_in().size() == b.particles_in().size() &&
-        a.particles_out().size() == b.particles_out().size() &&
-        std::equal(a.particles_in().begin(), a.particles_in().end(),
-                   b.particles_in().begin(), equal_id) &&
-        std::equal(a.particles_out().begin(), a.particles_out().end(),
-                   b.particles_out().begin(),
-                   equal_id);
+        equal_particle_set(a.particles_in(), b.particles_in()) &&
+        equal_particle_set(a.particles_out(), b.particles_out());
 }
 
 bool operator!=(const GenVertex& a, const GenVertex& b) {
   return !operator==(a, b);
+}
+
+// compares all real qualities of both vertex sets,
+// but ignores the .id() fields and the vertex order
+bool equal_vertex_set(const std::vector<ConstGenVertexPtr>& a,
+                      const std::vector<ConstGenVertexPtr>& b) {
+  if (a.size() != b.size())
+    return false;
+  auto unmatched = b;
+  for (auto&& ai : a) {
+    auto it = std::find_if(unmatched.begin(), unmatched.end(),
+      [ai](ConstGenVertexPtr x) { return *ai == *x; });
+    if (it == unmatched.end())
+      return false;
+    unmatched.erase(it);
+  }
+  return unmatched.empty();
 }
 
 bool operator==(const GenRunInfo::ToolInfo& a,
@@ -143,20 +172,8 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
         return false;
     }
 
-    const auto& ap = a.particles();
-    const auto& bp = b.particles();
-    const auto& av = a.vertices();
-    const auto& bv = b.vertices();
-
-    return ap.size() == bp.size() && av.size() == bv.size() &&
-    std::equal(ap.begin(), ap.end(), bp.begin(),
-      [](decltype(*ap.begin()) a, decltype(*bp.begin()) b) {
-        return *a == *b;
-      }) &&
-    std::equal(av.begin(), av.end(), bv.begin(),
-      [](decltype(*av.begin()) a, decltype(*bv.begin()) b) {
-        return *a == *b;
-      });
+    // if all vertices compare equal, then also all particles are equal
+    return equal_vertex_set(a.vertices(), b.vertices());
 }
 
 bool operator!=(const GenEvent& a, const GenEvent& b) {
@@ -407,11 +424,12 @@ PYBIND11_MODULE(_bindings, m) {
     clsGenRunInfo
         .def(py::init<>())
         .def_property("tools",
-                (std::vector<GenRunInfo::ToolInfo>&(GenRunInfo::*)()) &GenRunInfo::tools,
-                [](GenRunInfo& self, py::sequence seq) {
-                    self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
-                }
-            )
+            overload_cast<std::vector<GenRunInfo::ToolInfo>&, GenRunInfo>(
+              &GenRunInfo::tools),
+            [](GenRunInfo& self, py::sequence seq) {
+                self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
+            }
+          )
         PROP(weight_names, GenRunInfo)
         PROP_RO(attributes, GenRunInfo)
         .def("__repr__", [](const GenRunInfo& self) {
@@ -470,7 +488,7 @@ PYBIND11_MODULE(_bindings, m) {
         PROP_RO_OL(particles, GenEvent, const std::vector<ConstGenParticlePtr>&)
         PROP_RO_OL(vertices, GenEvent, const std::vector<ConstGenVertexPtr>&)
         .def_property("weights",
-          (std::vector<double>& (GenEvent::*)())&GenEvent::weights,
+          overload_cast<std::vector<double>&, GenEvent>(&GenEvent::weights),
           [](GenEvent& x, py::sequence seq) {
             std::vector<double> w;
             w.reserve(py::len(seq));
@@ -479,19 +497,30 @@ PYBIND11_MODULE(_bindings, m) {
             x.weights() = w;
           }
         )
+        .def("weight",
+          overload_cast<double, const GenEvent, const size_t&>(&GenEvent::weight),
+          "index"_a = 0)
+        .def("weight",
+          overload_cast<double, const GenEvent, const std::string&>(&GenEvent::weight),
+          "name"_a)
+        .def("set_weight",
+          [](GenEvent& self, const std::string& name, double v) { self.weight(name) = v; },
+          "name"_a, "value"_a)
+        .def_property_readonly("weight_names",
+          [](const GenEvent& self) { return self.weight_names(std::string()); })
         PROP(run_info, GenEvent)
         PROP(event_number, GenEvent)
         PROP_RO(momentum_unit, GenEvent)
         PROP_RO(length_unit, GenEvent)
         METH(set_units, GenEvent)
         .def_property("heavy_ion",
-          (GenHeavyIonPtr (GenEvent::*)()) &GenEvent::heavy_ion,
+          overload_cast<GenHeavyIonPtr, GenEvent>(&GenEvent::heavy_ion),
           &GenEvent::set_heavy_ion)
         .def_property("pdf_info",
-          (HepMC3::GenPdfInfoPtr (GenEvent::*)()) &GenEvent::pdf_info,
+          overload_cast<GenPdfInfoPtr, GenEvent>(&GenEvent::pdf_info),
           &GenEvent::set_pdf_info)
         .def_property("cross_section",
-          (HepMC3::GenCrossSectionPtr (GenEvent::*)()) &GenEvent::cross_section,
+          overload_cast<GenCrossSectionPtr, GenEvent>(&GenEvent::cross_section),
           &GenEvent::set_cross_section)
         METH(event_pos, GenEvent)
         PROP_RO_OL(beams, GenEvent, std::vector<ConstGenParticlePtr>)
