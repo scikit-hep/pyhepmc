@@ -132,7 +132,8 @@ setup(
                 'extern/HepMC3/include',
                 'extern/pybind11/include',
             ],
-            language='c++')
+            define_macros=[("HEPMC3_HEPEVT_NMXHEP", 10000)], # increase this if necessary
+            language='c++',)
     ],
     zip_safe=False,
 )

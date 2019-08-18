@@ -19,6 +19,7 @@ _T overload_cast(_T x) {
 
 #define FUNC(name) m.def(#name, name)
 #define PROP_RO(name, cls) .def_property_readonly(#name, &cls::name)
+#define PROP_ROS(name, cls) .def_property_readonly_static(#name, &cls::name)
 #define PROP_RO_OL(name, cls, rval) .def_property_readonly(#name, overload_cast<rval, const cls>(&cls::name))
 #define PROP(name, cls) .def_property(#name, &cls::name, &cls::set_##name)
 #define PROP_OL(name, cls, rval) .def_property(#name, overload_cast<rval, const cls> (&cls::name), &cls::set_##name)

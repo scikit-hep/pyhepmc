@@ -1,28 +1,29 @@
 #ifndef PYHEPMC_NG_HEPEVT_WRAPPER_H
 #define PYHEPMC_NG_HEPEVT_WRAPPER_H
 
-#include <pybind11/pybind11.h>
+#include "pybind.h"
 #include <pybind11/numpy.h>
 #include "HepMC3/FourVector.h"
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/GenVertex.h"
+#include "HepMC3/HEPEVT_Wrapper.h"
 #include <map>
 #include <utility>
 
-template <typename RealType>
+// alternative conversion from HEPEVT to GenEvent, UNUSED
 bool fill_genevent_from_hepevt(HepMC3::GenEvent& evt,
                                int event_number,
-                               pybind11::array_t<RealType> p_array, // N x 4
-                               pybind11::array_t<RealType> m_array, // N
-                               pybind11::array_t<RealType> v_array, // N x 4
+                               pybind11::array_t<HEPMC3_HEPEVT_PRECISION> p_array, // N x 4
+                               pybind11::array_t<HEPMC3_HEPEVT_PRECISION> m_array, // N
+                               pybind11::array_t<HEPMC3_HEPEVT_PRECISION> v_array, // N x 4
                                pybind11::array_t<int> pid_array,    // N
                                pybind11::array_t<int> parents_array, // N x 2
                                pybind11::array_t<int> /* children_array */, // N x 2, not used
                                pybind11::array_t<int> particle_status_array, // N
                                pybind11::array_t<int> vertex_status_array, // N
-                               RealType momentum_scaling,
-                               RealType length_scaling) {
+                               HEPMC3_HEPEVT_PRECISION momentum_scaling,
+                               HEPMC3_HEPEVT_PRECISION length_scaling) {
     using namespace HepMC3;
     namespace py = pybind11;
 
@@ -98,7 +99,7 @@ bool fill_genevent_from_hepevt(HepMC3::GenEvent& evt,
               v->add_particle_in(evt.particles()[j]);
             v->set_status(vsta(i));
             evt.add_vertex(v);
-            vi = vertex_map.insert(std::make_pair(parents, v)).first;
+            vi = vertex_map.emplace(parents, v).first;
         }
         vi->second->add_particle_out(evt.particles()[i]);
     }
