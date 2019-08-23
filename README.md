@@ -43,10 +43,6 @@ where appropriate.
 pyhepmc-ng currently has no separate documentation, but it mirrors the C++ interface of the HepMC3 library, which is documented here: http://hepmc.web.cern.ch/hepmc.
 <!-- end of description -->
 
-## Documentation
-
-pyhepmc-ng currently has no separate documentation, but it mirrors the C++ interface of the HepMC3 library, which is documented here: http://hepmc.web.cern.ch/hepmc.
-
 ## For developers
 
 ### Repository management
