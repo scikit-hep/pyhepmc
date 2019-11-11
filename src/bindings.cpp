@@ -498,7 +498,7 @@ PYBIND11_MODULE(_bindings, m) {
           }
         )
         .def("weight",
-          overload_cast<double, const GenEvent, const size_t&>(&GenEvent::weight),
+          overload_cast<double, const GenEvent, const const unsigned long&>(&GenEvent::weight),
           "index"_a = 0)
         .def("weight",
           overload_cast<double, const GenEvent, const std::string&>(&GenEvent::weight),
