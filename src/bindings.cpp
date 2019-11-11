@@ -507,7 +507,7 @@ PYBIND11_MODULE(_bindings, m) {
           [](GenEvent& self, const std::string& name, double v) { self.weight(name) = v; },
           "name"_a, "value"_a)
         .def_property_readonly("weight_names",
-          [](const GenEvent& self) { return self.weight_names(std::string()); })
+          [](const GenEvent& self) { return self.weight_names(); })
         PROP(run_info, GenEvent)
         PROP(event_number, GenEvent)
         PROP_RO(momentum_unit, GenEvent)
