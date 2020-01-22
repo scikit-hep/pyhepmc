@@ -5,14 +5,14 @@ A Python wrapper for the HepMC3 C++ library.
 
 [![PyPI version](https://badge.fury.io/py/pyhepmc-ng.svg)](https://badge.fury.io/py/pyhepmc-ng)
 [![Build Status](https://travis-ci.org/scikit-hep/pyhepmc.svg?branch=master)](https://travis-ci.org/scikit-hep/pyhepmc)
+[![Build Status](https://dev.azure.com/afedynitch/EventGenerators/_apis/build/status/afedynitch.pyhepmc?branchName=master)](https://dev.azure.com/afedynitch/EventGenerators/_build/latest?definitionId=5&branchName=master)
 
 <!-- begin of description -->
 Another wrapper is [pyhepmc](https://pypi.org/project/pyhepmc/). Why should you use this one?
 
 **pyhepmc-ng is easy to install**
 
-The command `pip install pyhepmc-ng` just works! You only need a compiler that
-supports C++11, everything else is handled by pip.
+The command `pip install pyhepmc-ng` should work on all Python versions > 2.7 and all common architectures.
 
 Under the hood, the bindings are build with the excellent
 [pybind11](http://pybind11.readthedocs.io/en/stable/) library. External installations of pybind11 or HepMC3 are not required, pyhepmc-ng includes the lightweight source code of both libraries with the submodule feature of `git`.
