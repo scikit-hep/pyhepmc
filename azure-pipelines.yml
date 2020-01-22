@@ -1,13 +1,13 @@
 # Azure only builds master, Travis and Appveyor only build develop
-
+# Add branch names that can will trigger building wheels
 trigger:
-  - master
+  - binary_wheels_azure
 
 pr:
   - master
 
 variables:
-  package_name: MCEq
+  package_name: pyhepmc_ng
   many_linux_base: quay.io/pypa/manylinux1_
 
 jobs:
@@ -93,5 +93,5 @@ jobs:
   steps:
     - template: .ci/azure-setup.yml
     - template: .ci/azure-steps.yml
-    # - template: .ci/azure-tests.yml
+    - template: .ci/azure-tests.yml
     - template: .ci/azure-publish-dist.yml
