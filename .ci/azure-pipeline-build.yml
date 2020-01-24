@@ -13,15 +13,14 @@ trigger:
     include:
       - 'refs/tags/*'
 
-pr: none
+pr: 
+  - master
 
 # For a master-develop workflow:
 # pr:
 #   - master
 # trigger:
 #   - master
-
-
 
 # You must set the package name here. Optionally change the other variables.
 variables:
