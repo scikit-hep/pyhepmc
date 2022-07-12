@@ -130,9 +130,6 @@ def pyhepmc_open(filename, mode="r", precision=None):
     raise ValueError("mode must be r or w")
 
 
-_hepevt_buffer = HEPEVT()
-
-
 def fill_genevent_from_hepevt(evt, **kwargs):
     """
     Fills GenEvent from HEPEVT data.
@@ -180,27 +177,26 @@ def fill_genevent_from_hepevt(evt, **kwargs):
     momentum_scaling = kwargs.get("momentum_scaling", 1.0)
     vertex_scaling = kwargs.get("vertex_scaling", 1.0)
 
-    global _hepevt_buffer
+    hepevt = HEPEVT()
     n = pid.shape[0]
-    if n > _hepevt_buffer.max_size:
+    if n > hepevt.max_size:
         raise ValueError(
             (
-                "Number of particles in event (%i) exceeds HepMC3 buffer size (%i).\n"
+                f"Number of particles in event ({n}) exceeds HepMC3 buffer size "
+                f"({hepevt.max_size}).\n"
                 'Change the line `define_macros={"HEPMC3_HEPEVT_NMXHEP": 50000}`'
                 " in setup.py\n"
                 "to a larger value and (re)compile pyhepmc from scratch."
             )
-            % (n, _hepevt_buffer.max_size)
         )
-    _hepevt_buffer.event_number = event_number
-    _hepevt_buffer.nentries = n
-    _hepevt_buffer.pm()[:n, :4] = p / momentum_scaling
-    _hepevt_buffer.pm()[:n, 4] = m / momentum_scaling
-    _hepevt_buffer.v()[:n] = v / vertex_scaling
-    _hepevt_buffer.pid()[:n] = pid
-    _hepevt_buffer.parents()[:n] = parents
-    _hepevt_buffer.children()[:n] = children
-    _hepevt_buffer.status()[:n] = status
-
+    hepevt.event_number = event_number
+    hepevt.nentries = n
+    hepevt.pm()[:n, :4] = p / momentum_scaling
+    hepevt.pm()[:n, 4] = m / momentum_scaling
+    hepevt.v()[:n] = v / vertex_scaling
+    hepevt.pid()[:n] = pid
+    hepevt.parents()[:n] = parents
+    hepevt.children()[:n] = children
+    hepevt.status()[:n] = status
     evt.clear()
-    _hepevt_buffer.to_genevent(evt)
+    hepevt.to_genevent(evt)

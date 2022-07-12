@@ -9,6 +9,8 @@ try:
         WriterAscii,
         WriterAsciiHepMC2,
         WriterHEPEVT,
+        fill_genevent_from_hepevt,
+        pyhepmc_open as open,
     )
 except ImportError:  # pragma: no cover
     pass  # pragma: no cover

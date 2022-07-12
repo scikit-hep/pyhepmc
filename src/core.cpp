@@ -21,7 +21,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "hepevt_wrapper.h"
+// #include "hepevt_wrapper.h"
 // #include "GzReaderAscii.h"
 
 void register_io(py::module &m);
@@ -658,6 +658,8 @@ PYBIND11_MODULE(_core, m) {
            })
       .def_property_readonly(
           "ptr", [](const HEPEVT &self) { return (std::uintptr_t)&self; })
+      .def_property_readonly("object_size",
+                             [](const HEPEVT &self) { return sizeof(HEPEVT); })
       .def_property_readonly_static("max_size",
                                     [](py::object) { return NMXHEP; });
 
