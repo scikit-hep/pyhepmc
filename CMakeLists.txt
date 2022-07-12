@@ -24,6 +24,7 @@ endif()
 set(HEPMC3_ENABLE_ROOTIO OFF CACHE BOOL "" FORCE)
 set(HEPMC3_ENABLE_PYTHON OFF CACHE BOOL "" FORCE)
 set(HEPMC3_BUILD_STATIC_LIBS OFF CACHE BOOL "" FORCE)
+set(HEPMC3_ENABLE_SEARCH OFF CACHE BOOL "" FORCE)
 add_subdirectory(extern/HepMC3)
 
 file(GLOB SOURCES "src/*.cpp")
@@ -32,7 +33,7 @@ pybind11_add_module(_core MODULE ${SOURCES})
 target_link_libraries(_core PRIVATE HepMC3)
 
 if(MSVC)
-  # target_compile_options(_core PRIVATE)
+  target_compile_options(_core PRIVATE /bigobj)
 else()
   # ignore warnings raised by HepMC3 code
   target_compile_options(_core PRIVATE
