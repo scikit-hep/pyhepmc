@@ -2,7 +2,7 @@ name: Wheels
 
 on:
   release:
-    - published
+    types: [published]
   workflow_dispatch:
 
 jobs:
