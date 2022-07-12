@@ -12,3 +12,4 @@ tests/__pycache__
 py??
 .ci_bak
 venv
+.coverage

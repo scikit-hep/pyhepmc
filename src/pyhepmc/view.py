@@ -6,10 +6,10 @@ def to_dot(evt, style=None):
     d = Digraph(name="event %i" % evt.event_number)
     # d.graph_attr['rotate'] = '90'
     # d.graph_attr['splines'] = 'line'
-    d.node_attr['shape'] = 'point'
+    d.node_attr["shape"] = "point"
 
     for v in evt.vertices:
-        d.node('%i'%v.id)
+        d.node(f"{v.id}")
 
     # additional nodes for incoming and outgoing particles
     vi = 0
@@ -17,24 +17,21 @@ def to_dot(evt, style=None):
     for p in evt.particles:
         p_db = Particle.from_pdgid(p.pid)
         pname = p_db.name
-        label = '%s\n%.2g GeV'%(pname, p.momentum.e/1e3)
+        label = f"{pname}\n{p.momentum.e / 1e3:.2g} GeV"
         if not p.parents:
-            vid = 'in_%i'%vi
+            vid = f"in_{vi}"
             vi += 1
-            d.node(vid, style='invis')
+            d.node(vid, style="invis")
             assert p.end_vertex
-            d.edge(vid, '%i'%p.end_vertex.id,
-                   label=label)
+            d.edge(vid, f"{p.end_vertex.id}", label=label)
             continue
         if not p.children:
-            vid = 'out_%i'%vo
+            vid = f"out_{vo}"
             vo += 1
-            d.node(vid, style='invis')
+            d.node(vid, style="invis")
             assert p.production_vertex
-            d.edge('%i'%p.production_vertex.id, vid,
-                   label=label)
+            d.edge(f"{p.production_vertex.id}", vid, label=label)
             continue
-        d.edge('%i'%p.production_vertex.id, '%i'%p.end_vertex.id,
-               label=label)
+        d.edge(f"{p.production_vertex.id}", f"{p.end_vertex.id}", label=label)
 
     return d

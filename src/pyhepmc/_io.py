@@ -1,11 +1,51 @@
-from ._bindings import *
-from ._io import _enter, _exit, _iter, _read
-from ._version import version as __version__
-import ctypes
+from ._core import (
+    GenEvent,
+    ReaderAscii,
+    ReaderAsciiHepMC2,
+    ReaderLHEF,
+    ReaderHEPEVT,
+    WriterAscii,
+    WriterAsciiHepMC2,
+    WriterHEPEVT,
+    GenRunInfo,
+    HEPEVT,
+)
 
 
-# save original open because it is overwritten
-builtin_open = open
+class _Iter:
+    def __init__(self, parent):
+        self.parent = parent
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        evt = self.parent.read()
+        if evt is None:
+            raise StopIteration
+        return evt
+
+
+_Iter.next = _Iter.__next__
+
+
+def _enter(self):
+    return self
+
+
+def _exit(self, type, value, tb):
+    self.close()
+    return False
+
+
+def _iter(self):
+    return _Iter(self)
+
+
+def _read(self):
+    evt = GenEvent()
+    ok = self.read_event(evt)
+    return evt if ok and not self.failed() else None
 
 
 # add pythonic interface to IO classes
@@ -44,7 +84,6 @@ WriterHEPEVT.write = WriterHEPEVT.write_event
 
 # pythonic wrapper for AsciiWriter, to be used by `open`
 class WrappedAsciiWriter:
-
     def __init__(self, filename, precision=None):
         self._writer = (filename, precision)
 
@@ -74,9 +113,9 @@ class WrappedAsciiWriter:
     __exit__ = _exit
 
 
-def open(filename, mode="r", precision=None):
+def pyhepmc_open(filename, mode="r", precision=None):
     if mode == "r":
-        with builtin_open(filename, "r") as f:
+        with open(filename, "r") as f:
             header = f.read(256)
         if "HepMC::Asciiv3" in header:
             return ReaderAscii(filename)
@@ -92,6 +131,7 @@ def open(filename, mode="r", precision=None):
 
 
 _hepevt_buffer = HEPEVT()
+
 
 def fill_genevent_from_hepevt(evt, **kwargs):
     """
@@ -122,7 +162,10 @@ def fill_genevent_from_hepevt(evt, **kwargs):
 
     Notes
     -----
-    The current implementation copies the input into an internal buffer. This is not as efficient as possible, but currently the only way to use the HepMC3 C++ code with input data which does not have exactly the memory layout of the HEPEVT struct defined in HepMC3/HEPEVT_Wrapper.h.
+    The current implementation copies the input into an internal buffer.
+    This is not as efficient as possible, but currently the only way to use
+    the HepMC3 C++ code with input data which does not have exactly the
+    memory layout of the HEPEVT struct defined in HepMC3/HEPEVT_Wrapper.h.
 
     Calling this function is not thread-safe.
     """
@@ -141,10 +184,14 @@ def fill_genevent_from_hepevt(evt, **kwargs):
     n = pid.shape[0]
     if n > _hepevt_buffer.max_size:
         raise ValueError(
-            ('Number of particles in event (%i) exceeds HepMC3 buffer size (%i).\n'
-             'Change the line `define_macros={"HEPMC3_HEPEVT_NMXHEP": 50000}` in setup.py\n'
-             'to a larger value and (re)compile pyhepmc_ng from scratch.') %
-             (n, _hepevt_buffer.max_size))
+            (
+                "Number of particles in event (%i) exceeds HepMC3 buffer size (%i).\n"
+                'Change the line `define_macros={"HEPMC3_HEPEVT_NMXHEP": 50000}`'
+                " in setup.py\n"
+                "to a larger value and (re)compile pyhepmc from scratch."
+            )
+            % (n, _hepevt_buffer.max_size)
+        )
     _hepevt_buffer.event_number = event_number
     _hepevt_buffer.nentries = n
     _hepevt_buffer.pm()[:n, :4] = p / momentum_scaling
