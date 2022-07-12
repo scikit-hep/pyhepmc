@@ -1,9 +1,9 @@
 name: Wheels
 
 on:
-  workflow_dispatch:
   release:
     - published
+  workflow_dispatch:
 
 jobs:
   wheels:
