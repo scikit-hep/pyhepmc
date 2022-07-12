@@ -29,6 +29,7 @@ target_include_directories(_core PRIVATE extern/HepMC3/include)
 
 if(MSVC)
   target_compile_options(_core PRIVATE /bigobj)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 else()
   # ignore warnings raised by HepMC3 code
   target_compile_options(_core PRIVATE

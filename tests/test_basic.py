@@ -95,6 +95,21 @@ def evt():
     return evt
 
 
+def test_GenEvent(evt):
+    for i, p in enumerate(evt.particles):
+        assert p.status == i + 1
+
+    p1, p2, p3, p4, *rest = evt.particles
+    assert p1.pid == 2212
+    assert p1.momentum == (0, 0, 7000, 7000)
+    assert p2.pid == 2212
+    assert p2.momentum == (0, 0, -7000, 7000)
+    assert p3.parents == [p1]
+    assert p3.momentum == (0.750, -1.569, 32.191, 32.238)
+    assert p4.parents == [p2]
+    assert p4.momentum == (-3.047, -19.0, -54.629, 57.920)
+
+
 def test_sequence_access():
     evt = hep.GenEvent()
     evt.add_particle(hep.GenParticle())
