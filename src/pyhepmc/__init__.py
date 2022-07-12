@@ -10,4 +10,4 @@ from ._io import (  # noqa
     fill_genevent_from_hepevt,
     pyhepmc_open as open,
 )
-from ._version import __version__  # noqa
+from ._version import version as __version__  # noqa
