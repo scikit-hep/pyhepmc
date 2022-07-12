@@ -497,7 +497,7 @@ PYBIND11_MODULE(_core, m) {
           [](GenEvent &self, const unsigned long i) -> double {
             try {
               return self.weight(i);
-            } catch (std::runtime_error) {
+            } catch (const std::runtime_error &) {
               throw py::index_error();
             }
           },
