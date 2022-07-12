@@ -64,7 +64,7 @@ def test_open(evt):  # noqa
     "writer", (hep.WriterAscii, hep.WriterAsciiHepMC2, hep.WriterHEPEVT)
 )
 def test_open_with_writer(evt, writer):  # noqa
-    filename = "test_open_%s.dat" % writer.__name__
+    filename = f"test_open_{writer.__name__}.dat"
     with writer(filename) as f:
         f.write(evt)
 
