@@ -13,3 +13,4 @@ py??
 .ci_bak
 venv
 .coverage
+htmlcov
