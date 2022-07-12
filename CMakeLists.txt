@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.13...3.17)
-cmake_policy(SET CMP0077 NEW)
 
 project(pyhepmc LANGUAGES CXX)
 
@@ -24,9 +23,9 @@ else()
   add_subdirectory(extern/pybind11)
 endif()
 
-set(HEPMC3_ENABLE_ROOTIO OFF)
-set(HEPMC3_ENABLE_PYTHON OFF)
 add_subdirectory(extern/HepMC3)
+option(HEPMC3_ENABLE_ROOTIO OFF)
+option(HEPMC3_ENABLE_PYTHON OFF)
 
 file(GLOB SOURCES_A "src/*.cpp")
 
