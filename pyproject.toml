@@ -17,7 +17,6 @@ minversion = "6.0"
 addopts = "-q -ra --ff"
 testpaths = ["tests"]
 filterwarnings = [
-    "error::numpy.VisibleDeprecationWarning",
     "error::DeprecationWarning",
 ]
 
