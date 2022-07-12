@@ -23,9 +23,9 @@ else()
   add_subdirectory(extern/pybind11)
 endif()
 
+set(HEPMC3_ENABLE_ROOTIO OFF CACHE BOOL "" FORCE)
+set(HEPMC3_ENABLE_PYTHON OFF CACHE BOOL "" FORCE)
 add_subdirectory(extern/HepMC3)
-option(HEPMC3_ENABLE_ROOTIO OFF)
-option(HEPMC3_ENABLE_PYTHON OFF)
 
 file(GLOB SOURCES_A "src/*.cpp")
 
