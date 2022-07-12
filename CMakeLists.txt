@@ -21,18 +21,20 @@ else()
   add_subdirectory(extern/pybind11)
 endif()
 
-file(GLOB SOURCES_A "src/*.cpp")
-file(GLOB SOURCES_B "extern/HepMC3/src/*.cc")
+file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES2 "extern/HepMC3/src/*.cc")
 
-pybind11_add_module(_core MODULE ${SOURCES_A} ${SOURCES_B})
+pybind11_add_module(_core MODULE ${SOURCES} ${SOURCES2})
 target_include_directories(_core PRIVATE extern/HepMC3/include)
 
 if(MSVC)
-  target_compile_options(_core PRIVATE /bigobj /D _CRT_SECURE_NO_WARNINGS)
+  target_compile_options(_core PRIVATE /bigobj)
 else()
+  # ignore warnings raised by HepMC3 code
   target_compile_options(_core PRIVATE
         -fvisibility=hidden
         -Wall
+        # -Wno-unused-value
         -Wno-self-assign-overloaded
         )
 endif()

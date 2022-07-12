@@ -1,7 +1,5 @@
 import pytest
 import pyhepmc as hep
-import numpy as np
-import re
 
 
 @pytest.fixture()
@@ -95,92 +93,6 @@ def evt():
     evt.run_info.weight_names = ["0"]
 
     return evt
-
-
-def test_hepevt(evt):
-    h = hep.HEPEVT()
-    h.from_genevent(evt)
-    evt2 = hep.GenEvent()
-    assert evt2 != evt
-    h.to_genevent(evt2)
-
-    # hepevt has no run_info, so we add it articially
-    evt2.run_info = evt.run_info
-    assert evt == evt2
-
-
-def test_hepevt_str(evt):
-    h = hep.HEPEVT()
-    h.from_genevent(evt)
-    s = str(h)
-    # order of particles differs from platform to platform
-    assert s.startswith(
-        """ Event No.: 1
-  Nr   Type   Parent(s)  Daughter(s)      Px       Py       Pz       E    Inv. M.
-"""
-    )
-
-    def se(m):
-        m = re.search(f"([1-9]) *{m}", s)
-        assert m
-        return m.group(1)
-
-    i1 = se("2212   0 -    0     0 -    0     0.00     0.00  7000.00  7000.00     0.94")
-    i2 = se("2212   0 -    0     0 -    0     0.00     0.00 -7000.00  7000.00     0.94")
-    i3 = se(
-        f"-2   {i2} -    {i2}     0 -    0    -3.05   -19.00   -54.63    57.92     0.00"
-    )
-    i4 = se(
-        f"1   {i1} -    {i1}     0 -    0     0.75    -1.57    32.19    32.24     0.00"
-    )
-    i5 = se(
-        f"-24   {i3} -    {i4}     0 -    0     1.52   -20.68   -20.61    85.92    80.80"
-    )
-    se(f"-2   {i5} -    {i5}     0 -    0     3.96   -49.50   -26.69    56.37     0.01")
-    se(f"1   {i5} -    {i5}     0 -    0    -2.44    28.82     6.08    29.55     0.01")
-    se(f"22   {i3} -    {i4}     0 -    0    -3.81     0.11    -1.83     4.23     0.00")
-
-
-def test_fill_genevent_from_hepevt(evt):
-    h = hep.HEPEVT()
-    h.from_genevent(evt)
-    evt2 = hep.GenEvent()
-    hep.fill_genevent_from_hepevt(
-        evt2,
-        event_number=h.event_number,
-        status=h.status(),
-        pid=h.pid(),
-        p=h.pm()[:, :4] * 2,
-        m=h.pm()[:, 4] * 2,
-        v=h.v() * 5,
-        parents=h.parents(),
-        momentum_scaling=2,
-        vertex_scaling=5,
-    )
-    # hepevt has no run_info, so we add it articially
-    evt2.run_info = evt.run_info
-    assert len(evt2.particles) == len(evt.particles)
-    # assert evt2.particles == evt.particles
-    assert evt == evt2
-
-    with pytest.raises(ValueError, match="exceeds HepMC3 buffer size"):
-        n = h.max_size + 1
-        x = np.zeros(n, dtype=int)
-        p = np.zeros((n, 2))
-        v = np.zeros((n, 4), dtype=float)
-        hep.fill_genevent_from_hepevt(
-            evt2,
-            event_number=h.event_number,
-            status=x,
-            pid=x,
-            p=v,
-            m=v[:, 0],
-            v=v,
-            parents=p,
-        )
-
-    with pytest.raises(KeyError):
-        hep.fill_genevent_from_hepevt(evt2)
 
 
 def test_sequence_access():

@@ -1,4 +1,3 @@
-#include "hepevt_wrapper.h" // patched version of HEPEVT_wrapper.h
 #include "pybind.h"
 
 #include "HepMC3/FourVector.h"
@@ -602,72 +601,6 @@ PYBIND11_MODULE(_core, m) {
 
   // py::class_<GenParticleData>(m, "GenParticleData");
   // py::class_<GenVertexData>(m, "GenVertexData");
-
-  // this class is here to allow unit testing of HEPEVT converters
-  py::class_<HEPEVT>(m, "HEPEVT")
-      .def(py::init<>())
-      .def_readwrite("event_number", &HEPEVT::nevhep)
-      .def_readwrite("nentries", &HEPEVT::nhep)
-      .def("status",
-           [](py::object self) {
-             auto &evt = py::cast<HEPEVT &>(self);
-             return py::array_t<int>(evt.nhep, evt.isthep, self);
-           })
-      .def("pid",
-           [](py::object self) {
-             auto &evt = py::cast<HEPEVT &>(self);
-             return py::array_t<int>(evt.nhep, evt.idhep, self);
-           })
-      .def("parents",
-           [](py::object self) {
-             auto &evt = py::cast<HEPEVT &>(self);
-             return py::array_t<int>({evt.nhep, 2}, &evt.jmohep[0][0], self);
-           })
-      .def("children",
-           [](py::object self) {
-             auto &evt = py::cast<HEPEVT &>(self);
-             return py::array_t<int>({evt.nhep, 2}, &evt.jdahep[0][0], self);
-           })
-      .def("pm",
-           [](py::object self) {
-             auto &evt = py::cast<HEPEVT &>(self);
-             return py::array_t<momentum_t>({evt.nhep, 5}, &evt.phep[0][0],
-                                            self);
-           })
-      .def("v",
-           [](py::object self) {
-             auto &evt = py::cast<HEPEVT &>(self);
-             return py::array_t<momentum_t>({evt.nhep, 4}, &evt.vhep[0][0],
-                                            self);
-           })
-      .def("clear",
-           [](HEPEVT &self) {
-             HEPEVT_Wrapper::set_hepevt_address((char *)&self);
-             HEPEVT_Wrapper::zero_everything();
-           })
-      .def("from_genevent",
-           [](HEPEVT &self, const GenEvent &evt) {
-             HEPEVT_Wrapper::set_hepevt_address((char *)&self);
-             HEPEVT_Wrapper::GenEvent_to_HEPEVT(&evt);
-           })
-      .def("to_genevent",
-           [](const HEPEVT &self, GenEvent &evt) {
-             HEPEVT_Wrapper::set_hepevt_address((char *)&self);
-             HEPEVT_Wrapper::HEPEVT_to_GenEvent(&evt);
-           })
-      .def("__str__",
-           [](const HEPEVT &self) {
-             HEPEVT_Wrapper::set_hepevt_address((char *)&self);
-             std::ostringstream os;
-             HEPEVT_Wrapper::print_hepevt(os);
-             return os.str();
-           })
-      .def_property_readonly(
-          "ptr", [](const HEPEVT &self) { return (std::uintptr_t)&self; })
-      .def_property_readonly("object_size",
-                             [](const HEPEVT &self) { return sizeof(HEPEVT); })
-      .def_property_readonly_static("max_size",
-                                    [](py::object) { return NMXHEP; });
 
   m.def("content", [](const GenEvent &event) {
     std::ostringstream os;
