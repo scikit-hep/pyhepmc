@@ -1,12 +1,17 @@
 import pytest
 from test_basic import evt
-view = pytest.importorskip("pyhepmc_ng.view") # depends on graphviz
+
+view = pytest.importorskip("pyhepmc.view")  # depends on graphviz
+
 
 def test_dot(tmpdir, evt):
     import os
+
     os.chdir(str(tmpdir))
     d = view.to_dot(evt)
-    assert str(d) == """digraph "event 1" {
+    assert (
+        str(d)
+        == """digraph "event 1" {
 	node [shape=point]
 	-1
 	-2
@@ -34,4 +39,5 @@ def test_dot(tmpdir, evt):
 	-4 -> out_2 [label="u~
 0.056 GeV"]
 }"""
+    )
     # d.render(view=True)

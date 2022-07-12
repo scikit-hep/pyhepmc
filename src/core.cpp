@@ -293,9 +293,9 @@ PYBIND11_MODULE(_core, m) {
   using namespace HepMC3;
 
   // m.doc() = R"pbdoc(
-  //     _pyhepmc_ng plugin
+  //     _pyhepmc plugin
   //     --------------
-  //     .. currentmodule:: pyhepmc_ng
+  //     .. currentmodule:: pyhepmc
   //     .. autosummary::
   //        :toctree: _generate
   //        Units

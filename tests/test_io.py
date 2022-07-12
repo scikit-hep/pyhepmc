@@ -1,5 +1,5 @@
 import os
-import pyhepmc_ng as hep
+import pyhepmc as hep
 import pytest
 from test_basic import evt
 
@@ -45,7 +45,7 @@ def test_read_empty_stream():
     with hep.ReaderAscii(oss) as f:
         evt = hep.GenEvent()
         ok = f.read_event(evt)
-        assert ok == True # reading empty stream is ok in HepMC
+        assert ok == True  # reading empty stream is ok in HepMC
 
 
 def test_open(evt):
@@ -60,7 +60,9 @@ def test_open(evt):
     os.unlink("test_read_write_file.dat")
 
 
-@pytest.mark.parametrize("writer", (hep.WriterAscii, hep.WriterAsciiHepMC2, hep.WriterHEPEVT))
+@pytest.mark.parametrize(
+    "writer", (hep.WriterAscii, hep.WriterAsciiHepMC2, hep.WriterHEPEVT)
+)
 def test_open_with_writer(evt, writer):
     filename = "test_open_%s.dat" % writer.__name__
     with writer(filename) as f:
