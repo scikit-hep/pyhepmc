@@ -23,6 +23,7 @@ endif()
 
 set(HEPMC3_ENABLE_ROOTIO OFF CACHE BOOL "" FORCE)
 set(HEPMC3_ENABLE_PYTHON OFF CACHE BOOL "" FORCE)
+set(HEPMC3_BUILD_STATIC_LIBS OFF CACHE BOOL "" FORCE)
 add_subdirectory(extern/HepMC3)
 
 file(GLOB SOURCES "src/*.cpp")
@@ -31,19 +32,15 @@ pybind11_add_module(_core MODULE ${SOURCES})
 target_link_libraries(_core PRIVATE HepMC3)
 
 if(MSVC)
-  target_compile_options(_core PRIVATE)
+  # target_compile_options(_core PRIVATE)
 else()
   # ignore warnings raised by HepMC3 code
   target_compile_options(_core PRIVATE
         -fvisibility=hidden
         -Wall
-        -Wno-strict-aliasing
-        -Wno-sign-compare
-        -Wno-reorder
+        # -Wno-unused-value
         -Wno-self-assign-overloaded
-        -Wno-unused-private-field
-        -Wno-unused-value
-  )
+        )
 endif()
 set_target_properties(_core PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 target_compile_definitions(_core PRIVATE HEPMC3_HEPEVT_NMXHEP=10000)
