@@ -1,10 +1,10 @@
 import pytest
-from test_basic import evt
+from test_basic import evt  # noqa
 
 view = pytest.importorskip("pyhepmc.view")  # depends on graphviz
 
 
-def test_dot(tmpdir, evt):
+def test_dot(tmpdir, evt):  # noqa
     import os
 
     os.chdir(str(tmpdir))

@@ -1,10 +1,10 @@
 import os
 import pyhepmc as hep
 import pytest
-from test_basic import evt
+from test_basic import evt  # noqa
 
 
-def test_read_write(evt):
+def test_read_write(evt):  # noqa
     oss = hep.stringstream()
     with hep.WriterAscii(oss) as f:
         f.write_event(evt)
@@ -22,7 +22,7 @@ def test_read_write(evt):
     assert evt == evt2
 
 
-def test_pythonic_read_write(evt):
+def test_pythonic_read_write(evt):  # noqa
     oss = hep.stringstream()
     with hep.WriterAscii(oss) as f:
         f.write(evt)
@@ -40,15 +40,15 @@ def test_failed_read_file():
         assert f.read() is None
 
 
-def test_read_empty_stream():
+def test_read_empty_stream(evt):  # noqa
     oss = hep.stringstream()
     with hep.ReaderAscii(oss) as f:
         evt = hep.GenEvent()
         ok = f.read_event(evt)
-        assert ok == True  # reading empty stream is ok in HepMC
+        assert ok is True  # reading empty stream is ok in HepMC
 
 
-def test_open(evt):
+def test_open(evt):  # noqa
     with hep.open("test_read_write_file.dat", "w") as f:
         f.write(evt)
 
@@ -63,7 +63,7 @@ def test_open(evt):
 @pytest.mark.parametrize(
     "writer", (hep.WriterAscii, hep.WriterAsciiHepMC2, hep.WriterHEPEVT)
 )
-def test_open_with_writer(evt, writer):
+def test_open_with_writer(evt, writer):  # noqa
     filename = "test_open_%s.dat" % writer.__name__
     with writer(filename) as f:
         f.write(evt)
