@@ -9,9 +9,8 @@ def test_dot(tmpdir, evt):
 
     os.chdir(str(tmpdir))
     d = view.to_dot(evt)
-    assert (
-        str(d)
-        == """digraph "event 1" {
+    assert str(d) == (
+        """digraph "event 1" {
 	node [shape=point]
 	-1
 	-2
@@ -38,6 +37,7 @@ def test_dot(tmpdir, evt):
 	out_2 [style=invis]
 	-4 -> out_2 [label="u~
 0.056 GeV"]
-}"""
+}
+"""
     )
     # d.render(view=True)

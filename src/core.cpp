@@ -485,17 +485,23 @@ PYBIND11_MODULE(_core, m) {
       .def_property(
           "weights",
           overload_cast<std::vector<double> &, GenEvent>(&GenEvent::weights),
-          [](GenEvent &x, py::sequence seq) {
+          [](GenEvent &self, py::sequence seq) {
             std::vector<double> w;
             w.reserve(py::len(seq));
             for (auto obj : seq)
               w.push_back(obj.cast<double>());
-            x.weights() = w;
+            self.weights() = w;
           })
-      .def("weight",
-           overload_cast<double, const GenEvent, const unsigned long &>(
-               &GenEvent::weight),
-           "index"_a = 0)
+      .def(
+          "weight",
+          [](GenEvent &self, const unsigned long i) -> double {
+            try {
+              return self.weight(i);
+            } catch (std::runtime_error) {
+              throw py::index_error();
+            }
+          },
+          "index"_a = 0)
       .def("weight",
            overload_cast<double, const GenEvent, const std::string &>(
                &GenEvent::weight),

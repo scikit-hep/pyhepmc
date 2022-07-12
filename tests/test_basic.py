@@ -1,7 +1,6 @@
 import pytest
 import pyhepmc as hep
 import numpy as np
-import os
 
 
 @pytest.fixture()
@@ -10,15 +9,15 @@ def evt():
     # In this example we will place the following event into HepMC "by hand"
     #
     #     name status pdg_id  parent Px       Py    Pz       Energy      Mass
-    #  1  !p+!    3   2212    0,0    0.000    0.000 7000.000 7000.000    0.938
-    #  2  !p+!    3   2212    0,0    0.000    0.000-7000.000 7000.000    0.938
+    #  1  !p+!    1   2212    0,0    0.000    0.000 7000.000 7000.000    0.938
+    #  2  !p+!    2   2212    0,0    0.000    0.000-7000.000 7000.000    0.938
     # =========================================================================
     #  3  !d!     3      1    1,1    0.750   -1.569   32.191   32.238    0.000
-    #  4  !u~!    3     -2    2,2   -3.047  -19.000  -54.629   57.920    0.000
-    #  5  !W-!    3    -24    3,4    1.517   -20.68  -20.605   85.925   80.799
-    #  6  !gamma! 1     22    3,4   -3.813    0.113   -1.833    4.233    0.000
-    #  7  !d!     1      1    5,5   -2.445   28.816    6.082   29.552    0.010
-    #  8  !u~!    1     -2    5,5    3.962  -49.498  -26.687   56.373    0.006
+    #  4  !u~!    4     -2    2,2   -3.047  -19.000  -54.629   57.920    0.000
+    #  5  !W-!    5    -24    3,4    1.517   -20.68  -20.605   85.925   80.799
+    #  6  !gamma! 6     22    3,4   -3.813    0.113   -1.833    4.233    0.000
+    #  7  !d!     7      1    5,5   -2.445   28.816    6.082   29.552    0.010
+    #  8  !u~!    8     -2    5,5    3.962  -49.498  -26.687   56.373    0.006
 
     # now we build the graph, which will looks like
     #                       p7                         #
@@ -98,15 +97,33 @@ def evt():
 
 
 def test_hepevt(evt):
-    particles = evt.particles
     h = hep.HEPEVT()
     h.from_genevent(evt)
     evt2 = hep.GenEvent()
+    assert evt2 != evt
     h.to_genevent(evt2)
 
     # hepevt has no run_info, so we add it articially
     evt2.run_info = evt.run_info
     assert evt == evt2
+
+
+def test_hepevt_str(evt):
+    h = hep.HEPEVT()
+    h.from_genevent(evt)
+    assert str(h) == (
+        """ Event No.: 1
+  Nr   Type   Parent(s)  Daughter(s)      Px       Py       Pz       E    Inv. M.
+    1   2212   0 -    0     0 -    0     0.00     0.00  7000.00  7000.00     0.94
+    2   2212   0 -    0     0 -    0     0.00     0.00 -7000.00  7000.00     0.94
+    3     -2   2 -    2     0 -    0    -3.05   -19.00   -54.63    57.92     0.00
+    4      1   1 -    1     0 -    0     0.75    -1.57    32.19    32.24     0.00
+    5    -24   3 -    4     0 -    0     1.52   -20.68   -20.61    85.92    80.80
+    6     -2   5 -    5     0 -    0     3.96   -49.50   -26.69    56.37     0.01
+    7      1   5 -    5     0 -    0    -2.44    28.82     6.08    29.55     0.01
+    8     22   3 -    4     0 -    0    -3.81     0.11    -1.83     4.23     0.00
+"""
+    )
 
 
 def test_fill_genevent_from_hepevt(evt):
@@ -127,6 +144,8 @@ def test_fill_genevent_from_hepevt(evt):
     )
     # hepevt has no run_info, so we add it articially
     evt2.run_info = evt.run_info
+    assert len(evt2.particles) == len(evt.particles)
+    # assert evt2.particles == evt.particles
     assert evt == evt2
 
     with pytest.raises(ValueError, match="exceeds HepMC3 buffer size"):
@@ -163,9 +182,12 @@ def test_sequence_access():
     assert len(evt.vertices) == 1
     assert evt.vertices[0].id == -1
     assert evt.vertices[0].position == (1, 2, 3, 4)
-    assert (
-        repr(evt)
-        == "GenEvent(momentum_unit=1, length_unit=0, event_number=0, particles=[GenParticle(FourVector(1, 2, 3, 4), status=0, id=1, production_vertex=0, end_vertex=-1)], vertices=[GenVertex(FourVector(1, 2, 3, 4), status=0, id=-1, particles_in=[], particles_out=[])], run_info=None)"
+    assert repr(evt) == (
+        "GenEvent(momentum_unit=1, length_unit=0, event_number=0, "
+        "particles=[GenParticle(FourVector(1, 2, 3, 4), status=0, id=1, "
+        "production_vertex=0, end_vertex=-1)], "
+        "vertices=[GenVertex(FourVector(1, 2, 3, 4), "
+        "status=0, id=-1, particles_in=[], particles_out=[])], run_info=None)"
     )
 
 
