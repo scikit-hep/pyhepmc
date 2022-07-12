@@ -10,5 +10,9 @@ tests/__pycache__
 .flag_filter_cache
 .pytest_cache
 py??
+py???
 .ci_bak
 venv
+.coverage
+htmlcov
+src/pyhepmc/_version.py
