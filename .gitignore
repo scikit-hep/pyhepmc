@@ -11,3 +11,4 @@ tests/__pycache__
 .pytest_cache
 py??
 .ci_bak
+venv
