@@ -1,3 +1,4 @@
+#include "hepevt_wrapper.h" // patched version of HEPEVT_wrapper.h
 #include "pybind.h"
 
 #include "HepMC3/FourVector.h"
@@ -8,7 +9,6 @@
 #include "HepMC3/GenPdfInfo.h"
 #include "HepMC3/GenRunInfo.h"
 #include "HepMC3/GenVertex.h"
-#include "HepMC3/HEPEVT_Wrapper.h"
 #include "HepMC3/Print.h"
 #include "HepMC3/Units.h"
 
