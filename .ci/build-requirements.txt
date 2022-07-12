@@ -1,4 +1,0 @@
-pybind11
-numpy
-graphviz
-particle
