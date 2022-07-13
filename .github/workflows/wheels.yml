@@ -1,9 +1,15 @@
 name: Wheels
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - '**'
   workflow_dispatch:
+
+# Reminder
+# - name: Extract Branch Name
+#   run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
+# https://dev.to/tomassirio/if-statements-on-github-actions-545d
 
 jobs:
   wheels:
@@ -71,7 +77,7 @@ jobs:
   upload:
     needs: [wheels, sdist]
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: github.event_name == 'push' && contains(github.event.ref, '/tags/')
     steps:
       - uses: actions/download-artifact@v2
         with:
