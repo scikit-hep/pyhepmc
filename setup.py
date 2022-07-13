@@ -1,11 +1,10 @@
 from setuptools import setup, find_packages, Extension
 from distutils.filelist import findall
-import sys
 import os
 from multiprocessing.pool import ThreadPool
 
-
-# patch UnixCCompiler to inject platform-specific compiler flags, build in parallel and
+# patch UnixCCompiler to inject platform-specific compiler flags,
+# build in parallel and
 # skip already compiled object files if they are newer than the source files
 def compile(
     self,
@@ -130,7 +129,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8"
+        "Programming Language :: Python :: 3.8",
     ],
     keywords="generator montecarlo simulation data hep physics particle",
     packages=find_packages("src"),

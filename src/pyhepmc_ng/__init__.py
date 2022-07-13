@@ -2,7 +2,15 @@ from ._bindings import *
 from ._io import _enter, _exit, _iter, _read
 from ._version import version as __version__
 import ctypes
+import warnings
+from numpy import VisibleDeprecationWarning
 
+warnings.warn(
+    """
+The pyhepmc-ng package is continued as the package pyhepmc.
+Please install pyhepmc, pyhepmc-ng is no longer updated.""",
+    VisibleDeprecationWarning,
+)
 
 # save original open because it is overwritten
 builtin_open = open
@@ -44,7 +52,6 @@ WriterHEPEVT.write = WriterHEPEVT.write_event
 
 # pythonic wrapper for AsciiWriter, to be used by `open`
 class WrappedAsciiWriter:
-
     def __init__(self, filename, precision=None):
         self._writer = (filename, precision)
 
@@ -92,6 +99,7 @@ def open(filename, mode="r", precision=None):
 
 
 _hepevt_buffer = HEPEVT()
+
 
 def fill_genevent_from_hepevt(evt, **kwargs):
     """
@@ -141,10 +149,13 @@ def fill_genevent_from_hepevt(evt, **kwargs):
     n = pid.shape[0]
     if n > _hepevt_buffer.max_size:
         raise ValueError(
-            ('Number of particles in event (%i) exceeds HepMC3 buffer size (%i).\n'
-             'Change the line `define_macros={"HEPMC3_HEPEVT_NMXHEP": 50000}` in setup.py\n'
-             'to a larger value and (re)compile pyhepmc_ng from scratch.') %
-             (n, _hepevt_buffer.max_size))
+            (
+                "Number of particles in event (%i) exceeds HepMC3 buffer size (%i).\n"
+                'Change the line `define_macros={"HEPMC3_HEPEVT_NMXHEP": 50000}` in setup.py\n'
+                "to a larger value and (re)compile pyhepmc_ng from scratch."
+            )
+            % (n, _hepevt_buffer.max_size)
+        )
     _hepevt_buffer.event_number = event_number
     _hepevt_buffer.nentries = n
     _hepevt_buffer.pm()[:n, :4] = p / momentum_scaling
