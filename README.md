@@ -6,6 +6,7 @@ A Pythonic wrapper for the HepMC3 C++ library.
 pyhepmc was formerly known as pyhepmc-ng. The development of pyhepmc-ng continues in the pyhepmc package.
 
 [![PyPI version](https://badge.fury.io/py/pyhepmc.svg)](https://badge.fury.io/py/pyhepmc)
+[![Coverage](https://github.com/scikit-hep/pyhepmc/actions/workflows/coverage.yml/badge.svg)](https://github.com/scikit-hep/pyhepmc/actions/workflows/coverage.yml)
 
 <!-- begin of description -->
 HepMC3 has its own Python bindings. Why should you use these one?
