@@ -263,6 +263,12 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   repr(os, x.run_info()) << ")";
   return os;
 }
+
+void from_hepevent(GenEvent& event, int event_number, py::array_t<float> momentum,
+                   py::array_t<float> mass, py::array_t<float> position,
+                   py::array_t<int> pid, py::array_t<int> parents,
+                   py::array_t<int> children, py::array_t<int> status);
+
 } // namespace HepMC3
 
 PYBIND11_MODULE(_core, m) {
@@ -482,7 +488,6 @@ PYBIND11_MODULE(_core, m) {
                           METH_OL(remove_vertex, GenEvent, void, GenVertexPtr)
                               METH_OL(remove_particle, GenEvent, void, GenParticlePtr)
       .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0)
-          METH(clear, GenEvent)
       .def(py::self == py::self)
       .def("__repr__",
            [](GenEvent& self) {

@@ -1,7 +1,7 @@
 #ifndef PYHEPMC_PYBIND_HEADER
 #define PYHEPMC_PYBIND_HEADER
 
-// #include <pybind11/numpy.h>
+#include <pybind11/numpy.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
