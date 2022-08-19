@@ -264,10 +264,10 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   return os;
 }
 
-void from_hepevent(GenEvent& event, int event_number, py::array_t<float> momentum,
-                   py::array_t<float> mass, py::array_t<float> position,
-                   py::array_t<int> pid, py::array_t<int> parents,
-                   py::array_t<int> children, py::array_t<int> status);
+void from_hepevt(GenEvent& event, int event_number, py::array_t<double> momentum,
+                 py::array_t<double> mass, py::array_t<double> position,
+                 py::array_t<int> pid, py::array_t<int> status, py::object parents,
+                 py::object children);
 
 } // namespace HepMC3
 
@@ -285,7 +285,6 @@ PYBIND11_MODULE(_core, m) {
   //        GenEvent
   //        GenParticle
   //        GenVertex
-  //        fill_genevent_from_hepevt
   //        print_hepevt
   //        print_content
   //        print_listing

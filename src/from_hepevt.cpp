@@ -3,6 +3,7 @@
 #include "HepMC3/GenVertex.h"
 #include "pybind.h"
 
+#include <array>
 #include <unordered_map>
 #include <utility>
 
@@ -33,32 +34,44 @@ bool normalize(int& m1, int& m2) {
 
 namespace HepMC3 {
 
-void from_hepevent(GenEvent& event, int event_number, py::array_t<float> momentum,
-                   py::array_t<float> mass, py::array_t<float> position,
-                   py::array_t<int> pid, py::array_t<int> parents,
-                   py::array_t<int> children, py::array_t<int> status) {
+void from_hepevt(GenEvent& event, int event_number, py::array_t<double> momentum,
+                 py::array_t<double> mass, py::array_t<double> position,
+                 py::array_t<int> pid, py::array_t<int> status, py::object parents,
+                 py::object children) {
 
   namespace py = pybind11;
 
-  if (momentum.request().ndim != 2) throw std::runtime_error("p must be 2D");
-  if (position.request().ndim != 2) throw std::runtime_error("v must be 2D");
-  if (parents.request().ndim != 2) throw std::runtime_error("parent must be 2D");
-  if (children.request().ndim != 2) throw std::runtime_error("children must be 2D");
+  const bool has_parents = !parents.is_none();
+  const bool has_children = !children.is_none();
+
   if (mass.request().ndim != 1) throw std::runtime_error("m must be 1D");
   if (pid.request().ndim != 1) throw std::runtime_error("pid must be 1D");
   if (status.request().ndim != 1) throw std::runtime_error("status must be 1D");
 
-  auto rp = momentum.unchecked<2>();
+  if (momentum.request().ndim != 2) throw std::runtime_error("p must be 2D");
+  if (position.request().ndim != 2) throw std::runtime_error("v must be 2D");
+  if (has_parents && py::cast<py::array_t<int>>(parents).request().ndim != 2)
+    throw std::runtime_error("parent must be 2D");
+  if (has_children && py::cast<py::array_t<int>>(children).request().ndim != 2)
+    throw std::runtime_error("children must be 2D");
+
   auto rm = mass.unchecked<1>();
-  auto rv = position.unchecked<2>();
   auto rpid = pid.unchecked<1>();
-  auto rpar = parents.unchecked<2>();
-  auto rchi = children.unchecked<2>();
   auto rsta = status.unchecked<1>();
+
+  auto rp = momentum.unchecked<2>();
+  auto rv = position.unchecked<2>();
+
+  std::array<py::ssize_t, 2> shape = {rm.shape(0), 2};
+  if (!has_parents) parents = py::array_t<int>(shape);
+  if (!has_children) children = py::array_t<int>(shape);
+
+  auto rpar = py::cast<py::array_t<int>>(parents).unchecked<2>();
+  auto rchi = py::cast<py::array_t<int>>(children).unchecked<2>();
 
   const int n = rm.shape(0);
   if (rp.shape(0) != n || rv.shape(0) != n || rpid.shape(0) != n ||
-      rpar.shape(0) != n || rchi.shape(0) != n || rsta.shape(0) != n)
+      rsta.shape(0) != n || rpar.shape(0) != n || rchi.shape(0) != n)
     throw std::runtime_error(
         "p, m, v, pid, parents, children, status must have same length");
 
@@ -99,7 +112,7 @@ void from_hepevent(GenEvent& event, int event_number, py::array_t<float> momentu
 
     for (int k = m1; k <= m2; ++k) v->add_particle_in(particles[k]);
 
-    // add any daugthers
+    // add any daugthers from mother
     // normalize daugther range, same rules as for mothers
     int d1 = rchi(m1, 0);
     int d2 = rchi(m1, 1);
