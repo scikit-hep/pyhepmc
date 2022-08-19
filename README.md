@@ -7,6 +7,7 @@ pyhepmc was formerly known as pyhepmc-ng. The development of pyhepmc-ng continue
 
 [![PyPI version](https://badge.fury.io/py/pyhepmc.svg)](https://badge.fury.io/py/pyhepmc)
 [![Coverage](https://github.com/scikit-hep/pyhepmc/actions/workflows/coverage.yml/badge.svg)](https://github.com/scikit-hep/pyhepmc/actions/workflows/coverage.yml)
+[![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 
 <!-- begin of description -->
 HepMC3 has its own Python bindings. Why should you use these one?
