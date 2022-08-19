@@ -110,7 +110,7 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> momentum
     auto v = new GenVertex(FourVector(rv(i, 0), rv(i, 1), rv(i, 2), rv(i, 3)));
     event.add_vertex(v);
 
-    for (int k = m1; k <= m2; ++k) v->add_particle_in(particles[k]);
+    for (int k = m1; k <= m2; ++k) v->add_particle_in(particles.at(k));
 
     // add any daugthers from mother
     // normalize daugther range, same rules as for mothers
@@ -118,7 +118,7 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> momentum
     int d2 = rchi(m1, 1);
     if (normalize(d1, d2)) continue;
 
-    for (int k = d1; k <= d2; ++k) v->add_particle_out(particles[k]);
+    for (int k = d1; k <= d2; ++k) v->add_particle_out(particles.at(k));
   }
 }
 
