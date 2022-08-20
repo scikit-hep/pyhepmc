@@ -24,8 +24,7 @@ class _Iter:
             raise StopIteration
         return evt
 
-
-_Iter.next = _Iter.__next__
+    next = __next__
 
 
 def _enter(self):
