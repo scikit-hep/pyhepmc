@@ -1,6 +1,5 @@
 import pytest
 import pyhepmc as hep
-import re
 
 
 @pytest.fixture()
