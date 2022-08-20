@@ -66,8 +66,8 @@ bool operator!=(const GenParticle& a, const GenParticle& b) {
 
 // compares all real qualities of both particle sets,
 // but ignores the .id() fields and the particle order
-bool equal_particle_set(const std::vector<ConstGenParticlePtr>& a,
-                        const std::vector<ConstGenParticlePtr>& b) {
+bool equal_particle_sets(const std::vector<ConstGenParticlePtr>& a,
+                         const std::vector<ConstGenParticlePtr>& b) {
   if (a.size() != b.size()) return false;
   auto unmatched = b;
   for (auto&& ai : a) {
@@ -82,16 +82,16 @@ bool equal_particle_set(const std::vector<ConstGenParticlePtr>& a,
 // compares all real qualities of two vertices, but ignores the .id() field
 bool operator==(const GenVertex& a, const GenVertex& b) {
   return a.status() == b.status() && is_close(a.position(), b.position()) &&
-         equal_particle_set(a.particles_in(), b.particles_in()) &&
-         equal_particle_set(a.particles_out(), b.particles_out());
+         equal_particle_sets(a.particles_in(), b.particles_in()) &&
+         equal_particle_sets(a.particles_out(), b.particles_out());
 }
 
 bool operator!=(const GenVertex& a, const GenVertex& b) { return !operator==(a, b); }
 
 // compares all real qualities of both vertex sets,
 // but ignores the .id() fields and the vertex order
-bool equal_vertex_set(const std::vector<ConstGenVertexPtr>& a,
-                      const std::vector<ConstGenVertexPtr>& b) {
+bool equal_vertex_sets(const std::vector<ConstGenVertexPtr>& a,
+                       const std::vector<ConstGenVertexPtr>& b) {
   if (a.size() != b.size()) return false;
   auto unmatched = b;
   for (auto&& ai : a) {
@@ -153,7 +153,7 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
   }
 
   // if all vertices compare equal, then also all particles are equal
-  return equal_vertex_set(a.vertices(), b.vertices());
+  return equal_vertex_sets(a.vertices(), b.vertices());
 }
 
 bool operator!=(const GenEvent& a, const GenEvent& b) { return !operator==(a, b); }
@@ -264,10 +264,11 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   return os;
 }
 
-void from_hepevt(GenEvent& event, int event_number, py::array_t<double> momentum,
-                 py::array_t<double> mass, py::array_t<double> position,
-                 py::array_t<int> pid, py::array_t<int> status, py::object parents,
-                 py::object children);
+void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
+                 py::array_t<double> py, py::array_t<double> pz, py::array_t<double> en,
+                 py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
+                 py::object parents, py::object children, py::object vx, py::object vy,
+                 py::object vz, py::object vt);
 
 } // namespace HepMC3
 
@@ -557,6 +558,9 @@ PYBIND11_MODULE(_core, m) {
     HepMC3::Print::listing(os, event, precision);
     return os.str();
   });
+
+  FUNC(equal_particle_sets);
+  FUNC(equal_vertex_sets);
 
   register_io(m);
 }
