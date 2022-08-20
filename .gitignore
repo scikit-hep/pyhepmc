@@ -16,3 +16,4 @@ venv
 .coverage
 htmlcov
 src/pyhepmc/_version.py
+.vscode

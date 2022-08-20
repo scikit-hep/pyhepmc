@@ -9,7 +9,9 @@ if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
   )
 endif()
 
-set(CMAKE_CXX_STANDARD 11 CACHE STRING "C++ version selection") 
+set(CMAKE_CXX_STANDARD
+    11
+    CACHE STRING "C++ version selection")
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # optional, ensure standard is supported
 set(CMAKE_CXX_EXTENSIONS OFF) # optional, keep compiler extensions off
 
@@ -32,11 +34,8 @@ if(MSVC)
   target_compile_options(_core PRIVATE /bigobj)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 else()
-  target_compile_options(_core PRIVATE
-        -fvisibility=hidden
-        -Wall
-        -Wno-self-assign-overloaded
-        )
+  target_compile_options(_core PRIVATE -fvisibility=hidden -Wall
+                                       -Wno-self-assign-overloaded)
 endif()
 set_target_properties(_core PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 target_compile_definitions(_core PRIVATE HEPMC3_HEPEVT_NMXHEP=10000)
