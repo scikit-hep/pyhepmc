@@ -439,8 +439,6 @@ PYBIND11_MODULE(_core, m) {
            "run"_a, "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
       .def(py::init<Units::MomentumUnit, Units::LengthUnit>(),
            "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
-          PROP_RO_OL(particles, GenEvent, const std::vector<ConstGenParticlePtr>&)
-              PROP_RO_OL(vertices, GenEvent, const std::vector<ConstGenVertexPtr>&)
       .def_property("weights",
                     overload_cast<std::vector<double>&, GenEvent>(&GenEvent::weights),
                     [](GenEvent& self, py::sequence seq) {
@@ -468,9 +466,6 @@ PYBIND11_MODULE(_core, m) {
           "name"_a, "value"_a)
       .def_property_readonly("weight_names",
                              [](const GenEvent& self) { return self.weight_names(); })
-          PROP(run_info, GenEvent) PROP(event_number, GenEvent)
-              PROP_RO(momentum_unit, GenEvent) PROP_RO(length_unit, GenEvent)
-                  METH(set_units, GenEvent)
       .def_property("heavy_ion",
                     overload_cast<GenHeavyIonPtr, GenEvent>(&GenEvent::heavy_ion),
                     &GenEvent::set_heavy_ion)
@@ -480,13 +475,7 @@ PYBIND11_MODULE(_core, m) {
       .def_property(
           "cross_section",
           overload_cast<GenCrossSectionPtr, GenEvent>(&GenEvent::cross_section),
-          &GenEvent::set_cross_section) METH(event_pos, GenEvent)
-          PROP_RO_OL(beams, GenEvent, std::vector<ConstGenParticlePtr>)
-              METH_OL(add_vertex, GenEvent, void, GenVertexPtr)
-                  METH_OL(add_particle, GenEvent, void, GenParticlePtr)
-                      METH(set_beam_particles, GenEvent)
-                          METH_OL(remove_vertex, GenEvent, void, GenVertexPtr)
-                              METH_OL(remove_particle, GenEvent, void, GenParticlePtr)
+          &GenEvent::set_cross_section)
       .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0)
       .def(py::self == py::self)
       .def("__repr__",
@@ -495,11 +484,30 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
-      .def("__str__", [](GenEvent& self) {
-        std::ostringstream os;
-        HepMC3::Print::listing(os, self, 2);
-        return os.str();
-      });
+      .def("__str__",
+           [](GenEvent& self) {
+             std::ostringstream os;
+             HepMC3::Print::listing(os, self, 2);
+             return os.str();
+           })
+      // clang-format off
+      METH(clear, GenEvent)
+      PROP(run_info, GenEvent)
+      PROP(event_number, GenEvent)
+      PROP_RO(momentum_unit, GenEvent)
+      PROP_RO(length_unit, GenEvent)
+      METH(set_units, GenEvent)
+      METH(event_pos, GenEvent)
+      PROP_RO_OL(beams, GenEvent, std::vector<ConstGenParticlePtr>)
+      METH_OL(add_vertex, GenEvent, void, GenVertexPtr)
+      METH_OL(add_particle, GenEvent, void, GenParticlePtr)
+      METH(set_beam_particles, GenEvent)
+      METH_OL(remove_vertex, GenEvent, void, GenVertexPtr)
+      METH_OL(remove_particle, GenEvent, void, GenParticlePtr)
+      PROP_RO_OL(particles, GenEvent, const std::vector<ConstGenParticlePtr>&)
+      PROP_RO_OL(vertices, GenEvent, const std::vector<ConstGenVertexPtr>&)
+      // clang-format on
+      ;
 
   py::class_<GenParticle, GenParticlePtr>(m, "GenParticle")
       .def(py::init<const FourVector&, int, int>(),
