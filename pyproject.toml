@@ -21,7 +21,7 @@ filterwarnings = [
 ]
 
 [tool.cibuildwheel]
-test-requires = "pytest"
+test-requires = "pytest numpy"
 test-command = "python -m pytest {package}/tests"
 # to match numpy, we use manylinux2014 for cp310+
 manylinux-x86_64-image = "manylinux2014"
