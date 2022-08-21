@@ -16,11 +16,11 @@ jobs:
     name: ${{ matrix.py }} ${{ matrix.os }} ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         arch: [auto]
-        py: [cp36, cp37, cp38, cp39, cp310]
+        py: [cp37, cp38, cp39, cp310]
         include:
           - os: macos-latest
             py: cp38
