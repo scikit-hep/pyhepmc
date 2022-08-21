@@ -22,7 +22,7 @@ filterwarnings = [
 
 [tool.cibuildwheel]
 test-extras = ["test"]
-test-command = "python -m pytest"
+test-command = "python -m pytest {package}/tests"
 # to match numpy, we use manylinux2014 for cp310+
 manylinux-x86_64-image = "manylinux2014"
 manylinux-i686-image = "manylinux2014"
