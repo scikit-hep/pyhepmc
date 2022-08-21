@@ -4,38 +4,37 @@ import pyhepmc as hep
 
 @pytest.fixture()
 def evt():
-    #
-    # In this example we will place the following event into HepMC "by hand"
-    #
-    #     name status pdg_id  parent Px       Py    Pz       Energy      Mass
-    #  1  !p+!    1   2212    0,0    0.000    0.000 7000.000 7000.000    0.938
-    #  2  !p+!    2   2212    0,0    0.000    0.000-7000.000 7000.000    0.938
-    # =========================================================================
-    #  3  !d!     3      1    1,1    0.750   -1.569   32.191   32.238    0.000
-    #  4  !u~!    4     -2    2,2   -3.047  -19.000  -54.629   57.920    0.000
-    #  5  !W-!    5    -24    3,4    1.517   -20.68  -20.605   85.925   80.799
-    #  6  !gamma! 6     22    3,4   -3.813    0.113   -1.833    4.233    0.000
-    #  7  !d!     7      1    5,5   -2.445   28.816    6.082   29.552    0.010
-    #  8  !u~!    8     -2    5,5    3.962  -49.498  -26.687   56.373    0.006
+    r"""
+    In this example we will generate the following event by hand
 
-    # now we build the graph, which will looks like
-    #                       p7                         #
-    # p1                   /                           #
-    #   \v1__p3      p5---v4                           #
-    #         \_v3_/       \                           #
-    #         /    \        p8                         #
-    #    v2__p4     \                                  #
-    #   /            p6                                #
-    # p2                                               #
-    #                                                  #
+        name status pdg_id  parent Px       Py     Pz       Energy      Mass
+     1  !p+!    1   2212    0,0    0.000    0.000  7000.000 7000.000    0.938
+     2  !p+!    2   2212    0,0    0.000    0.000 -7000.000 7000.000    0.938
+    =========================================================================
+     3  !d!     3      1    1,1    0.750   -1.569    32.191   32.238    0.000
+     4  !u~!    4     -2    2,2   -3.047  -19.000   -54.629   57.920    0.000
+     5  !W-!    5    -24    3,4    1.517   -20.68   -20.605   85.925   80.799
+     6  !gamma! 6     22    3,4   -3.813    0.113    -1.833    4.233    0.000
+     7  !d!     7      1    5,5   -2.445   28.816     6.082   29.552    0.010
+     8  !u~!    8     -2    5,5    3.962  -49.498   -26.687   56.373    0.006
 
-    #
-    # Finally, the event gets a weight.
-    #
+    The corresponding graph looks like this
+
+                           p7
+     p1                   /
+       \v1__p3      p5---v4
+             \_v3_/       \
+             /    \        p8
+        v2__p4     \
+       /            p6
+     p2
+
+    Finally, the event gets a weight.
+    """
     evt = hep.GenEvent(hep.Units.GEV, hep.Units.MM)
     evt.event_number = 1
 
-    #                         px      py       pz        e   pdgid status
+    #                     px   py   pz      e        pdgid status
     p1 = hep.GenParticle((0.0, 0.0, 7000.0, 7000.0), 2212, 1)
     p1.generated_mass = 0.938
     p2 = hep.GenParticle((0.0, 0.0, -7000.0, 7000.0), 2212, 2)
@@ -108,6 +107,79 @@ def test_GenEvent(evt):
     assert p3.momentum == (0.750, -1.569, 32.191, 32.238)
     assert p4.parents == [p2]
     assert p4.momentum == (-3.047, -19.0, -54.629, 57.920)
+
+
+@pytest.mark.parametrize("use_parent", (True, False))
+def test_GenEvent_from_hepevt(use_parent, evt):
+    status = [p.status for p in evt.particles]
+    pid = [p.pid for p in evt.particles]
+    px = [p.momentum[0] for p in evt.particles]
+    py = [p.momentum[1] for p in evt.particles]
+    pz = [p.momentum[2] for p in evt.particles]
+    en = [p.momentum[3] for p in evt.particles]
+    m = [p.generated_mass for p in evt.particles]
+    vx = vy = vz = vt = [0, 0, 1, 2, 3, 3, 4, 4]
+
+    assert len(m) == 8
+
+    #                           p7
+    #     p1                   /
+    #       \v1__p3      p5---v4
+    #             \_v3_/       \
+    #             /    \        p8
+    #        v2__p4     \
+    #       /            p6
+    #     p2
+
+    parents = [(0, 0), (0, 0), (1, 1), (2, 2), (3, 4), (3, 4), (5, 5), (5, 5)]
+    children = [(3, 0), (4, 0), (5, 6), (5, 6), (7, 8), (0, 0), (0, 0), (0, 0)]
+
+    ev = hep.GenEvent()
+    if use_parent:
+        ev.from_hepevt(
+            evt.event_number,
+            px,
+            py,
+            pz,
+            en,
+            m,
+            pid,
+            status,
+            parents,
+            None,
+            vx,
+            vy,
+            vz,
+            vt,
+        )
+    else:
+        ev.from_hepevt(
+            evt.event_number,
+            px,
+            py,
+            pz,
+            en,
+            m,
+            pid,
+            status,
+            None,
+            children,
+            vx,
+            vy,
+            vz,
+            vt,
+        )
+
+    # cannot be taken from HepEvt record, but is set for evt
+    ev.weights = [1.0]
+    ev.run_info = hep.GenRunInfo()
+    ev.run_info.weight_names = ["0"]
+
+    assert len(ev.particles) == len(evt.particles)
+    assert ev.particles == evt.particles
+    assert len(ev.vertices) == len(evt.vertices)
+    assert hep.equal_vertex_sets(ev.vertices, evt.vertices)
+    assert ev == evt
 
 
 def test_sequence_access():

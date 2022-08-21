@@ -66,8 +66,8 @@ bool operator!=(const GenParticle& a, const GenParticle& b) {
 
 // compares all real qualities of both particle sets,
 // but ignores the .id() fields and the particle order
-bool equal_particle_set(const std::vector<ConstGenParticlePtr>& a,
-                        const std::vector<ConstGenParticlePtr>& b) {
+bool equal_particle_sets(const std::vector<ConstGenParticlePtr>& a,
+                         const std::vector<ConstGenParticlePtr>& b) {
   if (a.size() != b.size()) return false;
   auto unmatched = b;
   for (auto&& ai : a) {
@@ -82,16 +82,16 @@ bool equal_particle_set(const std::vector<ConstGenParticlePtr>& a,
 // compares all real qualities of two vertices, but ignores the .id() field
 bool operator==(const GenVertex& a, const GenVertex& b) {
   return a.status() == b.status() && is_close(a.position(), b.position()) &&
-         equal_particle_set(a.particles_in(), b.particles_in()) &&
-         equal_particle_set(a.particles_out(), b.particles_out());
+         equal_particle_sets(a.particles_in(), b.particles_in()) &&
+         equal_particle_sets(a.particles_out(), b.particles_out());
 }
 
 bool operator!=(const GenVertex& a, const GenVertex& b) { return !operator==(a, b); }
 
 // compares all real qualities of both vertex sets,
 // but ignores the .id() fields and the vertex order
-bool equal_vertex_set(const std::vector<ConstGenVertexPtr>& a,
-                      const std::vector<ConstGenVertexPtr>& b) {
+bool equal_vertex_sets(const std::vector<ConstGenVertexPtr>& a,
+                       const std::vector<ConstGenVertexPtr>& b) {
   if (a.size() != b.size()) return false;
   auto unmatched = b;
   for (auto&& ai : a) {
@@ -153,7 +153,7 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
   }
 
   // if all vertices compare equal, then also all particles are equal
-  return equal_vertex_set(a.vertices(), b.vertices());
+  return equal_vertex_sets(a.vertices(), b.vertices());
 }
 
 bool operator!=(const GenEvent& a, const GenEvent& b) { return !operator==(a, b); }
@@ -263,6 +263,13 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   repr(os, x.run_info()) << ")";
   return os;
 }
+
+void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
+                 py::array_t<double> py, py::array_t<double> pz, py::array_t<double> en,
+                 py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
+                 py::object parents, py::object children, py::object vx, py::object vy,
+                 py::object vz, py::object vt);
+
 } // namespace HepMC3
 
 PYBIND11_MODULE(_core, m) {
@@ -279,7 +286,6 @@ PYBIND11_MODULE(_core, m) {
   //        GenEvent
   //        GenParticle
   //        GenVertex
-  //        fill_genevent_from_hepevt
   //        print_hepevt
   //        print_content
   //        print_listing
@@ -433,8 +439,6 @@ PYBIND11_MODULE(_core, m) {
            "run"_a, "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
       .def(py::init<Units::MomentumUnit, Units::LengthUnit>(),
            "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
-          PROP_RO_OL(particles, GenEvent, const std::vector<ConstGenParticlePtr>&)
-              PROP_RO_OL(vertices, GenEvent, const std::vector<ConstGenVertexPtr>&)
       .def_property("weights",
                     overload_cast<std::vector<double>&, GenEvent>(&GenEvent::weights),
                     [](GenEvent& self, py::sequence seq) {
@@ -462,9 +466,6 @@ PYBIND11_MODULE(_core, m) {
           "name"_a, "value"_a)
       .def_property_readonly("weight_names",
                              [](const GenEvent& self) { return self.weight_names(); })
-          PROP(run_info, GenEvent) PROP(event_number, GenEvent)
-              PROP_RO(momentum_unit, GenEvent) PROP_RO(length_unit, GenEvent)
-                  METH(set_units, GenEvent)
       .def_property("heavy_ion",
                     overload_cast<GenHeavyIonPtr, GenEvent>(&GenEvent::heavy_ion),
                     &GenEvent::set_heavy_ion)
@@ -474,15 +475,8 @@ PYBIND11_MODULE(_core, m) {
       .def_property(
           "cross_section",
           overload_cast<GenCrossSectionPtr, GenEvent>(&GenEvent::cross_section),
-          &GenEvent::set_cross_section) METH(event_pos, GenEvent)
-          PROP_RO_OL(beams, GenEvent, std::vector<ConstGenParticlePtr>)
-              METH_OL(add_vertex, GenEvent, void, GenVertexPtr)
-                  METH_OL(add_particle, GenEvent, void, GenParticlePtr)
-                      METH(set_beam_particles, GenEvent)
-                          METH_OL(remove_vertex, GenEvent, void, GenVertexPtr)
-                              METH_OL(remove_particle, GenEvent, void, GenParticlePtr)
+          &GenEvent::set_cross_section)
       .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0)
-          METH(clear, GenEvent)
       .def(py::self == py::self)
       .def("__repr__",
            [](GenEvent& self) {
@@ -490,11 +484,35 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
-      .def("__str__", [](GenEvent& self) {
-        std::ostringstream os;
-        HepMC3::Print::listing(os, self, 2);
-        return os.str();
-      });
+      .def("__str__",
+           [](GenEvent& self) {
+             std::ostringstream os;
+             HepMC3::Print::listing(os, self, 2);
+             return os.str();
+           })
+
+      .def("from_hepevt", from_hepevt, "event_number"_a, "px"_a, "py"_a, "pz"_a, "en"_a,
+           "m"_a, "pid"_a, "status"_a, "parents"_a = py::none(),
+           "children"_a = py::none(), "vx"_a = py::none(), "vy"_a = py::none(),
+           "vz"_a = py::none(), "vt"_a = py::none())
+      // clang-format off
+      METH(clear, GenEvent)
+      PROP(run_info, GenEvent)
+      PROP(event_number, GenEvent)
+      PROP_RO(momentum_unit, GenEvent)
+      PROP_RO(length_unit, GenEvent)
+      METH(set_units, GenEvent)
+      METH(event_pos, GenEvent)
+      PROP_RO_OL(beams, GenEvent, std::vector<ConstGenParticlePtr>)
+      METH_OL(add_vertex, GenEvent, void, GenVertexPtr)
+      METH_OL(add_particle, GenEvent, void, GenParticlePtr)
+      METH(set_beam_particles, GenEvent)
+      METH_OL(remove_vertex, GenEvent, void, GenVertexPtr)
+      METH_OL(remove_particle, GenEvent, void, GenParticlePtr)
+      PROP_RO_OL(particles, GenEvent, const std::vector<ConstGenParticlePtr>&)
+      PROP_RO_OL(vertices, GenEvent, const std::vector<ConstGenVertexPtr>&)
+      // clang-format on
+      ;
 
   py::class_<GenParticle, GenParticlePtr>(m, "GenParticle")
       .def(py::init<const FourVector&, int, int>(),
@@ -553,6 +571,9 @@ PYBIND11_MODULE(_core, m) {
     HepMC3::Print::listing(os, event, precision);
     return os.str();
   });
+
+  FUNC(equal_particle_sets);
+  FUNC(equal_vertex_sets);
 
   register_io(m);
 }
