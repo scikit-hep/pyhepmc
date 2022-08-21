@@ -490,6 +490,11 @@ PYBIND11_MODULE(_core, m) {
              HepMC3::Print::listing(os, self, 2);
              return os.str();
            })
+
+      .def("from_hepevt", from_hepevt, "event_number"_a, "px"_a, "py"_a, "pz"_a, "en"_a,
+           "m"_a, "pid"_a, "status"_a, "parents"_a = py::none(),
+           "children"_a = py::none(), "vx"_a = py::none(), "vy"_a = py::none(),
+           "vz"_a = py::none(), "vt"_a = py::none())
       // clang-format off
       METH(clear, GenEvent)
       PROP(run_info, GenEvent)
