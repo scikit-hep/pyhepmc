@@ -45,7 +45,7 @@ void normalize(int& m1, int& m2) {
 
 namespace HepMC3 {
 
-void connect_parents_and_children(GenEvent& event, bool is_parents,
+void connect_parents_and_children(GenEvent& event, bool parents,
                                   py::array_t<int> parents_or_children, py::object vx,
                                   py::object vy, py::object vz, py::object vt) {
 
@@ -60,7 +60,7 @@ void connect_parents_and_children(GenEvent& event, bool is_parents,
     throw std::runtime_error("parents or children must have shape (N, 2)");
 
   // find unique vertices:
-  // particles with same parents or children share one production vertex
+  // particles with same parents or children share one vertex
   // if parents: map from parents to children
   // if children: map from children to parents
   std::map<std::pair<int, int>, std::vector<int>> vmap;
@@ -116,13 +116,13 @@ void connect_parents_and_children(GenEvent& event, bool is_parents,
       // we assume this is a production vertex
       // if parent, co.front() is location of production vertex of first child
       // if child, we use location of first child m1
-      const int i = is_parents ? co.front() : m1;
+      const int i = parents ? co.front() : m1;
       pos.set(x(i), y(i), z(i), t(i));
     }
 
     GenVertexPtr v{new GenVertex(pos)};
 
-    if (is_parents) {
+    if (parents) {
       for (int k = m1; k < m2; ++k) v->add_particle_in(particles.at(k));
       for (const auto k : co) v->add_particle_out(particles.at(k));
     } else {
@@ -139,10 +139,6 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
                  py::object parents, py::object children, py::object vx, py::object vy,
                  py::object vz, py::object vt) {
-
-  const bool has_parents = !parents.is_none();
-  const bool has_children = !children.is_none();
-
   if (px.request().ndim != 1) throw std::runtime_error("px must be 1D");
   if (py.request().ndim != 1) throw std::runtime_error("py must be 1D");
   if (pz.request().ndim != 1) throw std::runtime_error("pz must be 1D");
@@ -175,12 +171,12 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
     event.add_particle(p);
   }
 
-  if (has_parents)
-    connect_parents_and_children(event, true, py::cast<py::array_t<int>>(parents), vx,
-                                 vy, vz, vt);
-  else if (has_children)
-    connect_parents_and_children(event, false, py::cast<py::array_t<int>>(children), vx,
-                                 vy, vz, vt);
+  const bool have_parents = !parents.is_none();
+  const bool have_children = !children.is_none();
+  if (have_parents || have_children)
+    connect_parents_and_children(
+        event, have_parents,
+        py::cast<py::array_t<int>>(have_parents ? parents : children), vx, vy, vz, vt);
 }
 
 } // namespace HepMC3
