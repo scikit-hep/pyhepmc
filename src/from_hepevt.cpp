@@ -27,7 +27,7 @@ struct std::less<std::pair<int, int>> {
   }
 };
 
-bool normalize(int& m1, int& m2) {
+void normalize(int& m1, int& m2) {
   // normalize mother range, see
   // https://pythia.org/latest-manual/ParticleProperties.html
   // m1 == m2 == 0 : no mothers
@@ -40,12 +40,7 @@ bool normalize(int& m1, int& m2) {
 
   if (m1 > 0 && m2 == 0) m2 = m1;
 
-  // skip?
-  if (m2 == 0) return true;
-
-  // fortran to c index
-  --m1;
-  return false;
+  --m1; // fortran to c index
 }
 
 namespace HepMC3 {
@@ -69,13 +64,9 @@ void connect_parents_and_children(GenEvent& event, bool is_parents,
   // if parents: map from parents to children
   // if children: map from children to parents
   std::map<std::pair<int, int>, std::vector<int>> vmap;
-  std::vector<int> first(1);
   for (int i = 0; i < n; ++i) {
     if (rco(i, 0) == 0 && rco(i, 1) == 0) continue;
-
-    first[0] = i;
-    auto optional_it = vmap.emplace(std::make_pair(rco(i, 0), rco(i, 1)), first);
-    if (!optional_it.second) optional_it.first->second.push_back(i);
+    vmap[std::make_pair(rco(i, 0), rco(i, 1))].push_back(i);
   }
 
   const int has_vertex = !vx.is_none() + !vy.is_none() + !vz.is_none() + !vt.is_none();
@@ -113,7 +104,8 @@ void connect_parents_and_children(GenEvent& event, bool is_parents,
     int m1 = vi.first.first;
     int m2 = vi.first.second;
     // there must be at least one parent or child when we arrive here...
-    assert(!normalize(m1, m2));
+    normalize(m1, m2);
+    assert(m1 < m2);
 
     // ...with at least one child or parent
     const auto& co = vi.second;
