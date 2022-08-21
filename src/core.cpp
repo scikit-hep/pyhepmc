@@ -20,7 +20,6 @@
 #include <stdexcept>
 #include <vector>
 
-// #include "hepevt_wrapper.h"
 // #include "GzReaderAscii.h"
 
 void register_io(py::module& m);
@@ -354,12 +353,7 @@ PYBIND11_MODULE(_core, m) {
                  PyErr_SetString(PyExc_IndexError, "out of bounds");
                  throw py::error_already_set();
              }
-           }) METH(length2, FourVector) METH(length, FourVector) METH(perp2, FourVector)
-          METH(perp, FourVector) METH(interval, FourVector) METH(pt, FourVector)
-              METH(m2, FourVector) METH(m, FourVector) METH(phi, FourVector)
-                  METH(theta, FourVector) METH(eta, FourVector) METH(rap, FourVector)
-                      METH(abs_eta, FourVector) METH(abs_rap, FourVector)
-                          METH(is_zero, FourVector)
+           })
       .def(py::self == py::self)
       .def(py::self != py::self)
       .def(py::self + py::self)
@@ -370,11 +364,30 @@ PYBIND11_MODULE(_core, m) {
       .def(py::self -= py::self)
       .def(py::self *= double())
       .def(py::self /= double())
-      .def("__repr__", [](const FourVector& self) {
-        std::ostringstream os;
-        repr(os, self);
-        return os.str();
-      });
+      .def("__repr__",
+           [](const FourVector& self) {
+             std::ostringstream os;
+             repr(os, self);
+             return os.str();
+           })
+      // clang-format off
+      METH(length2, FourVector)
+      METH(length, FourVector)
+      METH(perp2, FourVector)
+      METH(perp, FourVector)
+      METH(interval, FourVector)
+      METH(pt, FourVector)
+      METH(m2, FourVector)
+      METH(m, FourVector)
+      METH(phi, FourVector)
+      METH(theta, FourVector)
+      METH(eta, FourVector)
+      METH(rap, FourVector)
+      METH(abs_eta, FourVector)
+      METH(abs_rap, FourVector)
+      METH(is_zero, FourVector)
+      // clang-format on
+      ;
 
   py::implicitly_convertible<py::sequence, FourVector>();
 
@@ -517,45 +530,59 @@ PYBIND11_MODULE(_core, m) {
   py::class_<GenParticle, GenParticlePtr>(m, "GenParticle")
       .def(py::init<const FourVector&, int, int>(),
            "momentum"_a = py::make_tuple(0, 0, 0, 0), "pid"_a = 0, "status"_a = 0)
-          PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
-              PROP_RO(in_event, GenParticle) PROP_RO(id, GenParticle)
+      .def(py::self == py::self)
+      .def("__repr__",
+           [](const GenParticlePtr& self) {
+             std::ostringstream os;
+             repr(os, self);
+             return os.str();
+           })
+      // clang-format off
+      PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
+      PROP_RO(in_event, GenParticle)
+      PROP_RO(id, GenParticle)
       // PROP_RO(data, GenParticle)
       PROP_RO_OL(production_vertex, GenParticle, ConstGenVertexPtr)
-          PROP_RO_OL(end_vertex, GenParticle, ConstGenVertexPtr)
-              PROP_RO_OL(parents, GenParticle, std::vector<ConstGenParticlePtr>)
-                  PROP_RO_OL(children, GenParticle, std::vector<ConstGenParticlePtr>)
+      PROP_RO_OL(end_vertex, GenParticle, ConstGenVertexPtr)
+      PROP_RO_OL(parents, GenParticle, std::vector<ConstGenParticlePtr>)
+      PROP_RO_OL(children, GenParticle, std::vector<ConstGenParticlePtr>)
       // PROP_RO(ancestors, GenParticle)
       // PROP_RO(descendants, GenParticle)
-      PROP(pid, GenParticle) PROP(status, GenParticle) PROP(momentum, GenParticle)
-          PROP(generated_mass, GenParticle) METH(is_generated_mass_set, GenParticle)
-              METH(unset_generated_mass, GenParticle)
-      .def(py::self == py::self)
-      .def("__repr__", [](const GenParticlePtr& self) {
-        std::ostringstream os;
-        repr(os, self);
-        return os.str();
-      });
+      PROP(pid, GenParticle)
+      PROP(status, GenParticle)
+      PROP(momentum, GenParticle)
+      PROP(generated_mass, GenParticle)
+      METH(is_generated_mass_set, GenParticle)
+      METH(unset_generated_mass, GenParticle)
+      // clang-format on
+      ;
 
   py::class_<GenVertex, GenVertexPtr>(m, "GenVertex")
       .def(py::init<const FourVector&>(), "position"_a = py::make_tuple(0, 0, 0, 0))
-          PROP_RO_OL(parent_event, GenVertex, const GenEvent*)
-              PROP_RO(in_event, GenVertex) PROP_RO(id, GenVertex)
-                  PROP(status, GenVertex)
-      // PROP_RO(data, GenVertex)
-      METH_OL(add_particle_in, GenVertex, void, GenParticlePtr)
-          METH_OL(add_particle_out, GenVertex, void, GenParticlePtr)
-              METH_OL(remove_particle_in, GenVertex, void, GenParticlePtr)
-                  METH_OL(remove_particle_out, GenVertex, void, GenParticlePtr)
-      // METH(particles, GenVertex)
-      PROP_RO_OL(particles_in, GenVertex, const std::vector<ConstGenParticlePtr>&)
-          PROP_RO_OL(particles_out, GenVertex, const std::vector<ConstGenParticlePtr>&)
-              PROP(position, GenVertex) METH(has_set_position, GenVertex)
       .def(py::self == py::self)
-      .def("__repr__", [](const GenVertexPtr& self) {
-        std::ostringstream os;
-        repr(os, self);
-        return os.str();
-      });
+      .def("__repr__",
+           [](const GenVertexPtr& self) {
+             std::ostringstream os;
+             repr(os, self);
+             return os.str();
+           })
+      // clang-format off
+      PROP_RO_OL(parent_event, GenVertex, const GenEvent*)
+      PROP_RO(in_event, GenVertex)
+      PROP_RO(id, GenVertex)
+      PROP(status, GenVertex)
+      PROP_RO_OL(particles_in, GenVertex, const std::vector<ConstGenParticlePtr>&)
+      PROP_RO_OL(particles_out, GenVertex, const std::vector<ConstGenParticlePtr>&)
+      // PROP_RO(data, GenVertex)
+      PROP(position, GenVertex)
+      METH_OL(add_particle_in, GenVertex, void, GenParticlePtr)
+      METH_OL(add_particle_out, GenVertex, void, GenParticlePtr)
+      METH_OL(remove_particle_in, GenVertex, void, GenParticlePtr)
+      METH_OL(remove_particle_out, GenVertex, void, GenParticlePtr)
+      // METH(particles, GenVertex)
+      METH(has_set_position, GenVertex)
+      // clang-format on
+      ;
 
   // py::class_<GenParticleData>(m, "GenParticleData");
   // py::class_<GenVertexData>(m, "GenVertexData");
