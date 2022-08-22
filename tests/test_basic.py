@@ -198,10 +198,8 @@ def test_sequence_access():
     assert evt.vertices[0].position == (1, 2, 3, 4)
     assert repr(evt) == (
         "GenEvent(momentum_unit=1, length_unit=0, event_number=0, "
-        "particles=[GenParticle(FourVector(1, 2, 3, 4), status=0, id=1, "
-        "production_vertex=0, end_vertex=-1)], "
-        "vertices=[GenVertex(FourVector(1, 2, 3, 4), "
-        "status=0, id=-1, particles_in=[], particles_out=[])], run_info=None)"
+        "particles=[GenParticle(FourVector(1, 2, 3, 4), pid=5, status=0)], "
+        "vertices=[GenVertex(FourVector(1, 2, 3, 4))], run_info=None)"
     )
 
 
@@ -219,3 +217,13 @@ def test_weights():
         evt.weight(2)
     with pytest.raises(RuntimeError, match="no weight with given name"):
         evt.set_weight("c", 4)
+
+
+def test_GenParticle_repr():
+    p = hep.GenParticle([1, 2, 3, 4], pid=211, status=2)
+    assert repr(p) == "GenParticle(FourVector(1, 2, 3, 4), pid=211, status=2)"
+
+
+def test_GenVertex_repr():
+    p = hep.GenVertex([1, 2, 3, 4])
+    assert repr(p) == "GenVertex(FourVector(1, 2, 3, 4))"
