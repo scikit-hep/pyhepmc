@@ -224,26 +224,13 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenParticle& x) {
   os << "GenParticle(";
   repr(os, x.momentum());
   if (x.is_generated_mass_set()) os << ", mass=" << x.data().mass;
-  os << ", status=" << x.status() << ", id=" << x.id() << ", production_vertex="
-     << (x.production_vertex() ? x.production_vertex()->id() : -1)
-     << ", end_vertex=" << (x.end_vertex() ? x.end_vertex()->id() : -1) << ")";
+  os << ", pid=" << x.pid() << ", status=" << x.status() << ")";
   return os;
 }
 
 inline std::ostream& repr(std::ostream& os, const HepMC3::GenVertex& x) {
   os << "GenVertex(";
   repr(os, x.position());
-  os << ", status=" << x.status() << ", id=" << x.id();
-  ostream_range(os << ", particles_in=", x.particles_in().begin(),
-                x.particles_in().end(),
-                [](std::ostream& os, decltype(x.particles_in().begin()) it) {
-                  os << it->get()->id();
-                });
-  ostream_range(os << ", particles_out=", x.particles_out().begin(),
-                x.particles_out().end(),
-                [](std::ostream& os, decltype(x.particles_in().begin()) it) {
-                  os << it->get()->id();
-                });
   os << ")";
   return os;
 }
