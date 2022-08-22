@@ -13,21 +13,13 @@ pyhepmc was formerly known as pyhepmc-ng. The development of pyhepmc-ng continue
 
 
 <!-- begin of description -->
-HepMC3 has its own Python bindings. Why should you use these one?
+HepMC3 has its own Python bindings. Why should you use these?
 
 **pyhepmc is easy to install**
 
-The command `pip install pyhepmc` should work on all Python versions >= 3.6 and all common architectures, since we publish binary wheels.
+The command `pip install pyhepmc` just works on all common platforms. Since we publish binary wheels, you don't need to compile anything. Since we include the HepMC3 library, you don't need to install it separately either.
 
-Building from source is also easy. External software is not required, pyhepmc comes with the source of both pybind11 for the bindings and HepMC3.
-
-**pyhepmc is actively developed**
-
-pyhepmc is part of the Scikit-HEP project, which aims to provide all tools needed by particle physicists to do data analysis in Python. It also gets official support from the HepMC3 project.
-
-**pyhepmc is unit tested**
-
-Everything in pyhepmc is unit tested.
+However, building from source is also easy. External software is not required. Just download the repository with `git clone --recursive` and run `pip install -v -e .`.
 
 **pyhepmc is Pythonic**
 
@@ -42,9 +34,17 @@ where appropriate.
 - ReaderAscii and WriterAscii support the context manager protocol
 - A convenient `open` function is provided for reading and writing HepMC files
 
+**pyhepmc is actively maintained**
+
+pyhepmc is part of the Scikit-HEP project, which aims to provide all tools needed by particle physicists to do data analysis in Python. There is also official collaboration with the HepMC3 project.
+
+**pyhepmc is unit tested**
+
+We aim for 100% coverage, not quite there yet.
+
 ## Documentation
 
-pyhepmc currently has no separate documentation, but it mirrors the C++ interface of the HepMC3 library, which is documented here: http://hepmc.web.cern.ch/hepmc.
+pyhepmc currently has no separate documentation, but it mirrors the C++ interface of the HepMC3 library, which is documented here: http://hepmc.web.cern.ch/hepmc. Docs will come soon, for now, please use Python's `help()` browser to learn about the API.
 <!-- end of description -->
 
 ## License
