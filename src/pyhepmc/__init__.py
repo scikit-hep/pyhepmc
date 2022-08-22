@@ -1,11 +1,10 @@
 from ._core import (  # noqa
-    GenEvent,
     Units,
-    GenVertex,
-    GenParticle,
-    GenEvent,
-    GenHeavyIon,
     FourVector,
+    GenEvent,
+    GenParticle,
+    GenVertex,
+    GenHeavyIon,
     GenRunInfo,
     equal_vertex_sets,
     equal_particle_sets,
@@ -31,12 +30,13 @@ from ._io import (  # noqa
 )
 from ._version import version as __version__  # noqa
 
-
-def _GenEvent_repr_html(self):
+try:
     from .view import to_dot
 
-    g = to_dot(self)
-    return g._repr_image_svg_xml()
+    def _genevent_repr_html(self):
+        g = to_dot(self)
+        return g._repr_image_svg_xml()
 
-
-GenEvent._repr_html_ = _GenEvent_repr_html
+    GenEvent._repr_html_ = _genevent_repr_html
+except ModuleNotFoundError:
+    pass

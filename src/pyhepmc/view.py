@@ -15,6 +15,7 @@ def to_dot(evt, style=None):
         d.node(f"{v.id}")
 
     GeV = 1 if evt.momentum_unit == Units.GEV else 1e3
+    gray = "#a0a0a0"
 
     # additional nodes for incoming and outgoing particles
     vi = 0
@@ -46,28 +47,39 @@ def to_dot(evt, style=None):
             vi += 1
             d.node(vid, style="invis")
             assert p.end_vertex
-            d.edge(vid, f"{p.end_vertex.id}", label=label, arrowsize="1", style="bold")
-            continue
-        if not p.children:  # final state particles
+            d.edge(
+                vid,
+                f"{p.end_vertex.id}",
+                label=label,
+                arrowsize="1",
+                style="bold",
+                tooltip=tooltip,
+            )
+        elif not p.children:  # final state particles
             vid = f"out_{vo}"
             vo += 1
             d.node(vid, style="invis")
             assert p.production_vertex
-            d.edge(f"{p.production_vertex.id}", vid, label=label, style=style)
-            continue
-        # intermediate particles
-        gray = "#a0a0a0"
-        d.edge(
-            f"{p.production_vertex.id}",
-            f"{p.end_vertex.id}",
-            label=label,
-            color=gray,
-            fontcolor=gray,
-            style=style,
-            dir="none",
-            tooltip=tooltip,
-        )
+            d.edge(
+                f"{p.production_vertex.id}",
+                vid,
+                label=label,
+                style=style,
+                tooltip=tooltip,
+            )
+        else:
+            # intermediate particles
+            d.edge(
+                f"{p.production_vertex.id}",
+                f"{p.end_vertex.id}",
+                label=label,
+                color=gray,
+                fontcolor=gray,
+                style=style,
+                dir="none",
+                tooltip=tooltip,
+            )
     for v in evt.vertices:
-        d.node(f"{v.id}", height="0.02", color=gray)
+        d.node(f"{v.id}", height="0.02", color=gray, tooltip=f"status={v.status}")
 
     return d

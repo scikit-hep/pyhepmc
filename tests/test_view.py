@@ -1,7 +1,7 @@
 import pytest
 from test_basic import evt  # noqa
 
-view = pytest.importorskip("pyhepmc.view")  # depends on graphviz
+view = pytest.importorskip("pyhepmc.view")  # depends on graphviz and particle
 
 
 def test_dot(tmpdir, evt):  # noqa
