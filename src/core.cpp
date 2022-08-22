@@ -393,14 +393,19 @@ PYBIND11_MODULE(_core, m) {
                         &GenRunInfo::tools),
                     [](GenRunInfo& self, py::sequence seq) {
                       self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
-                    }) PROP(weight_names, GenRunInfo) PROP_RO(attributes, GenRunInfo)
+                    })
       .def("__repr__",
            [](const GenRunInfo& self) {
              std::ostringstream os;
              repr(os, self);
              return os.str();
            })
-      .def(py::self == py::self);
+      .def(py::self == py::self)
+      // clang-format off
+      PROP(weight_names, GenRunInfo)
+      PROP_RO(attributes, GenRunInfo)
+      // clang-format on
+      ;
 
   py::class_<GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo")
       .def(py::init<std::string, std::string, std::string>(), "name"_a, "version"_a,

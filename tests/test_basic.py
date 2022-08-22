@@ -88,8 +88,12 @@ def evt():
     evt.add_vertex(v4)
 
     evt.weights = [1.0]
-    evt.run_info = hep.GenRunInfo()
-    evt.run_info.weight_names = ["0"]
+
+    ti = hep.GenRunInfo.ToolInfo("dummy", "1.0", "dummy generator")
+    ri = hep.GenRunInfo()
+    ri.tools = [ti]
+    ri.weight_names = ["0"]
+    evt.run_info = ri
 
     return evt
 
@@ -172,8 +176,7 @@ def test_GenEvent_from_hepevt(use_parent, evt):
 
     # cannot be taken from HepEvt record, but is set for evt
     ev.weights = [1.0]
-    ev.run_info = hep.GenRunInfo()
-    ev.run_info.weight_names = ["0"]
+    ev.run_info = evt.run_info
 
     assert len(ev.particles) == len(evt.particles)
     assert ev.particles == evt.particles

@@ -7,16 +7,12 @@ from ._core import (
     WriterAscii,
     WriterAsciiHepMC2,
     WriterHEPEVT,
-    GenRunInfo,
 )
 
 
 class _Iter:
     def __init__(self, parent):
         self.parent = parent
-
-    def __iter__(self):
-        return self
 
     def __next__(self):
         evt = self.parent.read()
@@ -85,24 +81,14 @@ class WrappedAsciiWriter:
     def __init__(self, filename, precision=None):
         self._writer = (filename, precision)
 
-    def write(self, object):
+    def write(self, event):
         if isinstance(self._writer, tuple):
+            # first call
             filename, precision = self._writer
-            if isinstance(object, GenRunInfo):
-                self._writer = self.WriterAscii(filename, object)
-                if precision is not None:
-                    self._writer.precision = precision
-                self._writer.write_run_info()
-                return
-            else:
-                self._writer = WriterAscii(filename)
-                if precision is not None:
-                    self._writer.precision = precision
-
-        if isinstance(object, GenRunInfo):
-            raise RuntimeError("GenRunInfo must be written first")
-
-        self._writer.write_event(object)
+            self._writer = WriterAscii(filename, event.run_info)
+            if precision is not None:
+                self._writer.precision = precision
+        self._writer.write_event(event)
 
     def close(self):
         self._writer.close()
