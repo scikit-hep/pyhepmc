@@ -2,10 +2,11 @@ import os
 import pyhepmc as hep
 import pytest
 from test_basic import evt  # noqa
+from pyhepmc._core import stringstream
 
 
 def test_read_write(evt):  # noqa
-    oss = hep.stringstream()
+    oss = stringstream()
     with hep.WriterAscii(oss) as f:
         f.write_event(evt)
 
@@ -23,7 +24,7 @@ def test_read_write(evt):  # noqa
 
 
 def test_pythonic_read_write(evt):  # noqa
-    oss = hep.stringstream()
+    oss = stringstream()
     with hep.WriterAscii(oss) as f:
         f.write(evt)
 
@@ -32,6 +33,7 @@ def test_pythonic_read_write(evt):  # noqa
             assert i == 0
             assert evt.particles == evt2.particles
             assert evt.vertices == evt2.vertices
+            assert evt.run_info == evt2.run_info
             assert evt == evt2
 
 
@@ -41,7 +43,7 @@ def test_failed_read_file():
 
 
 def test_read_empty_stream(evt):  # noqa
-    oss = hep.stringstream()
+    oss = stringstream()
     with hep.ReaderAscii(oss) as f:
         evt = hep.GenEvent()
         ok = f.read_event(evt)
@@ -49,13 +51,21 @@ def test_read_empty_stream(evt):  # noqa
 
 
 def test_open(evt):  # noqa
-    with hep.open("test_read_write_file.dat", "w") as f:
+    with hep.open("test_read_write_file.dat", "w", precision=3) as f:
         f.write(evt)
 
     with hep.open("test_read_write_file.dat") as f:
         evt2 = f.read()
 
-    assert evt == evt2
+    assert evt != evt2
+
+    with hep.open("test_read_write_file.dat", "w") as f:
+        f.write(evt)
+
+    with hep.open("test_read_write_file.dat") as f:
+        evt3 = f.read()
+
+    assert evt == evt3
 
     os.unlink("test_read_write_file.dat")
 
@@ -71,11 +81,10 @@ def test_open_with_writer(evt, writer):  # noqa
     with hep.open(filename) as f:
         evt2 = f.read()
 
-        # ReaderHEPEVT adds arbitrary weight to evt2, so we must add that to evt as well
-        if isinstance(writer, hep.WriterHEPEVT):
-            evt.run_info = hep.GenRunInfo(weight_names=["0"])
-            evt.weights = [1]
-        assert evt.run_info == evt2.run_info
-        assert evt == evt2
+    if writer in (hep.WriterAsciiHepMC2, hep.WriterHEPEVT):
+        # ToolInfo not stored in this format, so adding it manually
+        evt2.run_info.tools = evt.run_info.tools
+
+    assert evt == evt2
 
     os.unlink(filename)
