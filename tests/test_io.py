@@ -3,6 +3,7 @@ import pyhepmc as hep
 import pytest
 from test_basic import evt  # noqa
 from pyhepmc._core import stringstream
+from pathlib import Path
 
 
 def test_read_write(evt):  # noqa
@@ -97,7 +98,9 @@ def test_open_2(evt):  # noqa
 
 
 def test_open_3(evt):  # noqa
-    with hep.open("test_read_write_file.dat", "w") as f:
+    filename = Path("test_read_write_file.dat")
+
+    with hep.open(filename, "w") as f:
         with pytest.raises(TypeError):
             f.write(None)
 
@@ -110,15 +113,15 @@ def test_open_3(evt):  # noqa
 
     foo = Foo()
 
-    with hep.open("test_read_write_file.dat", "w") as f:
+    with hep.open(filename, "w") as f:
         f.write(foo)
 
-    with hep.open("test_read_write_file.dat") as f:
+    with hep.open(filename) as f:
         evt2 = f.read()
 
     assert evt == evt2
 
-    os.unlink("test_read_write_file.dat")
+    filename.unlink()
 
 
 @pytest.mark.parametrize(
