@@ -19,10 +19,10 @@ The command `pip install pyhepmc` just works on all common platforms. Since we p
 
 However, building from source is also easy. External software is not required. Just download the repository with `git clone --recursive` and run `pip install -v -e .`.
 
-**pyhepmc is Pythonic**
+**pyhepmc is Pythonic and Jupyter notebook-friendly**
 
 pyhepmc is a hand-crafted mapping of C++ code to Python. It supports Python idioms
-where appropriate.
+where appropriate. The classes are designed to render well in Jupyter notebooks.
 
 - C++ methods which act like properties are represented as properties,
   e.g. GenParticle::set_status and GenParticle::status are mapped to a single
@@ -31,6 +31,12 @@ where appropriate.
 - Vectors of objects on the C++ side are mapped to Python lists
 - ReaderAscii and WriterAscii support the context manager protocol
 - A convenient `open` function is provided for reading and writing HepMC files
+
+**pyhepmc supports visualizations powered by graphviz**
+
+pyhepmc can optionally visualize events, using the mature graphviz library as a backend.
+
+![](docs/pyhepmc.svg)
 
 **pyhepmc is actively maintained**
 

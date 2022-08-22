@@ -8,16 +8,15 @@ def to_dot(evt, style=None):
     d = Digraph(name="event %i" % evt.event_number)
     d.node_attr["shape"] = "point"
     d.graph_attr["rankdir"] = "LR"
-    d.graph_attr["size"] = "15,20"
+    d.graph_attr["size"] = "7,7"
     d.graph_attr["ratio"] = "compress"
-
-    for v in evt.vertices:
-        d.node(f"{v.id}")
 
     GeV = 1 if evt.momentum_unit == Units.GEV else 1e3
     gray = "#a0a0a0"
 
-    # additional nodes for incoming and outgoing particles
+    for v in evt.vertices:
+        d.node(f"{v.id}", height="0.02", color=gray, tooltip=f"status={v.status}")
+
     vi = 0
     vo = 0
     for p in evt.particles:
@@ -79,7 +78,5 @@ def to_dot(evt, style=None):
                 dir="none",
                 tooltip=tooltip,
             )
-    for v in evt.vertices:
-        d.node(f"{v.id}", height="0.02", color=gray, tooltip=f"status={v.status}")
 
     return d
