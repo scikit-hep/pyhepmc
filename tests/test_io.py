@@ -50,7 +50,33 @@ def test_read_empty_stream(evt):  # noqa
         assert ok is True  # reading empty stream is ok in HepMC
 
 
-def test_open(evt):  # noqa
+@pytest.mark.parametrize("format", ("hepmc3", "hepmc2", "hepevt"))
+def test_open_1(evt, format):  # noqa
+    with hep.open("test_read_write_file.dat", "w", format=format) as f:
+        f.write(evt)
+
+    with hep.open("test_read_write_file.dat", format=format) as f:
+        evt2 = f.read()
+
+    if format in ("hepmc2", "hepevt"):
+        # ToolInfo not stored in this format, so adding it manually
+        evt2.run_info.tools = evt.run_info.tools
+
+    assert evt == evt2
+
+    with hep.open("test_read_write_file.dat") as f:
+        evt3 = f.read()
+
+    if format in ("hepmc2", "hepevt"):
+        # ToolInfo not stored in this format, so adding it manually
+        evt3.run_info.tools = evt.run_info.tools
+
+    assert evt == evt3
+
+    os.unlink("test_read_write_file.dat")
+
+
+def test_open_2(evt):  # noqa
     with hep.open("test_read_write_file.dat", "w", precision=3) as f:
         f.write(evt)
 
@@ -66,6 +92,31 @@ def test_open(evt):  # noqa
         evt3 = f.read()
 
     assert evt == evt3
+
+    os.unlink("test_read_write_file.dat")
+
+
+def test_open_3(evt):  # noqa
+    with hep.open("test_read_write_file.dat", "w") as f:
+        with pytest.raises(TypeError):
+            f.write(None)
+
+        with pytest.raises(TypeError):
+            f.write("foo")
+
+    class Foo:
+        def to_hepmc3(self):
+            return evt
+
+    foo = Foo()
+
+    with hep.open("test_read_write_file.dat", "w") as f:
+        f.write(foo)
+
+    with hep.open("test_read_write_file.dat") as f:
+        evt2 = f.read()
+
+    assert evt == evt2
 
     os.unlink("test_read_write_file.dat")
 
