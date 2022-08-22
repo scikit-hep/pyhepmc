@@ -2,10 +2,11 @@ import os
 import pyhepmc as hep
 import pytest
 from test_basic import evt  # noqa
+from pyhepmc._core import stringstream
 
 
 def test_read_write(evt):  # noqa
-    oss = hep.stringstream()
+    oss = stringstream()
     with hep.WriterAscii(oss) as f:
         f.write_event(evt)
 
@@ -23,7 +24,7 @@ def test_read_write(evt):  # noqa
 
 
 def test_pythonic_read_write(evt):  # noqa
-    oss = hep.stringstream()
+    oss = stringstream()
     with hep.WriterAscii(oss) as f:
         f.write(evt)
 
@@ -41,7 +42,7 @@ def test_failed_read_file():
 
 
 def test_read_empty_stream(evt):  # noqa
-    oss = hep.stringstream()
+    oss = stringstream()
     with hep.ReaderAscii(oss) as f:
         evt = hep.GenEvent()
         ok = f.read_event(evt)

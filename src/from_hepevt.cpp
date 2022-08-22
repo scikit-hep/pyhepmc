@@ -134,6 +134,33 @@ void connect_parents_and_children(GenEvent& event, bool parents,
   }
 }
 
+void try_to_fix_unconnected_particles(GenEvent& event) {
+  if (event.beams().size() == 2) return;
+
+  // Some generators produce initial particles not connected to one of the beams,
+  // try to fix this by connecting those particles randomly to either beam
+  GenParticlePtr beam[2] = {nullptr, nullptr};
+  for (const auto& p : event.beams())
+    if (p->status() != 3) {
+      if (!beam[0])
+        beam[0] = p;
+      else if (!beam[1])
+        beam[1] = p;
+      else {
+        // more than two particles with status == 3, abort the fix
+        return;
+      }
+    }
+
+  int i = 0;
+  for (const auto& p : event.beams()) {
+    if (p->status() == 3) continue;
+    beam[i++ % 2]->end_vertex()->add_particle_out(p);
+  }
+
+  assert(event.beams().size() == 2);
+}
+
 void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> py, py::array_t<double> pz, py::array_t<double> en,
                  py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
@@ -177,6 +204,8 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
     connect_parents_and_children(
         event, have_parents,
         py::cast<py::array_t<int>>(have_parents ? parents : children), vx, vy, vz, vt);
+
+  try_to_fix_unconnected_particles(event);
 }
 
 } // namespace HepMC3
