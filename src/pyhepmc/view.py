@@ -24,9 +24,9 @@ def to_dot(evt, style=None):
             charge = pdb.charge
             pname = pdb.name
             pname = _prettify.get(pdb.pdgid, pname)
-            tooltip = pdb.name
+            tooltip = f"{pdb.name} [{int(pdb.pdgid)}]"
             if pdb.quarks:
-                tooltip += f" ({pdb.quarks})"
+                tooltip += f"\n{pdb.quarks}"
             tooltip += f"\nQ = {pdb.charge:.3g}"
             if pdb.mass:
                 tooltip += f"\nm = {pdb.mass:.4g} MeV/c2"
