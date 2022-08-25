@@ -9,38 +9,21 @@ def to_dot(evt, style=None):
     d = Digraph(name="event %i" % evt.event_number)
     d.node_attr["shape"] = "point"
     d.graph_attr["rankdir"] = "LR"
-    d.graph_attr["size"] = "7,7"
+    d.graph_attr["size"] = "8,100"
     d.graph_attr["ratio"] = "compress"
 
     GeV = 1 if evt.momentum_unit == Units.GEV else 1e3
-    gray = "#a0a0a0"
 
     for v in evt.vertices:
-        d.node(f"{v.id}", height="0.02", color=gray, tooltip=f"status={v.status}")
+        d.node(f"{v.id}", tooltip=f"{v.position} mm\nstatus={v.status}")
 
+    enmax = max(p.momentum.e / GeV for p in evt.particles)
     for p in evt.particles:
-        try:
-            pdb = Particle.from_pdgid(p.pid)
-            charge = pdb.charge
-            pname = pdb.name
-            pname = _prettify.get(pdb.pdgid, pname)
-            tooltip = f"{pdb.name} [{int(pdb.pdgid)}]"
-            if pdb.quarks:
-                tooltip += f"\n{pdb.quarks}"
-            tooltip += f"\nQ = {pdb.charge:.3g}"
-            if pdb.mass:
-                tooltip += f"\nm = {pdb.mass:.4g} MeV/c2"
-            if pdb.ctau and np.isfinite(pdb.ctau):
-                tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
-        except ParticleNotFound:
-            pname = f"Internal({p.pid})"
-            charge = 0
-            tooltip = pname
-        except InvalidParticle:
-            pname = f"Invalid({p.pid})"
-            charge = 0
-            tooltip = pname
+        style = "solid"
+
         en = p.momentum.e / GeV
+        penwidth = str(max(0.5, 4 * en / enmax))
+
         unit = "GeV"
         if en > 1e2:
             en /= 1e3
@@ -49,7 +32,38 @@ def to_dot(evt, style=None):
             en *= 1e3
             unit = "MeV"
 
+        try:
+            pdb = Particle.from_pdgid(p.pid)
+            pname = pdb.name
+            pname = _prettify.get(pdb.pdgid, pname)
+            tooltip = f"{pdb.name} [{int(pdb.pdgid)}]"
+            quarks = pdb.quarks
+            if quarks:
+                tooltip += f"\n{quarks}"
+            tooltip += f"\nQ = {pdb.charge:.3g}"
+            if pdb.mass:
+                tooltip += f"\nm = {pdb.mass:.4g} MeV/c2"
+            if pdb.ctau and np.isfinite(pdb.ctau):
+                tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
+            color = "black" if quarks else "goldenrod"
+            # if not quarks:  # boson or lepton
+            if pdb.charge == 0:
+                style = "dashed"
+        except ParticleNotFound:
+            pname = f"Internal({p.pid})"
+            tooltip = pname
+            color = "dodgerblue"
+            penwidth = "7"
+        except InvalidParticle:
+            pname = f"Invalid({p.pid})"
+            tooltip = pname
+            color = "gainsboro"
+            penwidth = "7"
+
         label = f"{pname} {en:.2g} {unit}"
+
+        if 1000 <= p.pid < 10000:  # diquark
+            color = "black"
 
         # do not connect initial particles to root vertex
         if p.production_vertex and p.production_vertex.id != 0:
@@ -64,29 +78,24 @@ def to_dot(evt, style=None):
             vout = f"out_{p.id}"
             d.node(vout, style="invis")
 
-        style = "solid" if charge else "dashed"
         if not p.production_vertex or p.production_vertex.id == 0 and p.end_vertex:
             # initial particle which is not also final state is beam particle
-            style = "bold"
             edir = "forward"
-            color = None
         elif p.status == 1:  # final state
             edir = "forward"
-            color = None
         else:  # intermediate
             edir = "none"
-            color = gray
 
         d.edge(
             vin,
             vout,
-            label=label,
             dir=edir,
-            style=style,
+            label=label,
             color=color,
-            fontcolor=color,
+            style=style,
             tooltip=tooltip,
             labeltooltip=tooltip,
+            penwidth=penwidth,
         )
 
     return d
