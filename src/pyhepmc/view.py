@@ -5,8 +5,12 @@ import numpy as np
 
 
 def to_dot(evt, style=None):
-    name = ",".join(f"{t.name}-{t.version}" for t in evt.run_info.tools)
-    name += f"\nevent number = {evt.event_number}"
+    if evt.run_info:
+        name = "\n".join(f"{t.name}-{t.version}" for t in evt.run_info.tools)
+        name += "\n"
+    else:
+        name = ""
+    name += f"event number = {evt.event_number}"
 
     d = Digraph(name=name)
     d.node_attr["shape"] = "point"
