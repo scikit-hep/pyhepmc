@@ -187,8 +187,11 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenRunInfo::ToolInfo& 
 }
 
 inline std::ostream& repr(std::ostream& os, const HepMC3::FourVector& x) {
+  const int saved = os.precision();
+  os.precision(3);
   os << "FourVector(" << x.x() << ", " << x.y() << ", " << x.z() << ", " << x.t()
      << ")";
+  os.precision(saved);
   return os;
 }
 
@@ -421,7 +424,13 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
-      .def(py::self == py::self);
+      .def(py::self == py::self)
+      // clang-format off
+      ATTR(name, GenRunInfo::ToolInfo)
+      ATTR(version, GenRunInfo::ToolInfo)
+      ATTR(description, GenRunInfo::ToolInfo)
+      // clang-format on
+      ;
 
   py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
 

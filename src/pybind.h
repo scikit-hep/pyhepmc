@@ -27,5 +27,6 @@ _T overload_cast(_T x) {
   .def_property(#name, overload_cast<rval, const cls>(&cls::name), &cls::set_##name)
 #define METH(name, cls) .def(#name, &cls::name)
 #define METH_OL(name, cls, rval, args) .def(#name, (rval(cls::*)(args)) & cls::name)
+#define ATTR(name, cls) .def_readwrite(#name, &cls::name)
 
 #endif

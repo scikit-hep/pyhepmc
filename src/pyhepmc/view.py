@@ -1,26 +1,29 @@
 from graphviz import Digraph
-from particle import Particle, ParticleNotFound, InvalidParticle
 from pyhepmc._prettify import db as _prettify
 from pyhepmc import Units
 import numpy as np
 
 
 def to_dot(evt, style=None):
-    d = Digraph(name="event %i" % evt.event_number)
+    if evt.run_info:
+        name = "\n".join(f"{t.name}-{t.version}" for t in evt.run_info.tools)
+        name += "\n"
+    else:
+        name = ""
+    name += f"event number = {evt.event_number}"
+
+    d = Digraph(name=name)
     d.node_attr["shape"] = "point"
     d.graph_attr["rankdir"] = "LR"
     d.graph_attr["size"] = "8,100"
-    d.graph_attr["ratio"] = "compress"
 
     GeV = 1 if evt.momentum_unit == Units.GEV else 1e3
 
     for v in evt.vertices:
-        d.node(f"{v.id}", tooltip=f"{v.position} mm\nstatus={v.status}")
+        d.node(f"{v.id}", tooltip=f"{v.position} mm\nstatus = {v.status}")
 
     enmax = max(p.momentum.e / GeV for p in evt.particles)
     for p in evt.particles:
-        style = "solid"
-
         en = p.momentum.e / GeV
         penwidth = str(max(0.5, 4 * en / enmax))
 
@@ -32,33 +35,41 @@ def to_dot(evt, style=None):
             en *= 1e3
             unit = "MeV"
 
+        color = "black"
+        style = "solid"
+
+        pname = _prettify.get(p.pid, None)
+        if pname is None:
+            if p.pid == 0:
+                pname = "Invalid(0)"
+                color = "gainsboro"
+                penwidth = "7"
+            else:
+                pname = f"Internal({p.pid})"
+                color = "dodgerblue"
+                penwidth = "7"
+
+        tooltip = f"{pname} [PDGID: {int(p.pid)}]"
+        tooltip += f"\n{p.momentum} GeV"
+        tooltip += f"\nm = {p.generated_mass:.4g} GeV"
+        tooltip += f"\nstatus = {p.status}"
+
         try:
+            from particle import Particle, ParticleNotFound, InvalidParticle
+
             pdb = Particle.from_pdgid(p.pid)
-            pname = pdb.name
-            pname = _prettify.get(pdb.pdgid, pname)
-            tooltip = f"{pdb.name} [{int(pdb.pdgid)}]"
             quarks = pdb.quarks
             if quarks:
-                tooltip += f"\n{quarks}"
+                tooltip += f"\nquarks = {quarks}"
+            else:  # boson or lepton
+                color = "goldenrod"
             tooltip += f"\nQ = {pdb.charge:.3g}"
-            if pdb.mass:
-                tooltip += f"\nm = {pdb.mass:.4g} MeV/c2"
             if pdb.ctau and np.isfinite(pdb.ctau):
                 tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
-            color = "black" if quarks else "goldenrod"
-            # if not quarks:  # boson or lepton
             if pdb.charge == 0:
                 style = "dashed"
-        except ParticleNotFound:
-            pname = f"Internal({p.pid})"
-            tooltip = pname
-            color = "dodgerblue"
-            penwidth = "7"
-        except InvalidParticle:
-            pname = f"Invalid({p.pid})"
-            tooltip = pname
-            color = "gainsboro"
-            penwidth = "7"
+        except (ModuleNotFoundError, ParticleNotFound, InvalidParticle):
+            pass
 
         label = f"{pname} {en:.2g} {unit}"
 

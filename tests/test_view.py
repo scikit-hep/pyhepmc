@@ -9,7 +9,7 @@ def test_dot(evt):  # noqa
     d = view.to_dot(evt)
     s = str(d)
     print(s)
-    assert s.startswith('digraph "event 1')
+    assert s.startswith('digraph "dummy-1.0\nevent number = 1')
     assert "in_1" in s
     assert "in_2" in s
     assert "in_3" not in s
