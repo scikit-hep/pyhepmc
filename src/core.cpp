@@ -538,6 +538,18 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
+      .def_property(
+          "generated_mass",
+          [](GenParticle& self) {
+            if (self.is_generated_mass_set()) return py::cast(self.generated_mass());
+            return static_cast<py::object>(py::none());
+          },
+          [](GenParticle& self, py::object value) {
+            if (value.is_none())
+              self.unset_generated_mass();
+            else
+              self.set_generated_mass(py::cast<double>(value));
+          })
       // clang-format off
       PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
       PROP_RO(in_event, GenParticle)
@@ -552,9 +564,6 @@ PYBIND11_MODULE(_core, m) {
       PROP(pid, GenParticle)
       PROP(status, GenParticle)
       PROP(momentum, GenParticle)
-      PROP(generated_mass, GenParticle)
-      METH(is_generated_mass_set, GenParticle)
-      METH(unset_generated_mass, GenParticle)
       // clang-format on
       ;
 

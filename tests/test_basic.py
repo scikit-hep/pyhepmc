@@ -1,5 +1,6 @@
 import pytest
 import pyhepmc as hep
+import numpy as np
 
 
 @pytest.fixture()
@@ -111,6 +112,25 @@ def test_GenEvent(evt):
     assert p3.momentum == (0.750, -1.569, 32.191, 32.238)
     assert p4.parents == [p2]
     assert p4.momentum == (-3.047, -19.0, -54.629, 57.920)
+
+
+def test_GenEvent_generated_mass():
+    p = hep.GenParticle((1.0, 1.0, 1.0, 1.0), 2212, 1)
+    with pytest.warns(np.VisibleDeprecationWarning):
+        assert p.is_generated_mass_set() is False
+    p.generated_mass = 2.3
+    with pytest.warns(np.VisibleDeprecationWarning):
+        assert p.is_generated_mass_set() is True
+    assert p.generated_mass == 2.3
+    with pytest.warns(np.VisibleDeprecationWarning):
+        p.unset_generated_mass()
+        assert p.is_generated_mass_set() is False
+    p.generated_mass = 2.3
+    with pytest.warns(np.VisibleDeprecationWarning):
+        assert p.is_generated_mass_set() is True
+    p.generated_mass = None
+    with pytest.warns(np.VisibleDeprecationWarning):
+        assert p.is_generated_mass_set() is False
 
 
 @pytest.mark.parametrize("use_parent", (True, False))

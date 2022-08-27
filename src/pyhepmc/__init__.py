@@ -29,6 +29,21 @@ from ._io import (  # noqa
     pyhepmc_open as open,
 )
 from ._version import __version__  # noqa
+from ._deprecated import deprecated as _deprecated
+
+
+@_deprecated("use `GenParticle.generated_mass is not None`")
+def _genparticle_is_generated_mass_set(self):
+    return self.generated_mass is not None
+
+
+@_deprecated("use `GenParticle.generated_mass = None`")
+def _genparticle_unset_generated_mass(self):
+    self.generated_mass = None
+
+
+GenParticle.is_generated_mass_set = _genparticle_is_generated_mass_set
+GenParticle.unset_generated_mass = _genparticle_unset_generated_mass
 
 try:
     from .view import to_dot
