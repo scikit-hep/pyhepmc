@@ -30,6 +30,7 @@ from ._io import (  # noqa
 )
 from ._version import __version__  # noqa
 from ._deprecated import deprecated as _deprecated
+from . import _adddoc  # noqa
 
 
 @_deprecated("use `GenParticle.generated_mass is not None`")
