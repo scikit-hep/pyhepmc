@@ -51,7 +51,7 @@ def to_dot(evt, style=None):
 
         tooltip = f"{pname} [PDGID: {int(p.pid)}]"
         tooltip += f"\n{p.momentum} GeV"
-        tooltip += f"\nm = {p.generated_mass:.4g} GeV/c2"
+        tooltip += f"\nm = {p.generated_mass:.4g} GeV"
         tooltip += f"\nstatus = {p.status}"
 
         try:
