@@ -35,6 +35,7 @@ where appropriate. The classes are designed to render well in Jupyter notebooks.
 pyhepmc can optionally visualize events, using the mature graphviz library as a backend.
 
 ![](pyhepmc.svg)
+![](docs/pyhepmc.svg)
 
 **pyhepmc is actively maintained**
 
