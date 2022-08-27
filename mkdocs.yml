@@ -3,4 +3,9 @@ site_url: https://github.com/scikit-hep/pyhepmc
 site_author: Hans Dembinski
 repo_url: https://github.com/scikit-hep/pyhepmc
 plugins:
-- mkdocstrings
+- mkdocstrings:
+    handlers:
+      python:
+        paths: [src]
+        show_root_heading: true
+        show_source: true

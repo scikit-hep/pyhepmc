@@ -47,7 +47,7 @@ We aim for 100% coverage, not quite there yet.
 
 ## Documentation
 
-pyhepmc mirrors the C++ interface of the [HepMC3 library, which is documented here](http://hepmc.web.cern.ch/hepmc). You can use Python's `help()` browser to learn about the API or consult the [reference](reference.md).
+pyhepmc mirrors the C++ interface of the [HepMC3 library, which is documented here](http://hepmc.web.cern.ch/hepmc). You can use Python's `help()` browser to learn about the API or consult the [reference](/reference.md).
 
 ## License
 

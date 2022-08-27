@@ -17,3 +17,5 @@ venv
 htmlcov
 src/pyhepmc/_version.py
 .vscode
+docs/xml
+site
