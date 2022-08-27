@@ -438,7 +438,7 @@ PYBIND11_MODULE(_core, m) {
       .def(py::init([](int nh, int np, int nt, int nc, int ns, int nsp, int nnw = 0,
                        int nwn = 0, int nwnw = 0, float im = 0., float pl = 0.,
                        float ec = 0., float s = 0., float cent = 0.) {
-             auto x = GenHeavyIonPtr(new GenHeavyIon());
+             auto x = std::make_shared<GenHeavyIon>();
              x->set(nh, np, nt, nc, ns, nsp, nnw, nwn, nwnw, im, pl, ec, s, cent);
              return x;
            }),
