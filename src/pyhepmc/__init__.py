@@ -28,7 +28,7 @@ from ._io import (  # noqa
     WriterHEPEVT,
     pyhepmc_open as open,
 )
-from ._version import version as __version__  # noqa
+from ._version import __version__  # noqa
 
 try:
     from .view import to_dot

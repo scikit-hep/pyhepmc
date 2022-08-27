@@ -6,11 +6,13 @@ import numpy as np
 
 
 def to_dot(evt, style=None):
-    d = Digraph(name="event %i" % evt.event_number)
+    name = ",".join(f"{t.name}-{t.version}" for t in evt.run_info.tools)
+    name += f"\nevent number = {evt.event_number}"
+
+    d = Digraph(name=name)
     d.node_attr["shape"] = "point"
     d.graph_attr["rankdir"] = "LR"
     d.graph_attr["size"] = "8,100"
-    d.graph_attr["ratio"] = "compress"
 
     GeV = 1 if evt.momentum_unit == Units.GEV else 1e3
 

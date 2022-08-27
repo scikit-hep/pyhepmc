@@ -421,7 +421,13 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
-      .def(py::self == py::self);
+      .def(py::self == py::self)
+      // clang-format off
+      ATTR(name, GenRunInfo::ToolInfo)
+      ATTR(version, GenRunInfo::ToolInfo)
+      ATTR(description, GenRunInfo::ToolInfo)
+      // clang-format on
+      ;
 
   py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
 
