@@ -1,7 +1,6 @@
 # pyhepmc
-<!-- begin of description -->
+
 A Pythonic wrapper for the HepMC3 C++ library.
-<!-- end of description -->
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![PyPI version](https://badge.fury.io/py/pyhepmc.svg)](https://badge.fury.io/py/pyhepmc)
@@ -10,7 +9,6 @@ A Pythonic wrapper for the HepMC3 C++ library.
 
 pyhepmc was formerly known as pyhepmc-ng. The development of pyhepmc-ng continues in the pyhepmc package.
 
-<!-- begin of description -->
 HepMC3 has its own Python bindings. Why should you use these?
 
 **pyhepmc is easy to install**
@@ -36,7 +34,7 @@ where appropriate. The classes are designed to render well in Jupyter notebooks.
 
 pyhepmc can optionally visualize events, using the mature graphviz library as a backend.
 
-![](docs/pyhepmc.svg)
+![](pyhepmc.svg)
 
 **pyhepmc is actively maintained**
 
@@ -49,7 +47,6 @@ We aim for 100% coverage, not quite there yet.
 ## Documentation
 
 pyhepmc currently has no separate documentation, but it mirrors the C++ interface of the HepMC3 library, which is documented here: http://hepmc.web.cern.ch/hepmc. Docs will come soon, for now, please use Python's `help()` browser to learn about the API.
-<!-- end of description -->
 
 ## License
 
