@@ -1,6 +1,5 @@
 import pytest
 import pyhepmc as hep
-import numpy as np
 
 
 @pytest.fixture()
@@ -99,6 +98,18 @@ def evt():
     return evt
 
 
+def test_FourVector():
+    a = hep.FourVector(1, 2, 3, 4)
+    b = hep.FourVector([1, 2, 3, 4])
+    assert a == b
+
+    with pytest.raises(ValueError):
+        hep.FourVector([1, 2, 3])
+
+    with pytest.raises(ValueError):
+        hep.FourVector([1, 2, 3, 4, 5])
+
+
 def test_GenEvent(evt):
     for i, p in enumerate(evt.particles):
         assert p.status == i + 1
@@ -115,22 +126,14 @@ def test_GenEvent(evt):
 
 
 def test_GenEvent_generated_mass():
-    p = hep.GenParticle((1.0, 1.0, 1.0, 1.0), 2212, 1)
-    with pytest.warns(np.VisibleDeprecationWarning):
-        assert p.is_generated_mass_set() is False
+    p = hep.GenParticle((0.0, 0.0, 3.0, 5.0), 2212, 1)
+    assert p.is_generated_mass_set() is False
+    assert p.generated_mass == 4.0
     p.generated_mass = 2.3
-    with pytest.warns(np.VisibleDeprecationWarning):
-        assert p.is_generated_mass_set() is True
+    assert p.is_generated_mass_set() is True
     assert p.generated_mass == 2.3
-    with pytest.warns(np.VisibleDeprecationWarning):
-        p.unset_generated_mass()
-        assert p.is_generated_mass_set() is False
-    p.generated_mass = 2.3
-    with pytest.warns(np.VisibleDeprecationWarning):
-        assert p.is_generated_mass_set() is True
-    p.generated_mass = None
-    with pytest.warns(np.VisibleDeprecationWarning):
-        assert p.is_generated_mass_set() is False
+    p.unset_generated_mass()
+    assert p.generated_mass == 4.0
 
 
 @pytest.mark.parametrize("use_parent", (True, False))

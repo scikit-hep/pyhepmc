@@ -29,4 +29,23 @@ _T overload_cast(_T x) {
 #define METH_OL(name, cls, rval, args) .def(#name, (rval(cls::*)(args)) & cls::name)
 #define ATTR(name, cls) .def_readwrite(#name, &cls::name)
 
+// #define FUNC(name) m.def(#name, name, docs[#name])
+// #define PROP_RO(name, cls) \
+//   .def_property_readonly(#name, &cls::name, docs[#cls "." #name])
+// #define PROP_ROS(name, cls) \
+//   .def_property_readonly_static(#name, &cls::name, docs[#cls "." #name])
+// #define PROP_RO_OL(name, cls, rval)                                         \
+//   .def_property_readonly(#name, overload_cast<rval, const cls>(&cls::name), \
+//                          docs[#cls "." #name])
+// #define PROP(name, cls) \
+//   .def_property(#name, &cls::name, &cls::set_##name, docs[#cls "." #name])
+// #define PROP_OL(name, cls, rval) \
+//   .def_property(#name, overload_cast<rval, const cls>(&cls::name), &cls::set_##name,
+//   \
+//                 docs[#cls "." #name])
+// #define METH(name, cls) .def(#name, &cls::name, docs[#cls "." #name])
+// #define METH_OL(name, cls, rval, args) \
+//   .def(#name, (rval(cls::*)(args)) & cls::name, docs[#cls "." #name])
+// #define ATTR(name, cls) .def_readwrite(#name, &cls::name, docs[#cls "." #name])
+
 #endif

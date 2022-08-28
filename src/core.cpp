@@ -264,26 +264,8 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
 PYBIND11_MODULE(_core, m) {
   using namespace HepMC3;
 
-  // m.doc() = R"pbdoc(
-  //     _pyhepmc plugin
-  //     --------------
-  //     .. currentmodule:: pyhepmc
-  //     .. autosummary::
-  //        :toctree: _generate
-  //        Units
-  //        FourVector
-  //        GenEvent
-  //        GenParticle
-  //        GenVertex
-  //        print_hepevt
-  //        print_content
-  //        print_listing
-  // )pbdoc";
-
-  // m.def("dummy", []() { return 0; }, R"pbdoc(
-  //     Return zero
-  //     Some other explanation about the dummy function.
-  // )pbdoc");
+  // py::module_ m_doc = py::module_::import("pyhepmc._doc");
+  // py::dict doc = m_docs.attr("doc");
 
   py::class_<Units> clsUnits(m, "Units");
 
@@ -301,6 +283,7 @@ PYBIND11_MODULE(_core, m) {
       .def(py::init<>())
       .def(py::init<double, double, double, double>(), "x"_a, "y"_a, "z"_a, "t"_a)
       .def(py::init([](py::sequence seq) {
+        if (py::len(seq) != 4) throw py::value_error("length != 4");
         const double x = py::cast<double>(seq[0]);
         const double y = py::cast<double>(seq[1]);
         const double z = py::cast<double>(seq[2]);
@@ -325,10 +308,8 @@ PYBIND11_MODULE(_core, m) {
                case 1: return self.y();
                case 2: return self.z();
                case 3: return self.t();
-               default:; // noop
+               default: throw py::index_error("out of bounds");
              }
-             PyErr_SetString(PyExc_IndexError, "out of bounds");
-             throw py::error_already_set();
              return 0.0;
            })
       .def("__setitem__",
@@ -339,9 +320,7 @@ PYBIND11_MODULE(_core, m) {
                case 1: self.setY(v); break;
                case 2: self.setZ(v); break;
                case 3: self.setT(v); break;
-               default:
-                 PyErr_SetString(PyExc_IndexError, "out of bounds");
-                 throw py::error_already_set();
+               default: throw py::index_error("out of bounds");
              }
            })
       .def(py::self == py::self)
@@ -367,8 +346,9 @@ PYBIND11_MODULE(_core, m) {
       METH(perp, FourVector)
       METH(interval, FourVector)
       METH(pt, FourVector)
-      METH(m2, FourVector)
+      METH(pt2, FourVector)
       METH(m, FourVector)
+      METH(m2, FourVector)
       METH(phi, FourVector)
       METH(theta, FourVector)
       METH(eta, FourVector)
@@ -376,6 +356,9 @@ PYBIND11_MODULE(_core, m) {
       METH(abs_eta, FourVector)
       METH(abs_rap, FourVector)
       METH(is_zero, FourVector)
+      METH(rho, FourVector)
+      METH(p3mod, FourVector)
+      METH(p3mod2, FourVector)
       // clang-format on
       ;
 
@@ -414,6 +397,7 @@ PYBIND11_MODULE(_core, m) {
       .def(py::init<std::string, std::string, std::string>(), "name"_a, "version"_a,
            "description"_a)
       .def(py::init([](py::sequence seq) {
+        if (py::len(seq) != 3) throw py::value_error("length != 3");
         return new GenRunInfo::ToolInfo({py::cast<std::string>(seq[0]),
                                          py::cast<std::string>(seq[1]),
                                          py::cast<std::string>(seq[2])});
@@ -538,37 +522,27 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
-      .def_property(
-          "generated_mass",
-          [](GenParticle& self) {
-            if (self.is_generated_mass_set()) return py::cast(self.generated_mass());
-            return static_cast<py::object>(py::none());
-          },
-          [](GenParticle& self, py::object value) {
-            if (value.is_none())
-              self.unset_generated_mass();
-            else
-              self.set_generated_mass(py::cast<double>(value));
-          })
       // clang-format off
       PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
       PROP_RO(in_event, GenParticle)
       PROP_RO(id, GenParticle)
-      // PROP_RO(data, GenParticle)
+      // PROP_RO(data, GenParticle) // TODO
       PROP_RO_OL(production_vertex, GenParticle, ConstGenVertexPtr)
       PROP_RO_OL(end_vertex, GenParticle, ConstGenVertexPtr)
       PROP_RO_OL(parents, GenParticle, std::vector<ConstGenParticlePtr>)
       PROP_RO_OL(children, GenParticle, std::vector<ConstGenParticlePtr>)
-      // PROP_RO(ancestors, GenParticle)
-      // PROP_RO(descendants, GenParticle)
       PROP(pid, GenParticle)
+      PROP_RO(abs_pid, GenParticle)
       PROP(status, GenParticle)
       PROP(momentum, GenParticle)
+      PROP(generated_mass, GenParticle)
+      METH(unset_generated_mass, GenParticle)
+      METH(is_generated_mass_set, GenParticle)
       // clang-format on
       ;
 
   py::class_<GenVertex, GenVertexPtr>(m, "GenVertex")
-      .def(py::init<const FourVector&>(), "position"_a = py::make_tuple(0, 0, 0, 0))
+      .def(py::init<const FourVector&>(), "position"_a = FourVector())
       .def(py::self == py::self)
       .def("__repr__",
            [](const GenVertexPtr& self) {
@@ -589,7 +563,6 @@ PYBIND11_MODULE(_core, m) {
       METH_OL(add_particle_out, GenVertex, void, GenParticlePtr)
       METH_OL(remove_particle_in, GenVertex, void, GenParticlePtr)
       METH_OL(remove_particle_out, GenVertex, void, GenParticlePtr)
-      // METH(particles, GenVertex)
       METH(has_set_position, GenVertex)
       // clang-format on
       ;
