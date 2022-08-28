@@ -2,6 +2,7 @@
 from ._autodoc import autodoc as doc
 
 override = {
+    "Units": "Units in which HepMC3 stores momentum and position.",
     "GenParticle.end_vertex": "Get end vertex.",
     "GenParticle.generated_mass": """Get or set generated mass.
 
