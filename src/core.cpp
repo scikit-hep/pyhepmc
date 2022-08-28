@@ -268,7 +268,7 @@ PYBIND11_MODULE(_core, m) {
   py::module_ m_doc = py::module_::import("pyhepmc._doc");
   auto doc = py::cast<std::map<std::string, std::string>>(m_doc.attr("doc"));
 
-  py::class_<Units> clsUnits(m, "Units", doc["Units"].c_str());
+  py::class_<Units> clsUnits(m, "Units", DOC(Units));
 
   py::enum_<Units::MomentumUnit>(clsUnits, "MomentumUnit")
       .value("MEV", Units::MomentumUnit::MEV)
@@ -280,7 +280,7 @@ PYBIND11_MODULE(_core, m) {
       .value("MM", Units::LengthUnit::MM)
       .export_values();
 
-  py::class_<FourVector>(m, "FourVector")
+  py::class_<FourVector>(m, "FourVector", DOC(FourVector))
       .def(py::init<>())
       .def(py::init<double, double, double, double>(), "x"_a, "y"_a, "z"_a, "t"_a)
       .def(py::init([](py::sequence seq) {
@@ -291,14 +291,14 @@ PYBIND11_MODULE(_core, m) {
         const double t = py::cast<double>(seq[3]);
         return new FourVector(x, y, z, t);
       }))
-      .def_property("x", &FourVector::x, &FourVector::setX)
-      .def_property("y", &FourVector::y, &FourVector::setY)
-      .def_property("z", &FourVector::z, &FourVector::setZ)
-      .def_property("t", &FourVector::t, &FourVector::setT)
-      .def_property("px", &FourVector::px, &FourVector::setPx)
-      .def_property("py", &FourVector::py, &FourVector::setPy)
-      .def_property("pz", &FourVector::pz, &FourVector::setPz)
-      .def_property("e", &FourVector::e, &FourVector::setE)
+      .def_property("x", &FourVector::x, &FourVector::setX, DOC(FourVector.x))
+      .def_property("y", &FourVector::y, &FourVector::setY, DOC(FourVector.y))
+      .def_property("z", &FourVector::z, &FourVector::setZ, DOC(FourVector.z))
+      .def_property("t", &FourVector::t, &FourVector::setT, DOC(FourVector.t))
+      .def_property("px", &FourVector::px, &FourVector::setPx, DOC(FourVector.px))
+      .def_property("py", &FourVector::py, &FourVector::setPy, DOC(FourVector.py))
+      .def_property("pz", &FourVector::pz, &FourVector::setPz, DOC(FourVector.pz))
+      .def_property("e", &FourVector::e, &FourVector::setE, DOC(FourVector.e))
       // support sequence protocol
       .def("__len__", [](FourVector& self) { return 4; })
       .def("__getitem__",
@@ -373,7 +373,7 @@ PYBIND11_MODULE(_core, m) {
   FUNC(delta_r2_rap);
   FUNC(delta_r_rap);
 
-  py::class_<GenRunInfo, GenRunInfoPtr> clsGenRunInfo(m, "GenRunInfo");
+  py::class_<GenRunInfo, GenRunInfoPtr> clsGenRunInfo(m, "GenRunInfo", DOC(GenRunInfo));
   clsGenRunInfo.def(py::init<>())
       .def_property("tools",
                     overload_cast<std::vector<GenRunInfo::ToolInfo>&, GenRunInfo>(
@@ -394,7 +394,7 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo")
+  py::class_<GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo", DOC(GenRunInfo.ToolInfo))
       .def(py::init<std::string, std::string, std::string>(), "name"_a, "version"_a,
            "description"_a)
       .def(py::init([](py::sequence seq) {
@@ -419,7 +419,7 @@ PYBIND11_MODULE(_core, m) {
 
   py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
 
-  py::class_<GenHeavyIon, GenHeavyIonPtr>(m, "GenHeavyIon")
+  py::class_<GenHeavyIon, GenHeavyIonPtr>(m, "GenHeavyIon", DOC(GenHeavyIon))
       .def(py::init([](int nh, int np, int nt, int nc, int ns, int nsp, int nnw = 0,
                        int nwn = 0, int nwnw = 0, float im = 0., float pl = 0.,
                        float ec = 0., float s = 0., float cent = 0.) {
@@ -432,20 +432,21 @@ PYBIND11_MODULE(_core, m) {
            "impact_parameter"_a = 0.f, "event_plane_angle"_a = 0.f,
            "eccentricity"_a = 0.f, "sigma_inel_NN"_a = 0.f, "centrality"_a = 0.f);
 
-  py::class_<GenEvent>(m, "GenEvent")
+  py::class_<GenEvent>(m, "GenEvent", DOC(GenEvent))
       .def(py::init<std::shared_ptr<GenRunInfo>, Units::MomentumUnit,
                     Units::LengthUnit>(),
            "run"_a, "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
       .def(py::init<Units::MomentumUnit, Units::LengthUnit>(),
            "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
-      .def_property("weights",
-                    overload_cast<std::vector<double>&, GenEvent>(&GenEvent::weights),
-                    [](GenEvent& self, py::sequence seq) {
-                      std::vector<double> w;
-                      w.reserve(py::len(seq));
-                      for (auto obj : seq) w.push_back(obj.cast<double>());
-                      self.weights() = w;
-                    })
+      .def_property(
+          "weights", overload_cast<std::vector<double>&, GenEvent>(&GenEvent::weights),
+          [](GenEvent& self, py::sequence seq) {
+            std::vector<double> w;
+            w.reserve(py::len(seq));
+            for (auto obj : seq) w.push_back(obj.cast<double>());
+            self.weights() = w;
+          },
+          DOC(GenEvent.weights))
       .def(
           "weight",
           [](GenEvent& self, const unsigned long i) -> double {
@@ -453,7 +454,7 @@ PYBIND11_MODULE(_core, m) {
               return self.weight(i);
             } catch (const std::runtime_error&) { throw py::index_error(); }
           },
-          "index"_a = 0)
+          "index"_a = 0, DOC(GenEvent.weight))
       .def("weight",
            overload_cast<double, const GenEvent, const std::string&>(&GenEvent::weight),
            "name"_a)
@@ -462,20 +463,19 @@ PYBIND11_MODULE(_core, m) {
           [](GenEvent& self, const std::string& name, double v) {
             self.weight(name) = v;
           },
-          "name"_a, "value"_a)
-      .def_property_readonly("weight_names",
-                             [](const GenEvent& self) { return self.weight_names(); })
+          "name"_a, "value"_a, DOC(GenEvent.set_weight))
       .def_property("heavy_ion",
                     overload_cast<GenHeavyIonPtr, GenEvent>(&GenEvent::heavy_ion),
-                    &GenEvent::set_heavy_ion)
+                    &GenEvent::set_heavy_ion, DOC(GenEvent.heavy_ion))
       .def_property("pdf_info",
                     overload_cast<GenPdfInfoPtr, GenEvent>(&GenEvent::pdf_info),
-                    &GenEvent::set_pdf_info)
+                    &GenEvent::set_pdf_info, DOC(GenEvent.pdf_info))
       .def_property(
           "cross_section",
           overload_cast<GenCrossSectionPtr, GenEvent>(&GenEvent::cross_section),
-          &GenEvent::set_cross_section)
-      .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0)
+          &GenEvent::set_cross_section, DOC(GenEvent.cross_section))
+      .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0,
+           DOC(GenEvent.reserve))
       .def(py::self == py::self)
       .def("__repr__",
            [](GenEvent& self) {
@@ -489,17 +489,17 @@ PYBIND11_MODULE(_core, m) {
              HepMC3::Print::listing(os, self, 2);
              return os.str();
            })
-
       .def("from_hepevt", from_hepevt, "event_number"_a, "px"_a, "py"_a, "pz"_a, "en"_a,
            "m"_a, "pid"_a, "status"_a, "parents"_a = py::none(),
            "children"_a = py::none(), "vx"_a = py::none(), "vy"_a = py::none(),
-           "vz"_a = py::none(), "vt"_a = py::none())
+           "vz"_a = py::none(), "vt"_a = py::none(), DOC(GenEvent.from_hepevt))
       // clang-format off
       METH(clear, GenEvent)
       PROP(run_info, GenEvent)
       PROP(event_number, GenEvent)
       PROP_RO(momentum_unit, GenEvent)
       PROP_RO(length_unit, GenEvent)
+      PROP_RO(weight_names, GenEvent)
       METH(set_units, GenEvent)
       METH(event_pos, GenEvent)
       PROP_RO_OL(beams, GenEvent, std::vector<ConstGenParticlePtr>)
@@ -513,7 +513,7 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenParticle, GenParticlePtr>(m, "GenParticle")
+  py::class_<GenParticle, GenParticlePtr>(m, "GenParticle", DOC(GenParticle))
       .def(py::init<const FourVector&, int, int>(),
            "momentum"_a = py::make_tuple(0, 0, 0, 0), "pid"_a = 0, "status"_a = 0)
       .def(py::self == py::self)
@@ -542,7 +542,7 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenVertex, GenVertexPtr>(m, "GenVertex")
+  py::class_<GenVertex, GenVertexPtr>(m, "GenVertex", DOC(GenVertex))
       .def(py::init<const FourVector&>(), "position"_a = FourVector())
       .def(py::self == py::self)
       .def("__repr__",
@@ -571,17 +571,23 @@ PYBIND11_MODULE(_core, m) {
   // py::class_<GenParticleData>(m, "GenParticleData");
   // py::class_<GenVertexData>(m, "GenVertexData");
 
-  m.def("content", [](const GenEvent& event) {
-    std::ostringstream os;
-    HepMC3::Print::content(os, event);
-    return os.str();
-  });
+  m.def(
+      "content",
+      [](const GenEvent& event) {
+        std::ostringstream os;
+        HepMC3::Print::content(os, event);
+        return os.str();
+      },
+      DOC(Print.content));
 
-  m.def("listing", [](const GenEvent& event, unsigned short precision = 2) {
-    std::ostringstream os;
-    HepMC3::Print::listing(os, event, precision);
-    return os.str();
-  });
+  m.def(
+      "listing",
+      [](const GenEvent& event, unsigned short precision = 2) {
+        std::ostringstream os;
+        HepMC3::Print::listing(os, event, precision);
+        return os.str();
+      },
+      DOC(Print.listing));
 
   FUNC(equal_particle_sets);
   FUNC(equal_vertex_sets);

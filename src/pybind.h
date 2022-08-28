@@ -35,4 +35,6 @@ _T overload_cast(_T x) {
   .def(#name, (rval(cls::*)(args)) & cls::name, doc[#cls "." #name].c_str())
 #define ATTR(name, cls) .def_readwrite(#name, &cls::name, doc[#cls "." #name].c_str())
 
+#define DOC(name) doc[#name].c_str()
+
 #endif

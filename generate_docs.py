@@ -1,5 +1,4 @@
 from pathlib import Path  # noqa
-import pyhepmc
 import subprocess as subp
 import xml.etree.ElementTree as ET
 from collections import defaultdict
@@ -9,6 +8,8 @@ cdir = Path(__file__).parent
 if not (cdir / "docs" / "xml").exists():
     subp.check_call(["doxygen", "docs/Doxyfile"])
 
+with open(cdir / "src" / "pyhepmc" / "_autodoc.py", "w") as f:
+    f.write("autodoc = {}\n")
 
 IGNORED = {
     "HEPEVT_Pointers",
@@ -224,6 +225,9 @@ for name, comment in tmp.items():
                     comment = [c.replace(" (non-const)", "")]
                     break
     results[name] = comment
+
+# must import only after _autodoc.py was cleared
+import pyhepmc  # noqa
 
 objects = []
 object_visitor(objects, "", pyhepmc)

@@ -194,6 +194,9 @@ The ctor to read from temp stream.""",
     "ReaderLHEF.close": """Close.""",
     "ReaderLHEF.failed": """State.""",
     "ReaderLHEF.read_event": """Reading event.""",
+    "Units": """Stores units-related enums and conversion functions.
+
+Manages units used by hepmc::genevent.""",
     "WriterAscii": """Genevent i/o serialization for structured text files.""",
     "WriterAscii.__init__": """Constructor.
 
