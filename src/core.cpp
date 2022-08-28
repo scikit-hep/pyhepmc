@@ -264,10 +264,10 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
 PYBIND11_MODULE(_core, m) {
   using namespace HepMC3;
 
-  // py::module_ m_doc = py::module_::import("pyhepmc._doc");
-  // py::dict doc = m_docs.attr("doc");
+  py::module_ m_doc = py::module_::import("pyhepmc._doc");
+  auto doc = py::cast<std::map<std::string, std::string>>(m_doc.attr("doc"));
 
-  py::class_<Units> clsUnits(m, "Units");
+  py::class_<Units> clsUnits(m, "Units", doc["Units"].c_str());
 
   py::enum_<Units::MomentumUnit>(clsUnits, "MomentumUnit")
       .value("MEV", Units::MomentumUnit::MEV)

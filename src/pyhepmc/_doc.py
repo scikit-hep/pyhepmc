@@ -1,6 +1,6 @@
 # flake8: noqa
 doc = {
-    "Units": "Units doc",
+    "Units": "These are the Units docs",
     "GenParticle.end_vertex": "Get end vertex.",
     "GenParticle.generated_mass": """Get or set generated mass.
 
