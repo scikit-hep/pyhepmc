@@ -233,13 +233,7 @@ with open(cdir / "src" / "pyhepmc" / "_autodoc.py", "w") as f:
 
     fw("# DO NOT EDIT: created by generate_docs.py\n")
     fw("# flake8: noqa\n")
-    fw("from pyhepmc import (\n")
-    for x in sorted(objects):
-        if "." in x:
-            continue
-        fw(f"   {x},\n")
-    fw(")\n")
-
+    fw("autodoc = {\n")
     for name in sorted(results):
         if name not in objects:
             print("Info", name, "not found in Python")
@@ -249,4 +243,5 @@ with open(cdir / "src" / "pyhepmc" / "_autodoc.py", "w") as f:
         s = "\n\n".join(comment)
         if len(comment) > 1:
             print("WARN", name, "MULTIPLE comments")
-        fw(f'{name}.__doc__ = """{s}"""\n')
+        fw(f'    "{name}": """{s}""",\n')
+    fw("}\n")
