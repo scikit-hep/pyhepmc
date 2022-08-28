@@ -97,18 +97,21 @@ def to_dot(
         try:
             from particle import Particle, ParticleNotFound, InvalidParticle
 
-            pdb = Particle.from_pdgid(p.pid)
-            quarks = pdb.quarks
-            if quarks:
-                tooltip += f"\nquarks = {quarks}"
-            else:  # boson or lepton
-                color = color_lepton_or_boson
-            tooltip += f"\nQ = {pdb.charge:.3g}"
-            if pdb.ctau and np.isfinite(pdb.ctau):
-                tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
-            if pdb.charge == 0:
-                style = "dashed"
-        except (ModuleNotFoundError, ParticleNotFound, InvalidParticle):
+            try:
+                pdb = Particle.from_pdgid(p.pid)
+                quarks = pdb.quarks
+                if quarks:
+                    tooltip += f"\nquarks = {quarks}"
+                else:  # boson or lepton
+                    color = color_lepton_or_boson
+                tooltip += f"\nQ = {pdb.charge:.3g}"
+                if pdb.ctau and np.isfinite(pdb.ctau):
+                    tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
+                if pdb.charge == 0:
+                    style = "dashed"
+            except (ParticleNotFound, InvalidParticle):
+                pass
+        except ModuleNotFoundError:
             pass
 
         label = f"{pname} {en:.2g} {unit}"
