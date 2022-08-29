@@ -123,7 +123,9 @@ def test_GenPdfInfo(evt):
     assert pi.scale == 0.0
     pi.scale = 1.2
     assert pi.scale == 1.2
+    assert evt.pdf_info is None
     evt.pdf_info = pi
+    assert evt.pdf_info == pi
 
 
 def test_GenEvent(evt):

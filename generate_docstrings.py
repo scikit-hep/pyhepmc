@@ -21,7 +21,6 @@ IGNORED = {
     "Print.line",
     "GenParticlePtr_greater",
     "pair_GenVertexPtr_int_greater",
-    "GenEvent.particles",
     "ReaderPlugin",
     "WriterPlugin",
     "Reader",
@@ -29,13 +28,6 @@ IGNORED = {
     "FourVector.set",
     "FourVector.set_component",
     "FourVector.get_component",
-    "FourVector.delta_phi",
-    "FourVector.delta_eta",
-    "FourVector.delta_rap",
-    "FourVector.delta_r2_eta",
-    "FourVector.delta_r_eta",
-    "FourVector.delta_r2_rap",
-    "FourVector.delta_r_rap",
     "FourVector.ZERO_VECTOR",
 }
 
@@ -67,6 +59,8 @@ def handle_comment(node):
             xreftitle = xrefsect.find("xreftitle").text
             if xreftitle == "Deprecated":
                 return None
+            if xreftitle == "Todo":
+                continue
 
         parameterlist = para.find("parameterlist")
         if parameterlist is not None:
@@ -83,7 +77,7 @@ def handle_comment(node):
                 for line in description.split("\n"):
                     s += f"\n    {line}"
         else:
-            s += "".join(para.itertext()).strip().capitalize()
+            s += "".join(para.itertext()).strip()
         if s and not s.endswith("."):
             s += "."
         s += "\n\n"
@@ -157,12 +151,14 @@ for fn in Path("docs/xml").glob("*.xml"):
             print("unexpected", node)
             breakpoint()
 
-# postprocessing: constructors
+# postprocessing: constructors and delta_* methods
 for name in list(results):
     p = name.split(".")
     if len(p) > 1:
         if p[-1] == p[-2]:
             p[-1] = "__init__"
+        if p[0] == "FourVector" and p[1].startswith("delta_"):
+            p = p[1:]
     comment = results[name]
     del results[name]
     name = ".".join(p)
@@ -205,18 +201,25 @@ for name in list(results):
     del results[getter]
     del results[setter]
 
-# merge entries
+# merge trivially duplicated entries
 for name, comment in results.items():
     if len(comment) > 1:
+        # strip comments regarding constness
+        for i, c in enumerate(comment):
+            for x in (" (non-const)", " (const version)", " (const)"):
+                if x in c:
+                    comment[i] = c.replace(x, "")
+                    break
+        # unify get/set
+        for i, c in enumerate(comment):
+            for x in ("Get/set", "Get", "Set"):
+                if x in c:
+                    comment[i] = c.replace(x, "Access")
+                    break
         # merge comments if they are the same
         if comment[0].lower().strip(".") in comment[1].lower():
             comment = comment[:1]
-        # keep non-const when const and non-const are available
-        elif "const" in comment[0] and "const" in comment[1]:
-            for c in comment:
-                if " (non-const)" in c:
-                    comment = [c.replace(" (non-const)", "")]
-                    break
+
     results[name] = comment
 
 # must import only after _autodoc.py was cleared
