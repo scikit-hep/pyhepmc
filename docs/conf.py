@@ -33,4 +33,4 @@ html_static_path = ["_static"]
 
 # Autodoc options
 autodoc_member_order = "groupwise"
-autodoc_mock_imports = ["particle", "graphviz"]
+autodoc_mock_imports = ["numpy", "particle", "graphviz"]
