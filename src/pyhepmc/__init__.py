@@ -31,10 +31,10 @@ from ._io import (  # noqa
 from ._version import __version__  # noqa
 
 try:
-    from .view import to_dot
+    from .view import to_dot as _to_dot
 
     def _genevent_repr_html(self):
-        g = to_dot(self)
+        g = _to_dot(self)
         return g._repr_image_svg_xml()
 
     GenEvent._repr_html_ = _genevent_repr_html

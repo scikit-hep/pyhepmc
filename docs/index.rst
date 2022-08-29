@@ -1,4 +1,4 @@
-.. include:: about.rst
+.. include:: about.rst.in
 
 .. toctree::
     :hidden:

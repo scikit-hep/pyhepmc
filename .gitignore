@@ -19,3 +19,5 @@ src/pyhepmc/_version.py
 .vscode
 docs/xml
 docs/_build
+docs/about.rst.in
+docs/generated_reference.rst.in
