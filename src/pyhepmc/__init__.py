@@ -6,6 +6,8 @@ from ._core import (  # noqa
     GenVertex,
     GenHeavyIon,
     GenRunInfo,
+    GenCrossSection,
+    GenPdfInfo,
     equal_vertex_sets,
     equal_particle_sets,
     content,

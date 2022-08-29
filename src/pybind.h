@@ -27,6 +27,8 @@ _T overload_cast(_T x) {
                          doc[#cls "." #name].c_str())
 #define PROP(name, cls) \
   .def_property(#name, &cls::name, &cls::set_##name, doc[#cls "." #name].c_str())
+#define PROP2(name, cls) \
+  .def_property(#name, &cls::get_##name, &cls::set_##name, doc[#cls "." #name].c_str())
 #define PROP_OL(name, cls, rval)                                                     \
   .def_property(#name, overload_cast<rval, const cls>(&cls::name), &cls::set_##name, \
                 doc[#cls "." #name].c_str())

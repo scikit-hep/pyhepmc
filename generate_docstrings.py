@@ -18,7 +18,6 @@ IGNORED = {
     "HEPEVT_Wrapper_Runtime",
     "HEPEVT_Wrapper_Template",
     "HEPEVT_Wrapper_Runtime_Static",
-    "Print",
     "Print.line",
     "GenParticlePtr_greater",
     "pair_GenVertexPtr_int_greater",
@@ -158,30 +157,29 @@ for fn in Path("docs/xml").glob("*.xml"):
             print("unexpected", node)
             breakpoint()
 
-# postprocessing of constructors
-tmp = {}
-for name, comment in results.items():
+# postprocessing: constructors
+for name in list(results):
     p = name.split(".")
     if len(p) > 1:
         if p[-1] == p[-2]:
             p[-1] = "__init__"
+    comment = results[name]
+    del results[name]
     name = ".".join(p)
-    tmp[name] = comment
+    results[name] = comment
 
 # filter entries
-delete = set()
-for name, comment in tmp.items():
-    if "Attribute" in name or "operator" in name:
-        delete.add(name)
-    if name in IGNORED or name.split(".")[0] in IGNORED:
-        delete.add(name)
-for x in delete:
-    del tmp[x]
+for name in list(results):
+    if (
+        "Attribute" in name
+        or "operator" in name
+        or name in IGNORED
+        or name.split(".")[0] in IGNORED
+    ):
+        del results[name]
 
 # join set/get entries into properties
-delete = []
-tmp2 = {}
-for name, comment in tmp.items():
+for name in list(results):
     if ".set" not in name:
         continue
     i = name.find(".set")
@@ -199,21 +197,16 @@ for name, comment in tmp.items():
     else:
         prop = setter.replace(".set", ".").lower()
         getter = setter.replace(".set", ".get")
-    if getter not in tmp:
+    if getter not in results:
         getter = prop
-    if getter not in tmp:
+    if getter not in results:
         continue
-    tmp2[prop] = tmp[getter] + tmp[setter]
-    delete.append(getter)
-    delete.append(setter)
-
-for x in delete:
-    del tmp[x]
-tmp.update(tmp2)
+    results[prop] = results[getter] + results[setter]
+    del results[getter]
+    del results[setter]
 
 # merge entries
-results = {}
-for name, comment in tmp.items():
+for name, comment in results.items():
     if len(comment) > 1:
         # merge comments if they are the same
         if comment[0].lower().strip(".") in comment[1].lower():
@@ -232,7 +225,8 @@ import pyhepmc  # noqa
 objects = []
 object_visitor(objects, "", pyhepmc)
 
-with open(cdir / "src" / "pyhepmc" / "_autodoc.py", "w") as f:
+autodoc = cdir / "src" / "pyhepmc" / "_autodoc.py"
+with open(autodoc, "w") as f:
     fw = f.write
 
     fw("# DO NOT EDIT: created by generate_docs.py\n")
@@ -241,7 +235,6 @@ with open(cdir / "src" / "pyhepmc" / "_autodoc.py", "w") as f:
     for name in sorted(results):
         if name not in objects:
             print("Info", name, "not found in Python")
-            continue
 
         comment = results[name]
         s = "\n\n".join(comment)

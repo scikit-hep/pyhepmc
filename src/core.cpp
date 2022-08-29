@@ -1,5 +1,6 @@
 #include "pybind.h"
 
+#include "HepMC3/Attribute.h"
 #include "HepMC3/FourVector.h"
 #include "HepMC3/GenCrossSection.h"
 #include "HepMC3/GenEvent.h"
@@ -419,18 +420,160 @@ PYBIND11_MODULE(_core, m) {
 
   py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
 
-  py::class_<GenHeavyIon, GenHeavyIonPtr>(m, "GenHeavyIon", DOC(GenHeavyIon))
-      .def(py::init([](int nh, int np, int nt, int nc, int ns, int nsp, int nnw = 0,
-                       int nwn = 0, int nwnw = 0, float im = 0., float pl = 0.,
-                       float ec = 0., float s = 0., float cent = 0.) {
-             auto x = std::make_shared<GenHeavyIon>();
-             x->set(nh, np, nt, nc, ns, nsp, nnw, nwn, nwnw, im, pl, ec, s, cent);
-             return x;
-           }),
-           "n_coll_hard"_a, "n_part_proj"_a, "n_part_targ"_a, "n_coll"_a,
-           "n_spec_neut"_a, "n_spec_prot"_a, "nnw"_a = 0, "nwn"_a = 0, "nwnw"_a = 0,
-           "impact_parameter"_a = 0.f, "event_plane_angle"_a = 0.f,
-           "eccentricity"_a = 0.f, "sigma_inel_NN"_a = 0.f, "centrality"_a = 0.f);
+  using AttributePtr = std::shared_ptr<Attribute>;
+
+  py::class_<Attribute, AttributePtr>(m, "Attribute", DOC(Attribute))
+      .def_property_readonly(
+          "particle", overload_cast<GenParticlePtr, Attribute>(&Attribute::particle),
+          DOC(Attribute.particle))
+      .def_property_readonly("vertex",
+                             overload_cast<GenVertexPtr, Attribute>(&Attribute::vertex),
+                             DOC(Attribute.vertex))
+      .def("to_string",
+           [](const Attribute& self) {
+             std::string s;
+             self.to_string(s);
+             return s;
+           })
+      // clang-format off
+      METH(from_string, Attribute)
+      PROP_RO(is_parsed, Attribute)
+      PROP_RO(unparsed_string, Attribute)
+      PROP_RO(event, Attribute)
+      // clang-format on
+      ;
+
+  // py::class_<IntAttribute, Attribute>(m, "IntAttribute", DOC(IntAttribute))
+  //     .def(py::init<>())
+  //     .def(py::init<int>(), "val"_a)
+  //     .def("__str__",
+  //          [](const IntAttribute& self) {
+  //            std::string s;
+  //            self.to_string(s);
+  //            return s;
+  //          })
+  //     // clang-format off
+  //     METH(from_string, IntAttribute)
+  //     PROP(value, IntAttribute)
+  //     // clang-format on
+  //     ;
+
+  py::class_<GenHeavyIon, Attribute, GenHeavyIonPtr>(m, "GenHeavyIon", DOC(GenHeavyIon))
+      .def(py::init<>())
+      // clang-format off
+      ATTR(Ncoll_hard, GenHeavyIon)
+      ATTR(Npart_proj, GenHeavyIon)
+      ATTR(Npart_targ, GenHeavyIon)
+      ATTR(Ncoll, GenHeavyIon)
+      ATTR(N_Nwounded_collisions, GenHeavyIon)
+      ATTR(Nwounded_N_collisions, GenHeavyIon)
+      ATTR(Nwounded_Nwounded_collisions, GenHeavyIon)
+      ATTR(impact_parameter, GenHeavyIon)
+      ATTR(event_plane_angle, GenHeavyIon)
+      ATTR(sigma_inel_NN, GenHeavyIon)
+      ATTR(centrality, GenHeavyIon)
+      ATTR(user_cent_estimate, GenHeavyIon)
+      ATTR(Nspec_proj_n, GenHeavyIon)
+      ATTR(Nspec_targ_n, GenHeavyIon)
+      ATTR(Nspec_proj_p, GenHeavyIon)
+      ATTR(Nspec_targ_p, GenHeavyIon)
+      ATTR(participant_plane_angles, GenHeavyIon)
+      ATTR(eccentricities, GenHeavyIon)
+      // clang-format on
+      ;
+
+  py::class_<GenPdfInfo, Attribute, GenPdfInfoPtr>(m, "GenPdfInfo", DOC(GenPdfInfo))
+      .def(py::init<>())
+      .def_property(
+          "parton_id1", [](const GenPdfInfo& self) { return self.parton_id[0]; },
+          [](GenPdfInfo& self, int value) { self.parton_id[0] = value; },
+          DOC(GenPdfInfo.parton_id))
+      .def_property(
+          "parton_id2", [](const GenPdfInfo& self) { return self.parton_id[1]; },
+          [](GenPdfInfo& self, int value) { self.parton_id[1] = value; },
+          DOC(GenPdfInfo.parton_id))
+      .def_property(
+          "pdf_id1", [](const GenPdfInfo& self) { return self.pdf_id[0]; },
+          [](GenPdfInfo& self, int value) { self.pdf_id[0] = value; },
+          DOC(GenPdfInfo.pdf_id))
+      .def_property(
+          "pdf_id2", [](const GenPdfInfo& self) { return self.pdf_id[1]; },
+          [](GenPdfInfo& self, int value) { self.pdf_id[1] = value; },
+          DOC(GenPdfInfo.pdf_id))
+      .def_property(
+          "x1", [](const GenPdfInfo& self) { return self.x[0]; },
+          [](GenPdfInfo& self, double value) { self.x[0] = value; }, DOC(GenPdfInfo.x))
+      .def_property(
+          "x2", [](const GenPdfInfo& self) { return self.x[1]; },
+          [](GenPdfInfo& self, double value) { self.x[1] = value; }, DOC(GenPdfInfo.x))
+      .def_property(
+          "xf1", [](const GenPdfInfo& self) { return self.xf[0]; },
+          [](GenPdfInfo& self, double value) { self.xf[0] = value; },
+          DOC(GenPdfInfo.xf))
+      .def_property(
+          "xf2", [](const GenPdfInfo& self) { return self.xf[1]; },
+          [](GenPdfInfo& self, double value) { self.xf[1] = value; },
+          DOC(GenPdfInfo.xf))
+      // clang-format off
+      ATTR(scale, GenPdfInfo)
+      // clang-format on
+      ;
+
+  py::class_<GenCrossSection, Attribute, GenCrossSectionPtr>(m, "GenCrossSection",
+                                                             DOC(GenCrossSection))
+      .def(py::init<>())
+      .def(
+          "xsec",
+          [](GenCrossSection& self, py::object obj) {
+            if (py::isinstance<py::int_>(obj)) {
+              return self.xsec(py::cast<int>(obj));
+            } else if (py::isinstance<py::str>(obj)) {
+              return self.xsec(py::cast<std::string>(obj));
+            } else
+              throw py::type_error("int or str required");
+            return 0.0;
+          },
+          "index_or_name"_a = 0, DOC(GenCrossSection.xsec))
+      .def(
+          "xsec_err",
+          [](GenCrossSection& self, py::object obj) {
+            if (py::isinstance<py::int_>(obj)) {
+              return self.xsec_err(py::cast<int>(obj));
+            } else if (py::isinstance<py::str>(obj)) {
+              return self.xsec_err(py::cast<std::string>(obj));
+            } else
+              throw py::type_error("int or str required");
+            return 0.0;
+          },
+          "index_or_name"_a = 0, DOC(GenCrossSection.xsec_err))
+      .def(
+          "set_xsec",
+          [](GenCrossSection& self, py::object obj, double value) {
+            if (py::isinstance<py::int_>(obj)) {
+              self.set_xsec(py::cast<int>(obj), value);
+            } else if (py::isinstance<py::str>(obj)) {
+              self.set_xsec(py::cast<std::string>(obj), value);
+            } else
+              throw py::type_error("int or str required");
+          },
+          "index_or_name"_a, "value"_a, DOC(GenCrossSection.set_xsec))
+      .def(
+          "set_xsec_err",
+          [](GenCrossSection& self, py::object obj, double value) {
+            if (py::isinstance<py::int_>(obj)) {
+              self.set_xsec_err(py::cast<int>(obj), value);
+            } else if (py::isinstance<py::str>(obj)) {
+              self.set_xsec_err(py::cast<std::string>(obj), value);
+            } else
+              throw py::type_error("int or str required");
+          },
+          "index_or_name"_a, "value"_a, DOC(GenCrossSection.set_xsec_err))
+      // clang-format off
+      PROP2(accepted_events, GenCrossSection)
+      PROP2(attempted_events, GenCrossSection)
+      PROP_RO(is_valid, GenCrossSection)
+      // clang-format on
+      ;
 
   py::class_<GenEvent>(m, "GenEvent", DOC(GenEvent))
       .def(py::init<std::shared_ptr<GenRunInfo>, Units::MomentumUnit,
@@ -449,21 +592,23 @@ PYBIND11_MODULE(_core, m) {
           DOC(GenEvent.weights))
       .def(
           "weight",
-          [](GenEvent& self, const unsigned long i) -> double {
-            try {
-              return self.weight(i);
-            } catch (const std::runtime_error&) { throw py::index_error(); }
+          [](GenEvent& self, py::object obj) {
+            if (py::isinstance<py::int_>(obj)) try {
+                return self.weight(py::cast<int>(obj));
+              } catch (const std::runtime_error&) { throw py::index_error(); }
+            else if (py::isinstance<py::str>(obj))
+              return self.weight(py::cast<std::string>(obj));
+            else
+              throw py::type_error("int or str required");
+            return 0.0;
           },
-          "index"_a = 0, DOC(GenEvent.weight))
-      .def("weight",
-           overload_cast<double, const GenEvent, const std::string&>(&GenEvent::weight),
-           "name"_a)
+          "index_or_name"_a = 0, DOC(GenEvent.weight))
       .def(
           "set_weight",
           [](GenEvent& self, const std::string& name, double v) {
             self.weight(name) = v;
           },
-          "name"_a, "value"_a, DOC(GenEvent.set_weight))
+          "name"_a, "value"_a, DOC(GenEvent.weight))
       .def_property("heavy_ion",
                     overload_cast<GenHeavyIonPtr, GenEvent>(&GenEvent::heavy_ion),
                     &GenEvent::set_heavy_ion, DOC(GenEvent.heavy_ion))
