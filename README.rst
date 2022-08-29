@@ -41,7 +41,7 @@ pyhepmc is a hand-crafted mapping of C++ code to Python, see documentation for d
 
 pyhepmc can optionally visualize events, using the mature `graphviz <https://graphviz.org>`_ library as a backend.
 
-.. image:: docs/pyhepmc.svg
+.. image:: docs/_static/pyhepmc.svg
 
 **pyhepmc is actively maintained**
 
