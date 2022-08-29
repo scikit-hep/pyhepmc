@@ -7,6 +7,7 @@ A Pythonic wrapper for the HepMC3 C++ library.
   :target: https://scikit-hep.org
 
 .. image:: https://badge.fury.io/py/pyhepmc.svg
+  :target: https://pypi.org/project/pyhepmc
 
 .. image:: https://coveralls.io/repos/github/scikit-hep/pyhepmc/badge.svg
   :target: https://coveralls.io/github/scikit-hep/pyhepmc
