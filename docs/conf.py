@@ -10,13 +10,6 @@ project = "pyhepmc"
 copyright = "2022, Hans Dembinski"
 author = "Hans Dembinski"
 
-import sys  # noqa
-
-sys.path.append(".")
-
-import generate_about  # noqa
-import generate_reference  # noqa
-
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
