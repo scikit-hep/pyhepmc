@@ -4,6 +4,8 @@ from numpy import VisibleDeprecationWarning
 
 class deprecated:
     def __init__(self, reason):
+        if not isinstance(reason, str):
+            raise ValueError("argument `reason: str` is required")
         self._reason = reason
 
     def __call__(self, func):
