@@ -1,6 +1,5 @@
 import pytest
 import pyhepmc as hep
-import numpy as np
 
 
 @pytest.fixture()
@@ -99,6 +98,36 @@ def evt():
     return evt
 
 
+def test_FourVector():
+    a = hep.FourVector(1, 2, 3, 4)
+    b = hep.FourVector([1, 2, 3, 4])
+    assert a == b
+
+    with pytest.raises(ValueError):
+        hep.FourVector([1, 2, 3])
+
+    with pytest.raises(ValueError):
+        hep.FourVector([1, 2, 3, 4, 5])
+
+
+def test_GenPdfInfo(evt):
+    pi = hep.GenPdfInfo()
+    pi.parton_id1 = 211
+    pi.parton_id2 = 2212
+    pi.x1 = 0.5
+    pi.x2 = 0.3
+    assert pi.parton_id1 == 211
+    assert pi.parton_id2 == 2212
+    assert pi.x1 == 0.5
+    assert pi.x2 == 0.3
+    assert pi.scale == 0.0
+    pi.scale = 1.2
+    assert pi.scale == 1.2
+    assert evt.pdf_info is None
+    evt.pdf_info = pi
+    assert evt.pdf_info == pi
+
+
 def test_GenEvent(evt):
     for i, p in enumerate(evt.particles):
         assert p.status == i + 1
@@ -115,22 +144,14 @@ def test_GenEvent(evt):
 
 
 def test_GenEvent_generated_mass():
-    p = hep.GenParticle((1.0, 1.0, 1.0, 1.0), 2212, 1)
-    with pytest.warns(np.VisibleDeprecationWarning):
-        assert p.is_generated_mass_set() is False
+    p = hep.GenParticle((0.0, 0.0, 3.0, 5.0), 2212, 1)
+    assert p.is_generated_mass_set() is False
+    assert p.generated_mass == 4.0
     p.generated_mass = 2.3
-    with pytest.warns(np.VisibleDeprecationWarning):
-        assert p.is_generated_mass_set() is True
+    assert p.is_generated_mass_set() is True
     assert p.generated_mass == 2.3
-    with pytest.warns(np.VisibleDeprecationWarning):
-        p.unset_generated_mass()
-        assert p.is_generated_mass_set() is False
-    p.generated_mass = 2.3
-    with pytest.warns(np.VisibleDeprecationWarning):
-        assert p.is_generated_mass_set() is True
-    p.generated_mass = None
-    with pytest.warns(np.VisibleDeprecationWarning):
-        assert p.is_generated_mass_set() is False
+    p.unset_generated_mass()
+    assert p.generated_mass == 4.0
 
 
 @pytest.mark.parametrize("use_parent", (True, False))
@@ -236,6 +257,8 @@ def test_weights():
     evt.weights = [2, 3]
     assert evt.weight(1) == 3
     assert evt.weight("a") == 2
+    with pytest.raises(RuntimeError, match="no weight with given name"):
+        evt.weight("foo")
     with pytest.raises(IndexError):
         evt.weight(2)
     with pytest.raises(RuntimeError, match="no weight with given name"):

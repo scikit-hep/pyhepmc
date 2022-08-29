@@ -25,6 +25,7 @@ repos:
   - id: check-yaml
     args: ["--allow-multiple-documents"]
   - id: debug-statements
+    files: src/pyhepmc/.*\\.py
   - id: end-of-file-fixer
   - id: mixed-line-ending
   - id: sort-simple-yaml
@@ -43,7 +44,7 @@ repos:
   rev: 6.1.1
   hooks:
   - id: pydocstyle
-    files: src/iminuit/[^_].*\.py
+    files: src/pyhepmc/[^_].*\\.py
 
 # Python linter (Flake8)
 - repo: https://github.com/pycqa/flake8

@@ -1,10 +1,43 @@
+"""
+Visualization for GenEvent.
+"""
+
 from graphviz import Digraph
 from pyhepmc._prettify import db as _prettify
-from pyhepmc import Units
+from pyhepmc import Units as _Units
 import numpy as np
 
 
-def to_dot(evt, style=None):
+def to_dot(
+    evt,
+    size=None,
+    color_hadron="black",
+    color_lepton_or_boson="goldenrod",
+    color_interal="dodgerblue",
+    color_invalid="gainsboro",
+):
+    """
+    Convert GenEvent to Digraph.
+
+    This converts the GenEvent into a graphviz Digraph in the DOT language,
+    which in turn can be rendered in SVG format and displayed in Jupyter
+    notebooks.
+
+    Parameters
+    ----------
+    evt : GenEvent
+        The event to convert.
+    size : (int, int) or None, optional
+        Maximum size of the graph in inches.
+    color_hadron : str, optional
+        Color (HTML color specification) for hadrons.
+    color_lepton_or_boson: str, optional
+        Color (HTML color specification) for leptons or bosons.
+    color_internal: str, optional
+        Color (HTML color specification) for generator-internal particles (e.g. Pomerons).
+    color_invalid: str, optional
+        Color (HTML color specification) for invalid particles (e.g. PID==0).
+    """
     if evt.run_info:
         name = "\n".join(f"{t.name}-{t.version}" for t in evt.run_info.tools)
         name += "\n"
@@ -15,9 +48,13 @@ def to_dot(evt, style=None):
     d = Digraph(name=name)
     d.node_attr["shape"] = "point"
     d.graph_attr["rankdir"] = "LR"
-    d.graph_attr["size"] = "8,100"
+    if size is None:
+        size = "8,100"
+    else:
+        size = f"{size[0]},{size[1]}"
+    d.graph_attr["size"] = size
 
-    GeV = 1 if evt.momentum_unit == Units.GEV else 1e3
+    GeV = 1 if evt.momentum_unit == _Units.GEV else 1e3
 
     for v in evt.vertices:
         d.node(f"{v.id}", tooltip=f"{v.position} mm\nstatus = {v.status}")
@@ -35,18 +72,18 @@ def to_dot(evt, style=None):
             en *= 1e3
             unit = "MeV"
 
-        color = "black"
+        color = color_hadron
         style = "solid"
 
         pname = _prettify.get(p.pid, None)
         if pname is None:
             if p.pid == 0:
                 pname = "Invalid(0)"
-                color = "gainsboro"
+                color = color_invalid
                 penwidth = "7"
             else:
                 pname = f"Internal({p.pid})"
-                color = "dodgerblue"
+                color = color_interal
                 penwidth = "7"
 
         tooltip = f"{pname} [PDGID: {int(p.pid)}]"
@@ -60,24 +97,27 @@ def to_dot(evt, style=None):
         try:
             from particle import Particle, ParticleNotFound, InvalidParticle
 
-            pdb = Particle.from_pdgid(p.pid)
-            quarks = pdb.quarks
-            if quarks:
-                tooltip += f"\nquarks = {quarks}"
-            else:  # boson or lepton
-                color = "goldenrod"
-            tooltip += f"\nQ = {pdb.charge:.3g}"
-            if pdb.ctau and np.isfinite(pdb.ctau):
-                tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
-            if pdb.charge == 0:
-                style = "dashed"
-        except (ModuleNotFoundError, ParticleNotFound, InvalidParticle):
+            try:
+                pdb = Particle.from_pdgid(p.pid)
+                quarks = pdb.quarks
+                if quarks:
+                    tooltip += f"\nquarks = {quarks}"
+                else:  # boson or lepton
+                    color = color_lepton_or_boson
+                tooltip += f"\nQ = {pdb.charge:.3g}"
+                if pdb.ctau and np.isfinite(pdb.ctau):
+                    tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
+                if pdb.charge == 0:
+                    style = "dashed"
+            except (ParticleNotFound, InvalidParticle):
+                pass
+        except ModuleNotFoundError:
             pass
 
         label = f"{pname} {en:.2g} {unit}"
 
         if 1000 <= p.pid < 10000:  # diquark
-            color = "black"
+            color = color_hadron
 
         # do not connect initial particles to root vertex
         if p.production_vertex and p.production_vertex.id != 0:

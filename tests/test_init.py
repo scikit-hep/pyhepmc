@@ -11,6 +11,7 @@ def test_init():
         core_names.add(name)
 
     core_names.remove("stringstream")
+    core_names.remove("Attribute")
 
     names = set()
     for name in dir(pyhepmc):

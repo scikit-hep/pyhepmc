@@ -14,6 +14,7 @@
 #include "HepMC3/ReaderRootTree.h"
 #endif
 
+#include <map>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -32,6 +33,9 @@ using ReaderRootPtr = std::shared_ptr<ReaderRoot>;
 #endif
 
 void register_io(py::module& m) {
+
+  py::module_ m_doc = py::module_::import("pyhepmc._doc");
+  auto doc = py::cast<std::map<std::string, std::string>>(m_doc.attr("doc"));
 
   // this class is here to simplify unit testing of Readers and Writers
   py::class_<std::stringstream>(m, "stringstream")
