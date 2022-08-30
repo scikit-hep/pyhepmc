@@ -7,6 +7,10 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: ${ github.workflow }-${ github.head_ref }
+  cancel-in-progress: true
+
 jobs:
   doc:
     runs-on: ubuntu-latest

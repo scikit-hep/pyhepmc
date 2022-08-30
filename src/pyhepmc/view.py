@@ -1,21 +1,22 @@
 """
 Visualization for GenEvent.
 """
-
+from __future__ import annotations
 from graphviz import Digraph
-from pyhepmc._prettify import db as _prettify
-from pyhepmc import Units as _Units
+from ._prettify import db as _prettify
+from . import Units as _Units
 import numpy as np
+from . import GenEvent
 
 
 def to_dot(
-    evt,
-    size=None,
-    color_hadron="black",
-    color_lepton_or_boson="goldenrod",
-    color_interal="dodgerblue",
-    color_invalid="gainsboro",
-):
+    evt: GenEvent,
+    size: tuple[int, int] = None,
+    color_hadron: str = "black",
+    color_lepton_or_boson: str = "goldenrod",
+    color_interal: str = "dodgerblue",
+    color_invalid: str = "gainsboro",
+) -> Digraph:
     """
     Convert GenEvent to Digraph.
 
@@ -49,10 +50,10 @@ def to_dot(
     d.node_attr["shape"] = "point"
     d.graph_attr["rankdir"] = "LR"
     if size is None:
-        size = "8,100"
+        size_s = "8,100"
     else:
-        size = f"{size[0]},{size[1]}"
-    d.graph_attr["size"] = size
+        size_s = f"{size[0]},{size[1]}"
+    d.graph_attr["size"] = size_s
 
     GeV = 1 if evt.momentum_unit == _Units.GEV else 1e3
 

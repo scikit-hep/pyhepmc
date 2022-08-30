@@ -6,6 +6,10 @@ on:
       - '**'
   workflow_dispatch:
 
+concurrency:
+  group: ${ github.workflow }-${ github.head_ref }
+  cancel-in-progress: true
+
 # Reminder
 # - name: Extract Branch Name
 #   run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
