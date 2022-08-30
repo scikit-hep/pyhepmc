@@ -2,7 +2,7 @@ from pathlib import Path
 from setuptools import setup
 import sys
 
-cdir = Path(__file__).parent
+cdir = Path(__file__).parent.absolute()
 
 version = {}
 with open(cdir / "src" / "pyhepmc" / "_version.py") as f:
