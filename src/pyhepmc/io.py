@@ -64,8 +64,10 @@ def _iter(self: _tp.Any) -> _Iter:
 
 def _read(self: _tp.Any) -> _tp.Union[GenEvent, None]:
     evt = GenEvent()
-    ok = self.read_event(evt)
-    return evt if ok and not self.failed() else None
+    success = self.read_event(evt)
+    if self.failed():  # usually EOF
+        return None
+    return evt if success else None
 
 
 # add pythonic interface to IO classes
@@ -138,6 +140,8 @@ class _WrappedWriter:
                 self._writer.precision = precision
 
         self._writer.write_event(evt)
+        if self._writer.failed():
+            raise IOError("writing GenEvent failed")
 
     def close(self) -> None:
         if self._writer is not None:
@@ -172,6 +176,10 @@ def open(
         format when reading (this is fast and thus safe to use), and use the latest
         HepMC3 format when writing. Allowed values: "HepMC3", "HepMC2", "LHEF",
         "HEPEVT". "LHEF" is not supported for writing.
+
+    Raises
+    ------
+    IOError if reading or writing fails.
     """
     if mode == "r":
         if format is None:

@@ -1,4 +1,3 @@
-# flake8: F401
 """
 pyhepmc: a pythonic and Jupyter-friendly Python API for HepMC3
 
@@ -29,31 +28,56 @@ Missing functionality
 - Generic ``Attribute`` s for :class:`GenEvent`, :class:`GenParticle`,
   :class:`GenVertex`, :class:`GenRunInfo` are not yet implemented.
 """
+# flake8: F401
 from ._core import (  # noqa: F401
-    Units as Units,
-    FourVector as FourVector,
-    GenEvent as GenEvent,
-    GenParticle as GenParticle,
-    GenVertex as GenVertex,
-    GenHeavyIon as GenHeavyIon,
-    GenRunInfo as GenRunInfo,
-    GenCrossSection as GenCrossSection,
-    GenPdfInfo as GenPdfInfo,
-    equal_vertex_sets as equal_vertex_sets,
-    equal_particle_sets as equal_particle_sets,
-    content as content,
-    listing as listing,
-    delta_phi as delta_phi,
-    delta_eta as delta_eta,
-    delta_r2_eta as delta_r2_eta,
-    delta_r_eta as delta_r_eta,
-    delta_r2_rap as delta_r2_rap,
-    delta_r_rap as delta_r_rap,
-    delta_rap as delta_rap,
+    Units,
+    FourVector,
+    GenEvent,
+    GenParticle,
+    GenVertex,
+    GenHeavyIon,
+    GenRunInfo,
+    GenPdfInfo,
+    GenCrossSection,
+    equal_vertex_sets,
+    equal_particle_sets,
+    content,
+    listing,
+    delta_phi,
+    delta_eta,
+    delta_r2_eta,
+    delta_r_eta,
+    delta_r2_rap,
+    delta_r_rap,
+    delta_rap,
 )
 from .io import open as open  # noqa: F401
 from ._version import __version__ as __version__  # noqa: F401
 import typing as _tp
+
+__all__ = (
+    "Units",
+    "FourVector",
+    "GenEvent",
+    "GenParticle",
+    "GenVertex",
+    "GenHeavyIon",
+    "GenRunInfo",
+    "GenPdfInfo",
+    "GenCrossSection",
+    "equal_vertex_sets",
+    "equal_particle_sets",
+    "content",
+    "listing",
+    "delta_phi",
+    "delta_eta",
+    "delta_r2_eta",
+    "delta_r_eta",
+    "delta_r2_rap",
+    "delta_r_rap",
+    "delta_rap",
+    "open",
+)
 
 try:
     from .view import to_dot as _to_dot

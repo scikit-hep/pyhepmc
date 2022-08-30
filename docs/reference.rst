@@ -5,8 +5,8 @@ pyhepmc
 -------
 
 .. automodule:: pyhepmc
-
-.. include:: generated_reference.rst.in
+  :members:
+  :undoc-members:
 
 pyhepmc.io
 ----------
