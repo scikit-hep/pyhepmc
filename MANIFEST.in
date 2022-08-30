@@ -8,6 +8,7 @@ recursive-include extern/pybind11/include *.h
 include extern/pybind11/CMakeLists.txt
 include extern/pybind11/tools/*.cmake
 include extern/pybind11/LICENSE
+include extern/HepMC3/LICENSE
 include cmake_ext.py
 include CMakeLists.txt
 include LICENSE
