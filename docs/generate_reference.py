@@ -17,7 +17,7 @@ reference = """
 
 reference += """
 Classes
--------
+^^^^^^^
 """
 
 for name in classes:
@@ -29,7 +29,7 @@ for name in classes:
 
 reference += """
 Functions
----------
+^^^^^^^^^
 """
 
 for name in functions:

@@ -1,3 +1,14 @@
+"""
+HepMC3 IO classes.
+
+This module contains various Reader and Writer classes, which have
+pythonic interfaces. They act as context managers and close the file
+automatically. The Readers can be iterated over and yield events.
+
+The :func:`open` function is even easier to use. It can read any
+supported file and will auto-detect the format. It can be used for
+reading and writing.
+"""
 from ._core import (
     GenEvent,
     ReaderAscii,
@@ -10,6 +21,17 @@ from ._core import (
 )
 from pathlib import PurePath
 import typing as _tp
+
+__all__ = [
+    "open",
+    "ReaderAscii",
+    "ReaderAsciiHepMC2",
+    "ReaderLHEF",
+    "ReaderHEPEVT",
+    "WriterAscii",
+    "WriterAsciiHepMC2",
+    "WriterHEPEVT",
+]
 
 _open = open
 
