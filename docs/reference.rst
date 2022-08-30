@@ -1,6 +1,16 @@
 Reference
 =========
 
-.. automodule:: pyhepmc
+pyhepmc
+-------
 
-.. include:: generated_reference.rst.in
+.. automodule:: pyhepmc
+  :members:
+  :undoc-members:
+
+pyhepmc.io
+----------
+
+.. automodule:: pyhepmc.io
+  :members:
+  :undoc-members:

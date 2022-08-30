@@ -3,7 +3,7 @@ name: Coverage
 on:
   pull_request:
     paths-ignore:
-      - 'doc/**'
+      - 'docs/**'
       - '*.rst'
       - '*.md'
   push:
@@ -15,6 +15,10 @@ on:
       - 'doc/**'
       - '*.rst'
       - '*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
 
 jobs:
   coverage:

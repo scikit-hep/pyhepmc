@@ -10,12 +10,18 @@ build-backend = "setuptools.build_meta"
 write_to = "src/pyhepmc/_version.py"
 
 [tool.mypy]
+strict = true
+no_implicit_optional = false
+allow_redefinition = true
 ignore_missing_imports = true
+show_error_codes = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-q -ra --ff"
+addopts = "--strict-config --strict-markers -q -ra --ff"
 testpaths = ["tests"]
+log_cli_level = "INFO"
+xfail_strict = true
 filterwarnings = [
     "error::DeprecationWarning",
     "error::numpy.VisibleDeprecationWarning",

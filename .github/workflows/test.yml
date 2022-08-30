@@ -3,9 +3,13 @@ name: Test
 on:
   pull_request:
     paths-ignore:
-      - 'doc/**'
+      - 'docs/**'
       - '*.rst'
       - '*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
 
 jobs:
   test:

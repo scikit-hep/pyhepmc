@@ -28,7 +28,8 @@ Missing functionality
 - Generic ``Attribute`` s for :class:`GenEvent`, :class:`GenParticle`,
   :class:`GenVertex`, :class:`GenRunInfo` are not yet implemented.
 """
-from ._core import (  # noqa
+# flake8: F401
+from ._core import (  # noqa: F401
     Units,
     FourVector,
     GenEvent,
@@ -36,8 +37,8 @@ from ._core import (  # noqa
     GenVertex,
     GenHeavyIon,
     GenRunInfo,
-    GenCrossSection,
     GenPdfInfo,
+    GenCrossSection,
     equal_vertex_sets,
     equal_particle_sets,
     content,
@@ -50,25 +51,57 @@ from ._core import (  # noqa
     delta_r_rap,
     delta_rap,
 )
-from ._io import (  # noqa
-    ReaderAscii,
-    ReaderAsciiHepMC2,
-    ReaderLHEF,
-    ReaderHEPEVT,
-    WriterAscii,
-    WriterAsciiHepMC2,
-    WriterHEPEVT,
-    pyhepmc_open as open,
+from .io import open as open  # noqa: F401
+from ._version import __version__ as __version__  # noqa: F401
+import typing as _tp
+
+__all__ = (
+    "Units",
+    "FourVector",
+    "GenEvent",
+    "GenParticle",
+    "GenVertex",
+    "GenHeavyIon",
+    "GenRunInfo",
+    "GenPdfInfo",
+    "GenCrossSection",
+    "equal_vertex_sets",
+    "equal_particle_sets",
+    "content",
+    "listing",
+    "delta_phi",
+    "delta_eta",
+    "delta_r2_eta",
+    "delta_r_eta",
+    "delta_r2_rap",
+    "delta_r_rap",
+    "delta_rap",
+    "open",
 )
-from ._version import __version__  # noqa
 
 try:
     from .view import to_dot as _to_dot
 
-    def _genevent_repr_html(self):
+    def _genevent_repr_html(self: GenEvent) -> _tp.Any:
         g = _to_dot(self)
         return g._repr_image_svg_xml()
 
     GenEvent._repr_html_ = _genevent_repr_html
 except ModuleNotFoundError:
     pass
+
+
+def __getattr__(name: str) -> _tp.Any:
+    from . import io
+    import warnings
+    from numpy import VisibleDeprecationWarning
+
+    if name in dir(io):
+        warnings.warn(
+            f"importing {name} from pyhepmc is deprecated, please import from pyhepmc.io",
+            category=VisibleDeprecationWarning,
+            stacklevel=2,
+        )
+        return getattr(io, name)
+
+    raise AttributeError

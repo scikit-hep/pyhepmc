@@ -1,3 +1,14 @@
+"""
+HepMC3 IO classes.
+
+This module contains various Reader and Writer classes, which have
+pythonic interfaces. They act as context managers and close the file
+automatically. The Readers can be iterated over and yield events.
+
+The :func:`open` function is even easier to use. It can read any
+supported file and will auto-detect the format. It can be used for
+reading and writing.
+"""
 from ._core import (
     GenEvent,
     ReaderAscii,
@@ -11,12 +22,25 @@ from ._core import (
 from pathlib import PurePath
 import typing as _tp
 
+__all__ = [
+    "open",
+    "ReaderAscii",
+    "ReaderAsciiHepMC2",
+    "ReaderLHEF",
+    "ReaderHEPEVT",
+    "WriterAscii",
+    "WriterAsciiHepMC2",
+    "WriterHEPEVT",
+]
+
+_open = open
+
 
 class _Iter:
-    def __init__(self, parent):
+    def __init__(self, parent: _tp.Any):
         self.parent = parent
 
-    def __next__(self):
+    def __next__(self) -> GenEvent:
         evt = self.parent.read()
         if evt is None:
             raise StopIteration
@@ -25,23 +49,25 @@ class _Iter:
     next = __next__
 
 
-def _enter(self):
+def _enter(self: _Iter) -> _Iter:
     return self
 
 
-def _exit(self, type, value, tb):
+def _exit(self: _tp.Any, type: Exception, value: str, tb: _tp.Any) -> bool:
     self.close()
     return False
 
 
-def _iter(self):
+def _iter(self: _tp.Any) -> _Iter:
     return _Iter(self)
 
 
-def _read(self):
+def _read(self: _tp.Any) -> _tp.Union[GenEvent, None]:
     evt = GenEvent()
-    ok = self.read_event(evt)
-    return evt if ok and not self.failed() else None
+    success = self.read_event(evt)
+    if self.failed():  # usually EOF
+        return None
+    return evt if success else None
 
 
 # add pythonic interface to IO classes
@@ -77,46 +103,60 @@ WriterHEPEVT.__enter__ = _enter
 WriterHEPEVT.__exit__ = _exit
 WriterHEPEVT.write = WriterHEPEVT.write_event
 
+_Filename = _tp.Union[str, PurePath]
 
-# Wrapper for Writer, to be used by `open`
+
 class _WrappedWriter:
-    def __init__(self, filename, precision, Writer):
-        self._writer = (filename, precision, Writer)
+    # Wrapper for Writer, to be used by `open`
 
-    def write(self, event):
-        if not isinstance(event, GenEvent):
-            if hasattr(event, "to_hepmc3"):
-                event = event.to_hepmc3()
-            else:
-                raise TypeError(
-                    "event must be an instance of GenEvent or "
-                    "convertible to it by providing a to_hepmc3() method"
-                )
-        if isinstance(self._writer, tuple):
+    def __init__(
+        self, filename: _Filename, precision: _tp.Optional[int], Writer: _tp.Any
+    ):
+        self._writer: _tp.Any = None
+        self._init = (filename, precision, Writer)
+
+    @staticmethod
+    def _maybe_convert(event: _tp.Any) -> GenEvent:
+        if isinstance(event, GenEvent):
+            return event
+        if hasattr(event, "to_hepmc3"):
+            return event.to_hepmc3()
+        raise TypeError(
+            "event must be an instance of GenEvent or "
+            "convertible to it by providing a to_hepmc3() method"
+        )
+
+    def write(self, event: _tp.Any) -> None:
+        evt = self._maybe_convert(event)
+
+        if self._writer is None:
             # first call
-            filename, precision, Writer = self._writer
+            filename, precision, Writer = self._init
             if Writer is WriterHEPEVT:
                 self._writer = Writer(filename)
             else:
-                self._writer = Writer(filename, event.run_info)
+                self._writer = Writer(filename, evt.run_info)
             if precision is not None and hasattr(self._writer, "precision"):
                 self._writer.precision = precision
-        self._writer.write_event(event)
 
-    def close(self):
-        if not isinstance(self._writer, tuple):
+        self._writer.write_event(evt)
+        if self._writer.failed():
+            raise IOError("writing GenEvent failed")
+
+    def close(self) -> None:
+        if self._writer is not None:
             self._writer.close()
 
     __enter__ = _enter
     __exit__ = _exit
 
 
-def pyhepmc_open(
-    filename: _tp.Union[str, PurePath],
+def open(
+    filename: _Filename,
     mode: str = "r",
     precision: int = None,
     format: str = None,
-):
+) -> _tp.Any:
     """
     Open HepMC files for reading or writing.
 
@@ -136,11 +176,15 @@ def pyhepmc_open(
         format when reading (this is fast and thus safe to use), and use the latest
         HepMC3 format when writing. Allowed values: "HepMC3", "HepMC2", "LHEF",
         "HEPEVT". "LHEF" is not supported for writing.
+
+    Raises
+    ------
+    IOError if reading or writing fails.
     """
     if mode == "r":
         if format is None:
             # auto-detect
-            with open(filename, "r") as f:
+            with _open(filename, "r") as f:
                 header = f.read(256)
             if "HepMC::Asciiv3" in header:
                 Reader = ReaderAscii

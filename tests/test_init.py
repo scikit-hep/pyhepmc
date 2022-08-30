@@ -1,4 +1,5 @@
 import pyhepmc
+import pyhepmc.io
 import pyhepmc._core as core
 
 
@@ -15,6 +16,10 @@ def test_init():
 
     names = set()
     for name in dir(pyhepmc):
+        if name.startswith("_"):
+            continue
+        names.add(name)
+    for name in dir(pyhepmc.io):
         if name.startswith("_"):
             continue
         names.add(name)
