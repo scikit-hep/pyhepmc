@@ -1,17 +1,17 @@
 include src/*.cpp
 include src/*.h
 include src/pyhepmc/*.py
-include tests/*.py
 recursive-include extern/HepMC3/include *.h
 recursive-include extern/HepMC3/src *.cc
 recursive-include extern/pybind11/include *.h
 include extern/pybind11/CMakeLists.txt
 include extern/pybind11/tools/*.cmake
 include extern/pybind11/LICENSE
+include extern/HepMC3/LICENCE
 include cmake_ext.py
 include CMakeLists.txt
 include LICENSE
 include pyproject.toml
-include README.md
+include README.rst
 include setup.cfg
 include setup.py
