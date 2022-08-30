@@ -18,7 +18,7 @@ addopts = "-q -ra --ff"
 testpaths = ["tests"]
 filterwarnings = [
     "error::DeprecationWarning",
-    "error::VisibleDeprecationWarning",
+    "error::numpy.VisibleDeprecationWarning",
 ]
 
 [tool.coverage.run]
