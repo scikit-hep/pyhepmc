@@ -98,6 +98,17 @@ def evt():
     return evt
 
 
+def test_attribute(evt):
+    p1 = evt.particles[0]
+    assert p1.attributes == {}
+    p1.attributes = {"foo": 1}
+    assert p1.attributes == {"foo": 1}
+    p1.attributes = {"bar": 2}
+    assert p1.attributes == {"bar": 2}
+    p1.attributes = {}
+    assert p1.attributes == {}
+
+
 def test_FourVector():
     a = hep.FourVector(1, 2, 3, 4)
     b = hep.FourVector([1, 2, 3, 4])

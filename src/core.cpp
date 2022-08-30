@@ -1,5 +1,7 @@
 #include "pybind.h"
 
+#include "accessor.hpp"
+
 #include "HepMC3/Attribute.h"
 #include "HepMC3/FourVector.h"
 #include "HepMC3/GenCrossSection.h"
@@ -47,6 +49,7 @@ std::ostream& ostream_range(std::ostream& os, Iterator begin, Iterator end,
 namespace HepMC3 {
 
 using GenRunInfoPtr = std::shared_ptr<GenRunInfo>;
+using AttributePtr = std::shared_ptr<Attribute>;
 
 // equality comparions used by unit tests
 bool is_close(const FourVector& a, const FourVector& b, double rel_eps = 1e-7) {
@@ -261,7 +264,33 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::object parents, py::object children, py::object vx, py::object vy,
                  py::object vz, py::object vt);
 
+py::object attribute_to_python(AttributePtr a) {
+  if (auto x = std::dynamic_pointer_cast<IntAttribute>(a)) return py::cast(x->value());
+  throw std::runtime_error("Attribute not convertible to Python type");
+  return py::none();
+}
+
+AttributePtr attribute_from_python(py::object obj) {
+  if (py::isinstance<py::int_>(obj)) {
+    auto a = std::make_shared<IntAttribute>();
+    a->set_value(py::cast<int>(obj));
+    return std::dynamic_pointer_cast<Attribute>(a);
+  }
+  throw std::runtime_error("Python type not convertible to Attribute");
+  return {};
+}
 } // namespace HepMC3
+
+// get private access to attribute map of GenEvent
+using AttributeMap =
+    std::map<std::string, std::map<int, std::shared_ptr<HepMC3::Attribute>>>;
+MEMBER_ACCESSOR(GenEventAttributeMapAccessor, HepMC3::GenEvent, m_attributes,
+                AttributeMap)
+
+AttributeMap& genevent_attributes(HepMC3::GenEvent& event) {
+  auto ref = accessor::accessMember<GenEventAttributeMapAccessor>(event);
+  return ref.get();
+}
 
 PYBIND11_MODULE(_core, m) {
   using namespace HepMC3;
@@ -419,8 +448,6 @@ PYBIND11_MODULE(_core, m) {
       ;
 
   py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
-
-  using AttributePtr = std::shared_ptr<Attribute>;
 
   py::class_<Attribute, AttributePtr>(m, "Attribute", DOC(Attribute))
       .def_property_readonly(
@@ -668,6 +695,38 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
+      .def_property(
+          "attributes",
+          [](GenParticle& self) -> py::dict {
+            if (!self.parent_event()) { return {}; }
+
+            GenEvent* event = self.parent_event();
+
+            AttributeMap& amap = genevent_attributes(*event);
+
+            py::dict d;
+            for (auto& kv : amap) {
+              const auto& name = kv.first;
+              auto it = kv.second.find(self.id());
+              if (it == kv.second.end()) continue;
+              auto pyname = py::cast(name);
+              d[pyname] = attribute_to_python(it->second);
+            }
+            return d;
+          },
+          [](GenParticle& self, py::dict attributes) {
+            for (const auto& name : self.attribute_names()) {
+              auto pyname = py::cast(name);
+              if (!attributes.contains(pyname)) self.remove_attribute(name);
+            }
+
+            for (auto& key_value : attributes) {
+              auto obj = py::reinterpret_borrow<py::object>(key_value.second);
+              auto name = py::cast<std::string>(key_value.first);
+              self.add_attribute(name, attribute_from_python(obj));
+            }
+          },
+          DOC(GenParticle.attributes))
       // clang-format off
       PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
       PROP_RO(in_event, GenParticle)
@@ -696,6 +755,38 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
+      .def_property(
+          "attributes",
+          [](GenVertex& self) -> py::dict {
+            if (!self.parent_event()) { return {}; }
+
+            GenEvent* event = self.parent_event();
+
+            AttributeMap& amap = genevent_attributes(*event);
+
+            py::dict d;
+            for (auto& kv : amap) {
+              const auto& name = kv.first;
+              auto it = kv.second.find(self.id());
+              if (it == kv.second.end()) continue;
+              auto pyname = py::cast(name);
+              d[pyname] = attribute_to_python(it->second);
+            }
+            return d;
+          },
+          [](GenVertex& self, py::dict attributes) {
+            for (const auto& name : self.attribute_names()) {
+              auto pyname = py::cast(name);
+              if (!attributes.contains(pyname)) self.remove_attribute(name);
+            }
+
+            for (auto& key_value : attributes) {
+              auto obj = py::reinterpret_borrow<py::object>(key_value.second);
+              auto name = py::cast<std::string>(key_value.first);
+              self.add_attribute(name, attribute_from_python(obj));
+            }
+          },
+          DOC(GenVertex.attributes))
       // clang-format off
       PROP_RO_OL(parent_event, GenVertex, const GenEvent*)
       PROP_RO(in_event, GenVertex)

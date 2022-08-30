@@ -10,7 +10,7 @@ if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 endif()
 
 set(CMAKE_CXX_STANDARD
-    11
+    14
     CACHE STRING "C++ version selection")
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # optional, ensure standard is supported
 set(CMAKE_CXX_EXTENSIONS OFF) # optional, keep compiler extensions off
