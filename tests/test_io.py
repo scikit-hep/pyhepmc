@@ -8,12 +8,12 @@ from pathlib import Path
 
 def test_read_write(evt):  # noqa
     oss = stringstream()
-    with hep.WriterAscii(oss) as f:
+    with hep.io.WriterAscii(oss) as f:
         f.write_event(evt)
 
     evt2 = hep.GenEvent()
     assert evt != evt2
-    with hep.ReaderAscii(oss) as f:
+    with hep.io.ReaderAscii(oss) as f:
         f.read_event(evt2)
 
     assert evt.event_number == evt2.event_number
@@ -26,10 +26,10 @@ def test_read_write(evt):  # noqa
 
 def test_pythonic_read_write(evt):  # noqa
     oss = stringstream()
-    with hep.WriterAscii(oss) as f:
+    with hep.io.WriterAscii(oss) as f:
         f.write(evt)
 
-    with hep.ReaderAscii(oss) as f:
+    with hep.io.ReaderAscii(oss) as f:
         for i, evt2 in enumerate(f):
             assert i == 0
             assert evt.particles == evt2.particles
@@ -39,13 +39,13 @@ def test_pythonic_read_write(evt):  # noqa
 
 
 def test_failed_read_file():
-    with hep.ReaderAscii("test_failed_read_file.dat") as f:
+    with hep.io.ReaderAscii("test_failed_read_file.dat") as f:
         assert f.read() is None
 
 
 def test_read_empty_stream(evt):  # noqa
     oss = stringstream()
-    with hep.ReaderAscii(oss) as f:
+    with hep.io.ReaderAscii(oss) as f:
         evt = hep.GenEvent()
         ok = f.read_event(evt)
         assert ok is True  # reading empty stream is ok in HepMC
@@ -125,7 +125,7 @@ def test_open_3(evt):  # noqa
 
 
 @pytest.mark.parametrize(
-    "writer", (hep.WriterAscii, hep.WriterAsciiHepMC2, hep.WriterHEPEVT)
+    "writer", (hep.io.WriterAscii, hep.io.WriterAsciiHepMC2, hep.io.WriterHEPEVT)
 )
 def test_open_with_writer(evt, writer):  # noqa
     filename = f"test_open_{writer.__name__}.dat"
@@ -135,7 +135,7 @@ def test_open_with_writer(evt, writer):  # noqa
     with hep.open(filename) as f:
         evt2 = f.read()
 
-    if writer in (hep.WriterAsciiHepMC2, hep.WriterHEPEVT):
+    if writer in (hep.io.WriterAsciiHepMC2, hep.io.WriterHEPEVT):
         # ToolInfo not stored in this format, so adding it manually
         evt2.run_info.tools = evt.run_info.tools
 

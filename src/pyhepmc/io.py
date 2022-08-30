@@ -125,17 +125,19 @@ class _WrappedWriter:
         )
 
     def write(self, event: _tp.Any) -> None:
+        evt = self._maybe_convert(event)
+
         if self._writer is None:
             # first call
             filename, precision, Writer = self._init
             if Writer is WriterHEPEVT:
                 self._writer = Writer(filename)
             else:
-                self._writer = Writer(filename, event.run_info)
+                self._writer = Writer(filename, evt.run_info)
             if precision is not None and hasattr(self._writer, "precision"):
                 self._writer.precision = precision
 
-        self._writer.write_event(self._maybe_convert(event))
+        self._writer.write_event(evt)
 
     def close(self) -> None:
         if self._writer is not None:
