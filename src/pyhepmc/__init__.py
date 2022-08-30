@@ -89,3 +89,19 @@ try:
     GenEvent._repr_html_ = _genevent_repr_html
 except ModuleNotFoundError:
     pass
+
+
+def __getattr__(name: str) -> _tp.Any:
+    from . import io
+    import warnings
+    from numpy import VisibleDeprecationWarning
+
+    if name in dir(io):
+        warnings.warn(
+            f"importing {name} from pyhepmc is deprecated, please import from pyhepmc.io",
+            category=VisibleDeprecationWarning,
+            stacklevel=2,
+        )
+        return getattr(io, name)
+
+    raise AttributeError
