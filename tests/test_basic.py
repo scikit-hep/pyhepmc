@@ -105,11 +105,12 @@ def test_GenHeavyIon():
     assert hi != hep.GenHeavyIon()
 
 
-def test_attributes_1(evt):
-    att = evt.attributes
+def test_attributes_0():
+    ri = hep.GenRunInfo()
+    att = ri.attributes
     assert att == {}
     assert len(att) == 0
-    assert repr(att) == r"<AttributeMapView>{}"
+    assert repr(att) == r"<RunInfoAttributesView>{}"
     att["foo"] = 1
     att["bar"] = "xy"
     att["baz"] = True
@@ -121,7 +122,39 @@ def test_attributes_1(evt):
     assert len(att) == 3
     assert att == {"baz": True, "foo": 1, "bar": "xy"}
     # AttributeMapView has sorted keys
-    assert repr(att) == r"<AttributeMapView>{'bar': 'xy', 'baz': True, 'foo': 1}"
+    assert repr(att) == r"<RunInfoAttributesView>{'bar': 'xy', 'baz': True, 'foo': 1}"
+
+    del att["bar"]
+    assert len(att) == 2
+    assert att == {"baz": True, "foo": 1}
+
+    keys = [k for k in att]
+    assert keys == ["baz", "foo"]
+
+    assert len(ri.attributes) == 2
+    assert ri.attributes == att
+    att.clear()
+    assert len(att) == 0
+    assert att == {}
+
+
+def test_attributes_1(evt):
+    att = evt.attributes
+    assert att == {}
+    assert len(att) == 0
+    assert repr(att) == r"<AttributesView>{}"
+    att["foo"] = 1
+    att["bar"] = "xy"
+    att["baz"] = True
+    assert att["foo"] == 1
+    assert att["bar"] == "xy"
+    assert att["baz"] is True
+    with pytest.raises(KeyError):
+        att["xyz"]
+    assert len(att) == 3
+    assert att == {"baz": True, "foo": 1, "bar": "xy"}
+    # AttributeMapView has sorted keys
+    assert repr(att) == r"<AttributesView>{'bar': 'xy', 'baz': True, 'foo': 1}"
 
     del att["bar"]
     assert len(att) == 2

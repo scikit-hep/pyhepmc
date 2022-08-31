@@ -1,4 +1,4 @@
-#include "attributemapview.hpp"
+#include "attributes_view.hpp"
 #include "pointer.hpp"
 #include "pybind.hpp"
 #include <HepMC3/Attribute.h>
@@ -119,8 +119,8 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
          std::equal(a.weight_names().begin(), a.weight_names().end(),
                     b.weight_names().begin()) &&
          std::equal(a_attr.begin(), a_attr.end(), b_attr.begin(),
-                    [](const std::pair<std::string, std::shared_ptr<Attribute>>& a,
-                       const std::pair<std::string, std::shared_ptr<Attribute>>& b) {
+                    [](const std::pair<std::string, AttributePtr>& a,
+                       const std::pair<std::string, AttributePtr>& b) {
                       if (a.first != b.first) return false;
                       if (bool(a.second) != bool(b.second)) return false;
                       if (!a.second) return true;
@@ -379,53 +379,6 @@ PYBIND11_MODULE(_core, m) {
   FUNC(delta_r2_rap);
   FUNC(delta_r_rap);
 
-  py::class_<GenRunInfo, GenRunInfoPtr> clsGenRunInfo(m, "GenRunInfo", DOC(GenRunInfo));
-
-  clsGenRunInfo.def(py::init<>())
-      .def_property("tools",
-                    overload_cast<std::vector<GenRunInfo::ToolInfo>&, GenRunInfo>(
-                        &GenRunInfo::tools),
-                    [](GenRunInfo& self, py::sequence seq) {
-                      self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
-                    })
-      .def("__repr__",
-           [](const GenRunInfo& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
-      .def(py::self == py::self)
-      // clang-format off
-      PROP(weight_names, GenRunInfo)
-      PROP_RO(attributes, GenRunInfo)
-      // clang-format on
-      ;
-
-  py::class_<GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo", DOC(GenRunInfo.ToolInfo))
-      .def(py::init<std::string, std::string, std::string>(), "name"_a, "version"_a,
-           "description"_a)
-      .def(py::init([](py::sequence seq) {
-        if (py::len(seq) != 3) throw py::value_error("length != 3");
-        return new GenRunInfo::ToolInfo({py::cast<std::string>(seq[0]),
-                                         py::cast<std::string>(seq[1]),
-                                         py::cast<std::string>(seq[2])});
-      }))
-      .def("__repr__",
-           [](const GenRunInfo::ToolInfo& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
-      .def(py::self == py::self)
-      // clang-format off
-      ATTR(name, GenRunInfo::ToolInfo)
-      ATTR(version, GenRunInfo::ToolInfo)
-      ATTR(description, GenRunInfo::ToolInfo)
-      // clang-format on
-      ;
-
-  py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
-
   py::class_<Attribute, AttributePtr>(m, "Attribute", DOC(Attribute))
       .def_property_readonly(
           "particle", overload_cast<GenParticlePtr, Attribute>(&Attribute::particle),
@@ -583,21 +536,94 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<AttributeMapView> clsAttributeMapView(m, "AttributeMapView",
-                                                   DOC(AttributeMapView));
-  clsAttributeMapView
+  py::class_<AttributesView> clsAttributesView(m, "AttributesView",
+                                               DOC(AttributesView));
+  clsAttributesView
 
-      .def("__getitem__", &AttributeMapView::getitem)
-      .def("__setitem__", &AttributeMapView::setitem)
-      .def("__delitem__", &AttributeMapView::delitem)
-      .def("__contains__", &AttributeMapView::contains)
-      .def("__iter__", &AttributeMapView::iter)
-      .def("__len__", &AttributeMapView::len);
+      .def("__getitem__", &AttributesView::getitem)
+      .def("__setitem__", &AttributesView::setitem)
+      .def("__delitem__", &AttributesView::delitem)
+      .def("__contains__", &AttributesView::contains)
+      .def("__iter__", &AttributesView::iter)
+      .def("__len__", &AttributesView::len);
 
-  py::class_<AttributeMapView::Iter>(clsAttributeMapView, "Iter")
-      .def("next", &AttributeMapView::Iter::next)
-      .def("__next__", &AttributeMapView::Iter::next)
-      .def("__iter__", [](AttributeMapView::Iter& self) { return self; });
+  py::class_<AttributesView::Iter>(clsAttributesView, "Iter")
+      .def("next", &AttributesView::Iter::next)
+      .def("__next__", &AttributesView::Iter::next)
+      .def("__iter__", [](AttributesView::Iter& self) { return self; });
+
+  py::class_<RunInfoAttributesView> clsRunInfoAttributesView(
+      m, "RunInfoAttributesView", DOC(RunInfoAttributesView));
+  clsRunInfoAttributesView
+
+      .def("__getitem__", &RunInfoAttributesView::getitem)
+      .def("__setitem__", &RunInfoAttributesView::setitem)
+      .def("__delitem__", &RunInfoAttributesView::delitem)
+      .def("__contains__", &RunInfoAttributesView::contains)
+      .def("__iter__", &RunInfoAttributesView::iter)
+      .def("__len__", &RunInfoAttributesView::len);
+
+  py::class_<RunInfoAttributesView::Iter>(clsRunInfoAttributesView, "Iter")
+      .def("next", &RunInfoAttributesView::Iter::next)
+      .def("__next__", &RunInfoAttributesView::Iter::next)
+      .def("__iter__", [](RunInfoAttributesView::Iter& self) { return self; });
+
+  py::class_<GenRunInfo, GenRunInfoPtr> clsGenRunInfo(m, "GenRunInfo", DOC(GenRunInfo));
+
+  clsGenRunInfo.def(py::init<>())
+      .def_property("tools",
+                    overload_cast<std::vector<GenRunInfo::ToolInfo>&, GenRunInfo>(
+                        &GenRunInfo::tools),
+                    [](GenRunInfo& self, py::sequence seq) {
+                      self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
+                    })
+      .def_property(
+          "attributes", [](GenRunInfo& self) { return RunInfoAttributesView{&self}; },
+          [](GenRunInfo& self, py::dict obj) {
+            auto amv = RunInfoAttributesView{&self};
+            py::cast(amv).attr("clear")();
+            for (const auto& kv : obj) {
+              amv.setitem(py::cast<py::str>(kv.first),
+                          py::reinterpret_borrow<py::object>(kv.second));
+            }
+          },
+          DOC(GenRunInfo.attributes))
+      .def("__repr__",
+           [](const GenRunInfo& self) {
+             std::ostringstream os;
+             repr(os, self);
+             return os.str();
+           })
+      .def(py::self == py::self)
+      // clang-format off
+      PROP(weight_names, GenRunInfo)
+      // clang-format on
+      ;
+
+  py::class_<GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo", DOC(GenRunInfo.ToolInfo))
+      .def(py::init<std::string, std::string, std::string>(), "name"_a, "version"_a,
+           "description"_a)
+      .def(py::init([](py::sequence seq) {
+        if (py::len(seq) != 3) throw py::value_error("length != 3");
+        return new GenRunInfo::ToolInfo({py::cast<std::string>(seq[0]),
+                                         py::cast<std::string>(seq[1]),
+                                         py::cast<std::string>(seq[2])});
+      }))
+      .def("__repr__",
+           [](const GenRunInfo::ToolInfo& self) {
+             std::ostringstream os;
+             repr(os, self);
+             return os.str();
+           })
+      .def(py::self == py::self)
+      // clang-format off
+      ATTR(name, GenRunInfo::ToolInfo)
+      ATTR(version, GenRunInfo::ToolInfo)
+      ATTR(description, GenRunInfo::ToolInfo)
+      // clang-format on
+      ;
+
+  py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
 
   py::class_<GenEvent>(m, "GenEvent", DOC(GenEvent))
       .def(py::init<GenRunInfoPtr, Units::MomentumUnit, Units::LengthUnit>(), "run"_a,
@@ -645,10 +671,10 @@ PYBIND11_MODULE(_core, m) {
       .def_property(
           "attributes",
           [](GenEvent& self) {
-            return AttributeMapView{&self, 0};
+            return AttributesView{&self, 0};
           },
           [](GenEvent& self, py::dict obj) {
-            auto amv = AttributeMapView{&self, 0};
+            auto amv = AttributesView{&self, 0};
             py::cast(amv).attr("clear")();
             for (const auto& kv : obj) {
               amv.setitem(py::cast<py::str>(kv.first),
@@ -708,10 +734,10 @@ PYBIND11_MODULE(_core, m) {
       .def_property(
           "attributes",
           [](GenParticle& self) {
-            return AttributeMapView{self.parent_event(), self.id()};
+            return AttributesView{self.parent_event(), self.id()};
           },
           [](GenParticle& self, py::dict obj) {
-            auto amv = AttributeMapView{self.parent_event(), self.id()};
+            auto amv = AttributesView{self.parent_event(), self.id()};
             py::cast(amv).attr("clear")();
             for (const auto& kv : obj) {
               amv.setitem(py::cast<py::str>(kv.first),
@@ -750,10 +776,10 @@ PYBIND11_MODULE(_core, m) {
       .def_property(
           "attributes",
           [](GenVertex& self) {
-            return AttributeMapView{self.parent_event(), self.id()};
+            return AttributesView{self.parent_event(), self.id()};
           },
           [](GenVertex& self, py::dict obj) {
-            auto amv = AttributeMapView{self.parent_event(), self.id()};
+            auto amv = AttributesView{self.parent_event(), self.id()};
             py::cast(amv).attr("clear")();
             for (const auto& kv : obj) {
               amv.setitem(py::cast<py::str>(kv.first),
