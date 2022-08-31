@@ -1,19 +1,16 @@
-#include "pybind.h"
-
-#include "HepMC3/GenRunInfo.h"
-#include "HepMC3/ReaderAscii.h"
-#include "HepMC3/ReaderAsciiHepMC2.h"
-#include "HepMC3/ReaderHEPEVT.h"
-#include "HepMC3/ReaderLHEF.h"
-#include "HepMC3/WriterAscii.h"
-#include "HepMC3/WriterAsciiHepMC2.h"
-#include "HepMC3/WriterHEPEVT.h"
-
+#include "pybind.hpp"
+#include <HepMC3/GenRunInfo.h>
+#include <HepMC3/ReaderAscii.h>
+#include <HepMC3/ReaderAsciiHepMC2.h>
+#include <HepMC3/ReaderHEPEVT.h>
+#include <HepMC3/ReaderLHEF.h>
+#include <HepMC3/WriterAscii.h>
+#include <HepMC3/WriterAsciiHepMC2.h>
+#include <HepMC3/WriterHEPEVT.h>
 #ifdef HEPMC3_ROOTIO
 #include "HepMC3/ReaderRoot.h"
 #include "HepMC3/ReaderRootTree.h"
 #endif
-
 #include <map>
 #include <memory>
 #include <sstream>

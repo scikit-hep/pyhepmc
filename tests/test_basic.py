@@ -105,6 +105,22 @@ def test_GenHeavyIon():
     assert hi != hep.GenHeavyIon()
 
 
+def test_attributes(evt):
+    p1 = evt.particles[0]
+    att = p1.attributes
+    assert att == {}
+    assert len(att) == 0
+    att["foo"] = 1
+    att["bar"] = "xy"
+    att["baz"] = True
+    assert len(att) == 3
+    assert att == {"foo": 1, "bar": "xy", "baz": True}
+    assert p1.attributes == att
+    att.clear()
+    assert len(att) == 0
+    assert att == {}
+
+
 @pytest.mark.parametrize(
     "value",
     [
@@ -122,7 +138,7 @@ def test_GenHeavyIon():
         hep.HEPEUPAttribute(),
     ],
 )
-def test_attribute(evt, value):
+def test_attribute_2(evt, value):
     p1 = evt.particles[0]
     assert p1.attributes == {}
     p1.attributes = {"foo": value}
@@ -131,6 +147,15 @@ def test_attribute(evt, value):
     assert p1.attributes == {"bar": value}
     p1.attributes = {}
     assert p1.attributes == {}
+
+    v1 = evt.vertices[0]
+    assert v1.attributes == {}
+    v1.attributes = {"foo": value}
+    assert v1.attributes == {"foo": value}
+    v1.attributes = {"bar": value}
+    assert v1.attributes == {"bar": value}
+    v1.attributes = {}
+    assert v1.attributes == {}
 
 
 def test_FourVector():
