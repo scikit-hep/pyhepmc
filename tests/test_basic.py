@@ -115,6 +115,7 @@ def test_attributes(evt):
     att["baz"] = True
     assert len(att) == 3
     assert att == {"foo": 1, "bar": "xy", "baz": True}
+    assert len(p1.attributes) == 3
     assert p1.attributes == att
     att.clear()
     assert len(att) == 0
@@ -138,7 +139,7 @@ def test_attributes(evt):
         hep.HEPEUPAttribute(),
     ],
 )
-def test_attribute_2(evt, value):
+def test_attribute(evt, value):
     p1 = evt.particles[0]
     assert p1.attributes == {}
     p1.attributes = {"foo": value}

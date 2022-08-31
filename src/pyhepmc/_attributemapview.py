@@ -40,4 +40,4 @@ def _repr(self: AttributeMapView) -> str:
 AttributeMapView.clear = _clear
 AttributeMapView.items = _items
 AttributeMapView.__eq__ = _eq
-AttributeMapView.repr = _repr
+AttributeMapView.__repr__ = _repr

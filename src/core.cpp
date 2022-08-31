@@ -642,10 +642,18 @@ PYBIND11_MODULE(_core, m) {
           "cross_section",
           overload_cast<GenCrossSectionPtr, GenEvent>(&GenEvent::cross_section),
           &GenEvent::set_cross_section, DOC(GenEvent.cross_section))
-      .def_property_readonly(
+      .def_property(
           "attributes",
-          [](GenEvent* self) {
-            return AttributeMapView{self, 0};
+          [](GenEvent& self) {
+            return AttributeMapView{&self, 0};
+          },
+          [](GenEvent& self, py::dict obj) {
+            auto amv = AttributeMapView{&self, 0};
+            py::cast(amv).attr("clear")();
+            for (const auto& kv : obj) {
+              amv.setitem(py::cast<py::str>(kv.first),
+                          py::reinterpret_borrow<py::object>(kv.second));
+            }
           },
           DOC(GenEvent.attributes))
       .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0,
@@ -700,7 +708,7 @@ PYBIND11_MODULE(_core, m) {
       .def_property(
           "attributes",
           [](GenParticle& self) {
-            return AttributeMapView{self.parent_event(), 0};
+            return AttributeMapView{self.parent_event(), self.id()};
           },
           [](GenParticle& self, py::dict obj) {
             auto amv = AttributeMapView{self.parent_event(), self.id()};
@@ -739,10 +747,18 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
-      .def_property_readonly(
+      .def_property(
           "attributes",
           [](GenVertex& self) {
-            return AttributeMapView{self.parent_event(), 0};
+            return AttributeMapView{self.parent_event(), self.id()};
+          },
+          [](GenVertex& self, py::dict obj) {
+            auto amv = AttributeMapView{self.parent_event(), self.id()};
+            py::cast(amv).attr("clear")();
+            for (const auto& kv : obj) {
+              amv.setitem(py::cast<py::str>(kv.first),
+                          py::reinterpret_borrow<py::object>(kv.second));
+            }
           },
           DOC(GenVertex.attributes))
       // clang-format off
