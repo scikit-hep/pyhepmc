@@ -98,13 +98,35 @@ def evt():
     return evt
 
 
-def test_attribute(evt):
+def test_GenHeavyIon():
+    hi = hep.GenHeavyIon()
+    assert hi == hep.GenHeavyIon()
+    hi.Ncoll_hard = 3
+    assert hi != hep.GenHeavyIon()
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        True,
+        2,
+        1.5,
+        "baz",
+        [1, 2],
+        ["foo", "bar"],
+        [True, False],
+        hep.GenPdfInfo(),
+        hep.GenCrossSection(),
+        hep.GenHeavyIon(),
+    ],
+)
+def test_attribute(evt, value):
     p1 = evt.particles[0]
     assert p1.attributes == {}
-    p1.attributes = {"foo": 1}
-    assert p1.attributes == {"foo": 1}
-    p1.attributes = {"bar": 2}
-    assert p1.attributes == {"bar": 2}
+    p1.attributes = {"foo": value}
+    assert p1.attributes == {"foo": value}
+    p1.attributes = {"bar": value}
+    assert p1.attributes == {"bar": value}
     p1.attributes = {}
     assert p1.attributes == {}
 

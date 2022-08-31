@@ -1,6 +1,10 @@
+#include "boost/mp11/utility.hpp"
 #include "pybind.h"
 
-#include "accessor.hpp"
+#include <accessor/accessor.hpp>
+
+#include <boost/mp11/algorithm.hpp>
+#include <boost/mp11/list.hpp>
 
 #include "HepMC3/Attribute.h"
 #include "HepMC3/FourVector.h"
@@ -11,6 +15,7 @@
 #include "HepMC3/GenPdfInfo.h"
 #include "HepMC3/GenRunInfo.h"
 #include "HepMC3/GenVertex.h"
+#include "HepMC3/LHEFAttributes.h"
 #include "HepMC3/Print.h"
 #include "HepMC3/Units.h"
 
@@ -19,9 +24,11 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <pybind11/pytypes.h>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 // #include "GzReaderAscii.h"
@@ -50,6 +57,13 @@ namespace HepMC3 {
 
 using GenRunInfoPtr = std::shared_ptr<GenRunInfo>;
 using AttributePtr = std::shared_ptr<Attribute>;
+using HEPRUPAttributePtr = std::shared_ptr<HEPRUPAttribute>;
+using HEPEUPAttributePtr = std::shared_ptr<HEPEUPAttribute>;
+
+template <class T>
+bool operator!=(const T& a, const T& b) {
+  return !operator==(a, b);
+}
 
 // equality comparions used by unit tests
 bool is_close(const FourVector& a, const FourVector& b, double rel_eps = 1e-7) {
@@ -62,10 +76,6 @@ bool is_close(const FourVector& a, const FourVector& b, double rel_eps = 1e-7) {
 bool operator==(const GenParticle& a, const GenParticle& b) {
   return a.pid() == b.pid() && a.status() == b.status() &&
          is_close(a.momentum(), b.momentum());
-}
-
-bool operator!=(const GenParticle& a, const GenParticle& b) {
-  return !operator==(a, b);
 }
 
 // compares all real qualities of both particle sets,
@@ -90,8 +100,6 @@ bool operator==(const GenVertex& a, const GenVertex& b) {
          equal_particle_sets(a.particles_out(), b.particles_out());
 }
 
-bool operator!=(const GenVertex& a, const GenVertex& b) { return !operator==(a, b); }
-
 // compares all real qualities of both vertex sets,
 // but ignores the .id() fields and the vertex order
 bool equal_vertex_sets(const std::vector<ConstGenVertexPtr>& a,
@@ -109,10 +117,6 @@ bool equal_vertex_sets(const std::vector<ConstGenVertexPtr>& a,
 
 bool operator==(const GenRunInfo::ToolInfo& a, const GenRunInfo::ToolInfo& b) {
   return a.name == b.name && a.version == b.version && a.description == b.description;
-}
-
-bool operator!=(const GenRunInfo::ToolInfo& a, const GenRunInfo::ToolInfo& b) {
-  return !operator==(a, b);
 }
 
 bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
@@ -137,8 +141,6 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
                     });
 }
 
-bool operator!=(const GenRunInfo& a, const GenRunInfo& b) { return !operator==(a, b); }
-
 bool operator==(const GenEvent& a, const GenEvent& b) {
   // incomplete:
   // missing comparison of GenHeavyIon, GenPdfInfo, GenCrossSection
@@ -160,7 +162,17 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
   return equal_vertex_sets(a.vertices(), b.vertices());
 }
 
-bool operator!=(const GenEvent& a, const GenEvent& b) { return !operator==(a, b); }
+bool operator==(const GenHeavyIon& a, const GenHeavyIon& b) {
+  return a.Ncoll_hard == b.Ncoll_hard && a.Npart_proj == b.Npart_proj &&
+         a.Npart_targ == b.Npart_targ && a.Ncoll == b.Ncoll &&
+         a.N_Nwounded_collisions == b.N_Nwounded_collisions &&
+         a.Nwounded_N_collisions == b.Nwounded_N_collisions &&
+         a.Nwounded_Nwounded_collisions == b.Nwounded_Nwounded_collisions &&
+         a.impact_parameter == b.impact_parameter &&
+         a.event_plane_angle == b.event_plane_angle &&
+         a.sigma_inel_NN == b.sigma_inel_NN && a.centrality == b.centrality &&
+         a.user_cent_estimate == b.user_cent_estimate;
+}
 
 template <class T>
 std::ostream& repr(std::ostream& os, const std::shared_ptr<T>& x) {
@@ -265,30 +277,106 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::object vz, py::object vt);
 
 py::object attribute_to_python(AttributePtr a) {
-  if (auto x = std::dynamic_pointer_cast<IntAttribute>(a)) return py::cast(x->value());
-  throw std::runtime_error("Attribute not convertible to Python type");
-  return py::none();
+  using namespace boost::mp11;
+
+  // must contain all C++ attribute types derived from Attribute
+  using RawTypes =
+      mp_list<IntAttribute, LongAttribute, DoubleAttribute, FloatAttribute,
+              StringAttribute, CharAttribute, LongLongAttribute, LongDoubleAttribute,
+              UIntAttribute, ULongLongAttribute, BoolAttribute,
+
+              VectorCharAttribute, VectorFloatAttribute, VectorLongDoubleAttribute,
+              VectorLongLongAttribute, VectorUIntAttribute, VectorULongAttribute,
+              VectorULongLongAttribute, VectorIntAttribute, VectorLongIntAttribute,
+              VectorDoubleAttribute, VectorStringAttribute>;
+
+  // make default ctor noop
+  using Types = mp_transform<mp_identity, RawTypes>;
+  py::object result;
+  mp_for_each<Types>([&](auto t) {
+    using AttributeType = typename decltype(t)::type;
+    if (auto x = std::dynamic_pointer_cast<AttributeType>(a))
+      result = py::cast(x->value());
+  });
+
+  if (result.is_none()) {
+    using RawTypes = mp_list<GenCrossSection, GenHeavyIon, GenPdfInfo, HEPRUPAttribute,
+                             HEPEUPAttribute>;
+    using Types = mp_transform<mp_identity, RawTypes>;
+    mp_for_each<Types>([&](auto t) {
+      using AttributeType = typename decltype(t)::type;
+      if (auto x = std::dynamic_pointer_cast<AttributeType>(a)) result = py::cast(x);
+    });
+  }
+  if (result.is_none())
+    throw std::runtime_error("Attribute not convertible to Python type");
+  return result;
 }
 
 AttributePtr attribute_from_python(py::object obj) {
-  if (py::isinstance<py::int_>(obj)) {
-    auto a = std::make_shared<IntAttribute>();
-    a->set_value(py::cast<int>(obj));
-    return std::dynamic_pointer_cast<Attribute>(a);
+  using namespace boost::mp11;
+
+  AttributePtr result;
+
+  if (py::isinstance<GenPdfInfo>(obj)) {
+    result = py::cast<GenPdfInfoPtr>(obj);
+  } else if (py::isinstance<GenHeavyIon>(obj)) {
+    result = py::cast<GenHeavyIonPtr>(obj);
+  } else if (py::isinstance<GenCrossSection>(obj)) {
+    result = py::cast<GenCrossSectionPtr>(obj);
   }
-  throw std::runtime_error("Python type not convertible to Attribute");
-  return {};
+
+  if (!result) {
+    using Types = mp_list<mp_list<BoolAttribute, py::bool_, bool>,
+                          mp_list<IntAttribute, py::int_, int>,
+                          mp_list<FloatAttribute, py::float_, double>,
+                          mp_list<StringAttribute, py::str, std::string>>;
+
+    mp_for_each<Types>([&](auto t) {
+      using T = decltype(t);
+      using AT = mp_at_c<T, 0>;
+      using PT = mp_at_c<T, 1>;
+      using CT = mp_at_c<T, 2>;
+      if (!result && py::isinstance<PT>(obj)) {
+        auto a = std::make_shared<AT>();
+        a->set_value(py::cast<CT>(obj));
+        result = a;
+      }
+    });
+  }
+
+  if (!result && py::isinstance<py::iterable>(obj) && py::len(obj) > 0) {
+    using Types = mp_list<mp_list<VectorIntAttribute, py::int_, int>,
+                          mp_list<VectorDoubleAttribute, py::float_, double>,
+                          mp_list<VectorStringAttribute, py::str, std::string>>;
+
+    py::int_ zero(0);
+    mp_for_each<Types>([&](auto t) {
+      using T = decltype(t);
+      using AT = mp_at_c<T, 0>;
+      using PT = mp_at_c<T, 1>;
+      using CT = std::vector<mp_at_c<T, 2>>;
+      auto item = py::reinterpret_borrow<py::object>(obj[zero]);
+      if (!result && py::isinstance<PT>(item)) {
+        auto a = std::make_shared<AT>();
+        a->set_value(py::cast<CT>(obj));
+        result = a;
+      }
+    });
+  }
+
+  if (!result) throw std::runtime_error("Python type not convertible to Attribute");
+  return result;
 }
 } // namespace HepMC3
 
-// get private access to attribute map of GenEvent
-using AttributeMap =
-    std::map<std::string, std::map<int, std::shared_ptr<HepMC3::Attribute>>>;
-MEMBER_ACCESSOR(GenEventAttributeMapAccessor, HepMC3::GenEvent, m_attributes,
-                AttributeMap)
+// To avoid a superfluous copy, use legal evil to get private access
+// to attribute map of GenEvent
+using AttributeMap = std::map<std::string, std::map<int, HepMC3::AttributePtr>>;
+MEMBER_ACCESSOR(MA1, HepMC3::GenEvent, m_attributes, AttributeMap)
 
 AttributeMap& genevent_attributes(HepMC3::GenEvent& event) {
-  auto ref = accessor::accessMember<GenEventAttributeMapAccessor>(event);
+  auto ref = accessor::accessMember<MA1>(event);
   return ref.get();
 }
 
@@ -470,23 +558,27 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  // py::class_<IntAttribute, Attribute>(m, "IntAttribute", DOC(IntAttribute))
-  //     .def(py::init<>())
-  //     .def(py::init<int>(), "val"_a)
-  //     .def("__str__",
-  //          [](const IntAttribute& self) {
-  //            std::string s;
-  //            self.to_string(s);
-  //            return s;
-  //          })
-  //     // clang-format off
-  //     METH(from_string, IntAttribute)
-  //     PROP(value, IntAttribute)
-  //     // clang-format on
-  //     ;
-
-  py::class_<GenHeavyIon, Attribute, GenHeavyIonPtr>(m, "GenHeavyIon", DOC(GenHeavyIon))
+  py::class_<HEPRUPAttribute, HEPRUPAttributePtr, Attribute>(m, "HEPRUPAttribute",
+                                                             DOC(HEPRUPAttribute))
       .def(py::init<>())
+      // clang-format off
+      ATTR(heprup, HEPRUPAttribute)
+      // clang-format on
+      ;
+
+  py::class_<HEPEUPAttribute, HEPEUPAttributePtr, Attribute>(m, "HEPEUPAttribute",
+                                                             DOC(HEPEUPAttribute))
+      .def(py::init<>())
+      // clang-format off
+      METH(momentum, HEPEUPAttribute)
+      ATTR(hepeup, HEPEUPAttribute)
+      // clang-format on
+      ;
+
+  py::class_<GenHeavyIon, GenHeavyIonPtr, Attribute>(m, "GenHeavyIon", DOC(GenHeavyIon))
+      .def(py::init<>())
+      .def("__eq__", py::overload_cast<const GenHeavyIon&, const GenHeavyIon&>(
+                         HepMC3::operator==))
       // clang-format off
       ATTR(Ncoll_hard, GenHeavyIon)
       ATTR(Npart_proj, GenHeavyIon)
@@ -509,7 +601,7 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenPdfInfo, Attribute, GenPdfInfoPtr>(m, "GenPdfInfo", DOC(GenPdfInfo))
+  py::class_<GenPdfInfo, GenPdfInfoPtr, Attribute>(m, "GenPdfInfo", DOC(GenPdfInfo))
       .def(py::init<>())
       .def_property(
           "parton_id1", [](const GenPdfInfo& self) { return self.parton_id[0]; },
@@ -546,7 +638,7 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenCrossSection, Attribute, GenCrossSectionPtr>(m, "GenCrossSection",
+  py::class_<GenCrossSection, GenCrossSectionPtr, Attribute>(m, "GenCrossSection",
                                                              DOC(GenCrossSection))
       .def(py::init<>())
       .def(

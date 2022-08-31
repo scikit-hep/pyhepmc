@@ -4,3 +4,9 @@
 [submodule "extern/HepMC3"]
 	path = extern/HepMC3
 	url = https://gitlab.cern.ch/hepmc/HepMC3.git
+[submodule "extern/mp11"]
+	path = extern/mp11
+	url = https://github.com/boostorg/mp11.git
+[submodule "extern/cpp-member-accessor"]
+	path = extern/cpp-member-accessor
+	url = https://github.com/hliberacki/cpp-member-accessor.git
