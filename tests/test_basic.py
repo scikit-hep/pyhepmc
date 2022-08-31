@@ -105,18 +105,33 @@ def test_GenHeavyIon():
     assert hi != hep.GenHeavyIon()
 
 
-def test_attributes(evt):
-    p1 = evt.particles[0]
-    att = p1.attributes
+def test_attributes_1(evt):
+    att = evt.attributes
     assert att == {}
     assert len(att) == 0
+    assert repr(att) == r"<AttributeMapView>{}"
     att["foo"] = 1
     att["bar"] = "xy"
     att["baz"] = True
+    assert att["foo"] == 1
+    assert att["bar"] == "xy"
+    assert att["baz"] is True
+    with pytest.raises(KeyError):
+        att["xyz"]
     assert len(att) == 3
-    assert att == {"foo": 1, "bar": "xy", "baz": True}
-    assert len(p1.attributes) == 3
-    assert p1.attributes == att
+    assert att == {"baz": True, "foo": 1, "bar": "xy"}
+    # AttributeMapView has sorted keys
+    assert repr(att) == r"<AttributeMapView>{'bar': 'xy', 'baz': True, 'foo': 1}"
+
+    del att["bar"]
+    assert len(att) == 2
+    assert att == {"baz": True, "foo": 1}
+
+    keys = [k for k in att]
+    assert keys == ["baz", "foo"]
+
+    assert len(evt.attributes) == 2
+    assert evt.attributes == att
     att.clear()
     assert len(att) == 0
     assert att == {}
@@ -139,8 +154,9 @@ def test_attributes(evt):
         hep.HEPEUPAttribute(),
     ],
 )
-def test_attribute(evt, value):
+def test_attributes_2(evt, value):
     p1 = evt.particles[0]
+    assert p1.id == 1
     assert p1.attributes == {}
     p1.attributes = {"foo": value}
     assert p1.attributes == {"foo": value}
@@ -150,6 +166,7 @@ def test_attribute(evt, value):
     assert p1.attributes == {}
 
     v1 = evt.vertices[0]
+    assert v1.id != p1.id
     assert v1.attributes == {}
     v1.attributes = {"foo": value}
     assert v1.attributes == {"foo": value}
