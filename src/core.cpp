@@ -299,7 +299,7 @@ py::object attribute_to_python(AttributePtr a) {
       result = py::cast(x->value());
   });
 
-  if (result.is_none()) {
+  if (!result) {
     using RawTypes = mp_list<GenCrossSection, GenHeavyIon, GenPdfInfo, HEPRUPAttribute,
                              HEPEUPAttribute>;
     using Types = mp_transform<mp_identity, RawTypes>;
@@ -308,8 +308,7 @@ py::object attribute_to_python(AttributePtr a) {
       if (auto x = std::dynamic_pointer_cast<AttributeType>(a)) result = py::cast(x);
     });
   }
-  if (result.is_none())
-    throw std::runtime_error("Attribute not convertible to Python type");
+  if (!result) throw std::runtime_error("Attribute not convertible to Python type");
   return result;
 }
 

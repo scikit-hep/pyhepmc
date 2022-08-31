@@ -115,9 +115,11 @@ def test_GenHeavyIon():
         [1, 2],
         ["foo", "bar"],
         [True, False],
-        hep.GenPdfInfo(),
         hep.GenCrossSection(),
         hep.GenHeavyIon(),
+        hep.GenPdfInfo(),
+        hep.HEPRUPAttribute(),
+        hep.HEPEUPAttribute(),
     ],
 )
 def test_attribute(evt, value):
