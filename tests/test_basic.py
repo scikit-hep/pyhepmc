@@ -140,7 +140,7 @@ def test_GenCrossSection():
         cs.xsec_err("baz")
 
 
-def test_attributes_0():
+def test_attributes_1():
     ri = hep.GenRunInfo()
     att = ri.attributes
     assert att == {}
@@ -175,10 +175,6 @@ def test_attributes_0():
     del ri
     # att should keep GenRunInfo alive through shared_ptr
     assert len(att) == 0
-
-
-def test_attributes_1():
-    pass
 
 
 def test_attributes_2(evt):
