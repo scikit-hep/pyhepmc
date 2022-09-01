@@ -74,7 +74,7 @@ AttributePtr attribute_from_python(py::object obj) {
   if (!result) {
     using Types = mp_list<mp_list<BoolAttribute, py::bool_, bool>,
                           mp_list<IntAttribute, py::int_, int>,
-                          mp_list<FloatAttribute, py::float_, double>,
+                          mp_list<DoubleAttribute, py::float_, double>,
                           mp_list<StringAttribute, py::str, std::string>>;
 
     mp_for_each<Types>([&](auto t) {

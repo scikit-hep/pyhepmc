@@ -106,7 +106,8 @@ def test_GenHeavyIon():
 
 
 def test_GenCrossSection():
-    cs = hep.GenCrossSection(1.2, 0.2, 3, 10)
+    cs = hep.GenCrossSection()
+    cs.set_cross_section(1.2, 0.2, 3, 10)
     assert cs.event is None
     cs.set_xsec(0, 1.2)
     with pytest.raises(KeyError):
@@ -119,9 +120,10 @@ def test_GenCrossSection():
     with pytest.raises(IndexError):
         assert cs.xsec(1)
 
+    ri = hep.GenRunInfo()
+    ri.weight_names = ("foo", "bar")  # optional
     evt = hep.GenEvent()
-    evt.run_info = hep.GenRunInfo()
-    evt.run_info.weight_names = ("foo", "bar")  # optional
+    evt.run_info = ri
     evt.weights = [1.0, 2.0]
     evt.cross_section = cs
     assert evt.cross_section.event is evt
@@ -219,7 +221,7 @@ def test_attributes_2(evt):
         [1, 2],
         ["foo", "bar"],
         [True, False],
-        hep.GenCrossSection(1.2, 0.2, 3, 10),
+        hep.GenCrossSection(),
         hep.GenHeavyIon(),
         hep.GenPdfInfo(),
         hep.HEPRUPAttribute(),
@@ -227,6 +229,8 @@ def test_attributes_2(evt):
     ],
 )
 def test_attributes_3(evt, value):
+    if isinstance(value, hep.GenCrossSection):
+        value.set_cross_section(1.2, 0.2, 3, 10)
     p1 = evt.particles[0]
     assert p1.id == 1
     assert p1.attributes == {}

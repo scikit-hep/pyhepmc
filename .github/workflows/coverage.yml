@@ -1,14 +1,8 @@
 name: Coverage
 
 on:
-  pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.rst'
-      - '*.md'
   push:
-    branch:
-      - 'main'
+    branch: [main]
     paths-ignore:
       - 'docs/**'
       - '*.rst'
