@@ -114,6 +114,10 @@ The units of cross-sections are expected to be pb.""",
     If this attribute is not set, returns None.
     """,
     "GenEvent.vertices": "Access list of vertices.",
+    "attributes": """Access attributes with a dict-like view.
+
+    It is possible to read and write attributes. Primitive C++ types (and vectors therefore) are converted from/to native Python types.
+    """,
 }
 
 doc.update(override)

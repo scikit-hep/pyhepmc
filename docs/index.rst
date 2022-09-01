@@ -4,3 +4,4 @@
     :hidden:
 
     reference
+    citation

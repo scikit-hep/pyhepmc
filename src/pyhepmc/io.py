@@ -46,6 +46,9 @@ class _Iter:
             raise StopIteration
         return evt
 
+    def __iter__(self) -> "_Iter":
+        return self
+
     next = __next__
 
 

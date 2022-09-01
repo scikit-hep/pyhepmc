@@ -10,6 +10,10 @@ Differences between HepMC3 C++ and pyhepmc
   convertible to :class:`FourVector` und :class:`ToolInfo`.
 - In addition to the C++ Reader/Writer classes, we offer an easy to use
   :func:`open`. It can read any supported format and writes in HepMC3 format.
+- Attributes for :class:`GenRunInfo`, :class:`GenEvent`, :class:`GenParticle`,
+  :class:`GenVertex` can be accessed via a dict-like view returned by the
+  ``attributes`` property. The view automatically converts between native C++
+  types to native Python types.
 - The ``Print`` class is missing, but :func:`listing` and :func:`content`
   are present as free functions.
 - The member functions ``delta_X`` of :class:`FourVector` are free functions
@@ -25,8 +29,6 @@ Missing functionality
 
 - Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``,
   ``ReaderGZ``, ``Setup``, ``WriterGZ``. These will be added in the future.
-- Generic ``Attribute`` s for :class:`GenEvent`, :class:`GenParticle`,
-  :class:`GenVertex`, :class:`GenRunInfo` are not yet implemented.
 """
 # flake8: F401
 from ._core import (  # noqa: F401
@@ -39,6 +41,8 @@ from ._core import (  # noqa: F401
     GenRunInfo,
     GenPdfInfo,
     GenCrossSection,
+    HEPRUPAttribute,
+    HEPEUPAttribute,
     equal_vertex_sets,
     equal_particle_sets,
     content,
@@ -54,6 +58,7 @@ from ._core import (  # noqa: F401
 from .io import open as open  # noqa: F401
 from ._version import __version__ as __version__  # noqa: F401
 import typing as _tp
+from . import _attributes  # noqa
 
 __all__ = (
     "Units",
@@ -65,6 +70,8 @@ __all__ = (
     "GenRunInfo",
     "GenPdfInfo",
     "GenCrossSection",
+    "HEPRUPAttribute",
+    "HEPEUPAttribute",
     "equal_vertex_sets",
     "equal_particle_sets",
     "content",

@@ -1,25 +1,29 @@
-#include "pybind.h"
-
-#include "HepMC3/Attribute.h"
-#include "HepMC3/FourVector.h"
-#include "HepMC3/GenCrossSection.h"
-#include "HepMC3/GenEvent.h"
-#include "HepMC3/GenHeavyIon.h"
-#include "HepMC3/GenParticle.h"
-#include "HepMC3/GenPdfInfo.h"
-#include "HepMC3/GenRunInfo.h"
-#include "HepMC3/GenVertex.h"
-#include "HepMC3/Print.h"
-#include "HepMC3/Units.h"
-
+#include "attributes_view.hpp"
+#include "pointer.hpp"
+#include "pybind.hpp"
+#include <HepMC3/Attribute.h>
+#include <HepMC3/FourVector.h>
+#include <HepMC3/GenCrossSection.h>
+#include <HepMC3/GenEvent.h>
+#include <HepMC3/GenHeavyIon.h>
+#include <HepMC3/GenParticle.h>
+#include <HepMC3/GenPdfInfo.h>
+#include <HepMC3/GenRunInfo.h>
+#include <HepMC3/GenVertex.h>
+#include <HepMC3/LHEFAttributes.h>
+#include <HepMC3/Print.h>
+#include <HepMC3/Units.h>
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <map>
 #include <memory>
+#include <pybind11/detail/common.h>
+#include <pybind11/pytypes.h>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 // #include "GzReaderAscii.h"
@@ -46,7 +50,10 @@ std::ostream& ostream_range(std::ostream& os, Iterator begin, Iterator end,
 
 namespace HepMC3 {
 
-using GenRunInfoPtr = std::shared_ptr<GenRunInfo>;
+template <class T>
+bool operator!=(const T& a, const T& b) {
+  return !operator==(a, b);
+}
 
 // equality comparions used by unit tests
 bool is_close(const FourVector& a, const FourVector& b, double rel_eps = 1e-7) {
@@ -59,10 +66,6 @@ bool is_close(const FourVector& a, const FourVector& b, double rel_eps = 1e-7) {
 bool operator==(const GenParticle& a, const GenParticle& b) {
   return a.pid() == b.pid() && a.status() == b.status() &&
          is_close(a.momentum(), b.momentum());
-}
-
-bool operator!=(const GenParticle& a, const GenParticle& b) {
-  return !operator==(a, b);
 }
 
 // compares all real qualities of both particle sets,
@@ -87,8 +90,6 @@ bool operator==(const GenVertex& a, const GenVertex& b) {
          equal_particle_sets(a.particles_out(), b.particles_out());
 }
 
-bool operator!=(const GenVertex& a, const GenVertex& b) { return !operator==(a, b); }
-
 // compares all real qualities of both vertex sets,
 // but ignores the .id() fields and the vertex order
 bool equal_vertex_sets(const std::vector<ConstGenVertexPtr>& a,
@@ -108,10 +109,6 @@ bool operator==(const GenRunInfo::ToolInfo& a, const GenRunInfo::ToolInfo& b) {
   return a.name == b.name && a.version == b.version && a.description == b.description;
 }
 
-bool operator!=(const GenRunInfo::ToolInfo& a, const GenRunInfo::ToolInfo& b) {
-  return !operator==(a, b);
-}
-
 bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
   const auto a_attr = a.attributes();
   const auto b_attr = b.attributes();
@@ -122,8 +119,8 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
          std::equal(a.weight_names().begin(), a.weight_names().end(),
                     b.weight_names().begin()) &&
          std::equal(a_attr.begin(), a_attr.end(), b_attr.begin(),
-                    [](const std::pair<std::string, std::shared_ptr<Attribute>>& a,
-                       const std::pair<std::string, std::shared_ptr<Attribute>>& b) {
+                    [](const std::pair<std::string, AttributePtr>& a,
+                       const std::pair<std::string, AttributePtr>& b) {
                       if (a.first != b.first) return false;
                       if (bool(a.second) != bool(b.second)) return false;
                       if (!a.second) return true;
@@ -133,8 +130,6 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
                       return sa == sb;
                     });
 }
-
-bool operator!=(const GenRunInfo& a, const GenRunInfo& b) { return !operator==(a, b); }
 
 bool operator==(const GenEvent& a, const GenEvent& b) {
   // incomplete:
@@ -157,7 +152,17 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
   return equal_vertex_sets(a.vertices(), b.vertices());
 }
 
-bool operator!=(const GenEvent& a, const GenEvent& b) { return !operator==(a, b); }
+bool operator==(const GenHeavyIon& a, const GenHeavyIon& b) {
+  return a.Ncoll_hard == b.Ncoll_hard && a.Npart_proj == b.Npart_proj &&
+         a.Npart_targ == b.Npart_targ && a.Ncoll == b.Ncoll &&
+         a.N_Nwounded_collisions == b.N_Nwounded_collisions &&
+         a.Nwounded_N_collisions == b.Nwounded_N_collisions &&
+         a.Nwounded_Nwounded_collisions == b.Nwounded_Nwounded_collisions &&
+         a.impact_parameter == b.impact_parameter &&
+         a.event_plane_angle == b.event_plane_angle &&
+         a.sigma_inel_NN == b.sigma_inel_NN && a.centrality == b.centrality &&
+         a.user_cent_estimate == b.user_cent_estimate;
+}
 
 template <class T>
 std::ostream& repr(std::ostream& os, const std::shared_ptr<T>& x) {
@@ -253,6 +258,24 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   repr(os, x.vertices()) << ", run_info=";
   repr(os, x.run_info()) << ")";
   return os;
+}
+
+inline int gencrosssection_validate_index(GenCrossSection& cs, py::object obj) {
+  auto idx = py::cast<int>(obj);
+  const auto size = cs.event() ? std::max(cs.event()->weights().size(), 1ul) : 1ul;
+  if (idx < 0) idx += size;
+  if (idx < 0 || idx >= size) throw py::index_error();
+  return idx;
+}
+
+inline std::string gencrosssection_validate_name(GenCrossSection& cs, py::object obj) {
+  auto name = py::cast<std::string>(obj);
+  if (cs.event() && cs.event()->run_info()) {
+    const auto& wnames = cs.event()->run_info()->weight_names();
+    if (std::find(wnames.begin(), wnames.end(), name) != wnames.end()) return name;
+  }
+  throw py::key_error(name);
+  return {};
 }
 
 void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
@@ -374,54 +397,6 @@ PYBIND11_MODULE(_core, m) {
   FUNC(delta_r2_rap);
   FUNC(delta_r_rap);
 
-  py::class_<GenRunInfo, GenRunInfoPtr> clsGenRunInfo(m, "GenRunInfo", DOC(GenRunInfo));
-  clsGenRunInfo.def(py::init<>())
-      .def_property("tools",
-                    overload_cast<std::vector<GenRunInfo::ToolInfo>&, GenRunInfo>(
-                        &GenRunInfo::tools),
-                    [](GenRunInfo& self, py::sequence seq) {
-                      self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
-                    })
-      .def("__repr__",
-           [](const GenRunInfo& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
-      .def(py::self == py::self)
-      // clang-format off
-      PROP(weight_names, GenRunInfo)
-      PROP_RO(attributes, GenRunInfo)
-      // clang-format on
-      ;
-
-  py::class_<GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo", DOC(GenRunInfo.ToolInfo))
-      .def(py::init<std::string, std::string, std::string>(), "name"_a, "version"_a,
-           "description"_a)
-      .def(py::init([](py::sequence seq) {
-        if (py::len(seq) != 3) throw py::value_error("length != 3");
-        return new GenRunInfo::ToolInfo({py::cast<std::string>(seq[0]),
-                                         py::cast<std::string>(seq[1]),
-                                         py::cast<std::string>(seq[2])});
-      }))
-      .def("__repr__",
-           [](const GenRunInfo::ToolInfo& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
-      .def(py::self == py::self)
-      // clang-format off
-      ATTR(name, GenRunInfo::ToolInfo)
-      ATTR(version, GenRunInfo::ToolInfo)
-      ATTR(description, GenRunInfo::ToolInfo)
-      // clang-format on
-      ;
-
-  py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
-
-  using AttributePtr = std::shared_ptr<Attribute>;
-
   py::class_<Attribute, AttributePtr>(m, "Attribute", DOC(Attribute))
       .def_property_readonly(
           "particle", overload_cast<GenParticlePtr, Attribute>(&Attribute::particle),
@@ -443,23 +418,27 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  // py::class_<IntAttribute, Attribute>(m, "IntAttribute", DOC(IntAttribute))
-  //     .def(py::init<>())
-  //     .def(py::init<int>(), "val"_a)
-  //     .def("__str__",
-  //          [](const IntAttribute& self) {
-  //            std::string s;
-  //            self.to_string(s);
-  //            return s;
-  //          })
-  //     // clang-format off
-  //     METH(from_string, IntAttribute)
-  //     PROP(value, IntAttribute)
-  //     // clang-format on
-  //     ;
-
-  py::class_<GenHeavyIon, Attribute, GenHeavyIonPtr>(m, "GenHeavyIon", DOC(GenHeavyIon))
+  py::class_<HEPRUPAttribute, HEPRUPAttributePtr, Attribute>(m, "HEPRUPAttribute",
+                                                             DOC(HEPRUPAttribute))
       .def(py::init<>())
+      // clang-format off
+      ATTR(heprup, HEPRUPAttribute)
+      // clang-format on
+      ;
+
+  py::class_<HEPEUPAttribute, HEPEUPAttributePtr, Attribute>(m, "HEPEUPAttribute",
+                                                             DOC(HEPEUPAttribute))
+      .def(py::init<>())
+      // clang-format off
+      METH(momentum, HEPEUPAttribute)
+      ATTR(hepeup, HEPEUPAttribute)
+      // clang-format on
+      ;
+
+  py::class_<GenHeavyIon, GenHeavyIonPtr, Attribute>(m, "GenHeavyIon", DOC(GenHeavyIon))
+      .def(py::init<>())
+      .def("__eq__", py::overload_cast<const GenHeavyIon&, const GenHeavyIon&>(
+                         HepMC3::operator==))
       // clang-format off
       ATTR(Ncoll_hard, GenHeavyIon)
       ATTR(Npart_proj, GenHeavyIon)
@@ -482,7 +461,7 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenPdfInfo, Attribute, GenPdfInfoPtr>(m, "GenPdfInfo", DOC(GenPdfInfo))
+  py::class_<GenPdfInfo, GenPdfInfoPtr, Attribute>(m, "GenPdfInfo", DOC(GenPdfInfo))
       .def(py::init<>())
       .def_property(
           "parton_id1", [](const GenPdfInfo& self) { return self.parton_id[0]; },
@@ -519,16 +498,25 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenCrossSection, Attribute, GenCrossSectionPtr>(m, "GenCrossSection",
+  py::class_<GenCrossSection, GenCrossSectionPtr, Attribute>(m, "GenCrossSection",
                                                              DOC(GenCrossSection))
-      .def(py::init<>())
+      .def(py::init([](double cs, double cse, long acc, long att) {
+             auto p = std::make_shared<GenCrossSection>();
+             p->set_cross_section(cs, cse, acc, att);
+             return p;
+           }),
+           "cross_section"_a, "cross_section_error"_a, "accepted_events"_a,
+           "attempted_events"_a)
       .def(
           "xsec",
           [](GenCrossSection& self, py::object obj) {
+            // need to do checks for invalid indices because they are missing in C++
             if (py::isinstance<py::int_>(obj)) {
-              return self.xsec(py::cast<int>(obj));
+              auto idx = gencrosssection_validate_index(self, obj);
+              return self.xsec(idx);
             } else if (py::isinstance<py::str>(obj)) {
-              return self.xsec(py::cast<std::string>(obj));
+              auto name = gencrosssection_validate_name(self, obj);
+              return self.xsec(name);
             } else
               throw py::type_error("int or str required");
             return 0.0;
@@ -538,9 +526,11 @@ PYBIND11_MODULE(_core, m) {
           "xsec_err",
           [](GenCrossSection& self, py::object obj) {
             if (py::isinstance<py::int_>(obj)) {
-              return self.xsec_err(py::cast<int>(obj));
+              auto idx = gencrosssection_validate_index(self, obj);
+              return self.xsec_err(idx);
             } else if (py::isinstance<py::str>(obj)) {
-              return self.xsec_err(py::cast<std::string>(obj));
+              auto name = gencrosssection_validate_name(self, obj);
+              return self.xsec_err(name);
             } else
               throw py::type_error("int or str required");
             return 0.0;
@@ -550,9 +540,11 @@ PYBIND11_MODULE(_core, m) {
           "set_xsec",
           [](GenCrossSection& self, py::object obj, double value) {
             if (py::isinstance<py::int_>(obj)) {
-              self.set_xsec(py::cast<int>(obj), value);
+              auto idx = gencrosssection_validate_index(self, obj);
+              self.set_xsec(idx, value);
             } else if (py::isinstance<py::str>(obj)) {
-              self.set_xsec(py::cast<std::string>(obj), value);
+              auto name = gencrosssection_validate_name(self, obj);
+              self.set_xsec(name, value);
             } else
               throw py::type_error("int or str required");
           },
@@ -561,9 +553,11 @@ PYBIND11_MODULE(_core, m) {
           "set_xsec_err",
           [](GenCrossSection& self, py::object obj, double value) {
             if (py::isinstance<py::int_>(obj)) {
-              self.set_xsec_err(py::cast<int>(obj), value);
+              auto idx = gencrosssection_validate_index(self, obj);
+              self.set_xsec_err(idx, value);
             } else if (py::isinstance<py::str>(obj)) {
-              self.set_xsec_err(py::cast<std::string>(obj), value);
+              auto name = gencrosssection_validate_name(self, obj);
+              self.set_xsec_err(name, value);
             } else
               throw py::type_error("int or str required");
           },
@@ -575,10 +569,98 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenEvent>(m, "GenEvent", DOC(GenEvent))
-      .def(py::init<std::shared_ptr<GenRunInfo>, Units::MomentumUnit,
-                    Units::LengthUnit>(),
-           "run"_a, "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
+  py::class_<AttributesView> clsAttributesView(m, "AttributesView",
+                                               DOC(AttributesView));
+  clsAttributesView
+
+      .def("__getitem__", &AttributesView::getitem)
+      .def("__setitem__", &AttributesView::setitem)
+      .def("__delitem__", &AttributesView::delitem)
+      .def("__contains__", &AttributesView::contains)
+      .def("__iter__", &AttributesView::iter)
+      .def("__len__", &AttributesView::len);
+
+  py::class_<AttributesView::Iter>(clsAttributesView, "Iter")
+      .def("next", &AttributesView::Iter::next)
+      .def("__next__", &AttributesView::Iter::next)
+      .def("__iter__", [](AttributesView::Iter& self) { return self; });
+
+  py::class_<RunInfoAttributesView> clsRunInfoAttributesView(
+      m, "RunInfoAttributesView", DOC(RunInfoAttributesView));
+  clsRunInfoAttributesView
+
+      .def("__getitem__", &RunInfoAttributesView::getitem)
+      .def("__setitem__", &RunInfoAttributesView::setitem)
+      .def("__delitem__", &RunInfoAttributesView::delitem)
+      .def("__contains__", &RunInfoAttributesView::contains)
+      .def("__iter__", &RunInfoAttributesView::iter)
+      .def("__len__", &RunInfoAttributesView::len);
+
+  py::class_<RunInfoAttributesView::Iter>(clsRunInfoAttributesView, "Iter")
+      .def("next", &RunInfoAttributesView::Iter::next)
+      .def("__next__", &RunInfoAttributesView::Iter::next)
+      .def("__iter__", [](RunInfoAttributesView::Iter& self) { return self; });
+
+  py::class_<GenRunInfo, GenRunInfoPtr> clsGenRunInfo(m, "GenRunInfo", DOC(GenRunInfo));
+
+  clsGenRunInfo.def(py::init<>())
+      .def_property("tools",
+                    overload_cast<std::vector<GenRunInfo::ToolInfo>&, GenRunInfo>(
+                        &GenRunInfo::tools),
+                    [](GenRunInfo& self, py::sequence seq) {
+                      self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
+                    })
+      .def_property(
+          "attributes", [](GenRunInfoPtr self) { return RunInfoAttributesView{self}; },
+          [](GenRunInfoPtr self, py::dict obj) {
+            auto amv = RunInfoAttributesView{self};
+            py::cast(amv).attr("clear")();
+            for (const auto& kv : obj) {
+              amv.setitem(py::cast<py::str>(kv.first),
+                          py::reinterpret_borrow<py::object>(kv.second));
+            }
+          },
+          DOC(attributes))
+      .def("__repr__",
+           [](const GenRunInfo& self) {
+             std::ostringstream os;
+             repr(os, self);
+             return os.str();
+           })
+      .def(py::self == py::self)
+      // clang-format off
+      PROP(weight_names, GenRunInfo)
+      // clang-format on
+      ;
+
+  py::class_<GenRunInfo::ToolInfo>(clsGenRunInfo, "ToolInfo", DOC(GenRunInfo.ToolInfo))
+      .def(py::init<std::string, std::string, std::string>(), "name"_a, "version"_a,
+           "description"_a)
+      .def(py::init([](py::sequence seq) {
+        if (py::len(seq) != 3) throw py::value_error("length != 3");
+        return new GenRunInfo::ToolInfo({py::cast<std::string>(seq[0]),
+                                         py::cast<std::string>(seq[1]),
+                                         py::cast<std::string>(seq[2])});
+      }))
+      .def("__repr__",
+           [](const GenRunInfo::ToolInfo& self) {
+             std::ostringstream os;
+             repr(os, self);
+             return os.str();
+           })
+      .def(py::self == py::self)
+      // clang-format off
+      ATTR(name, GenRunInfo::ToolInfo)
+      ATTR(version, GenRunInfo::ToolInfo)
+      ATTR(description, GenRunInfo::ToolInfo)
+      // clang-format on
+      ;
+
+  py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
+
+  py::class_<GenEvent, GenEventPtr>(m, "GenEvent", DOC(GenEvent))
+      .def(py::init<GenRunInfoPtr, Units::MomentumUnit, Units::LengthUnit>(), "run"_a,
+           "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
       .def(py::init<Units::MomentumUnit, Units::LengthUnit>(),
            "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
       .def_property(
@@ -608,7 +690,7 @@ PYBIND11_MODULE(_core, m) {
           [](GenEvent& self, const std::string& name, double v) {
             self.weight(name) = v;
           },
-          "name"_a, "value"_a, DOC(GenEvent.weight))
+          "name"_a, "value"_a, DOC(GenEvent.set_weight))
       .def_property("heavy_ion",
                     overload_cast<GenHeavyIonPtr, GenEvent>(&GenEvent::heavy_ion),
                     &GenEvent::set_heavy_ion, DOC(GenEvent.heavy_ion))
@@ -619,6 +701,20 @@ PYBIND11_MODULE(_core, m) {
           "cross_section",
           overload_cast<GenCrossSectionPtr, GenEvent>(&GenEvent::cross_section),
           &GenEvent::set_cross_section, DOC(GenEvent.cross_section))
+      .def_property(
+          "attributes",
+          [](GenEvent& self) {
+            return AttributesView{&self, 0};
+          },
+          [](GenEvent& self, py::dict obj) {
+            auto amv = AttributesView{&self, 0};
+            py::cast(amv).attr("clear")();
+            for (const auto& kv : obj) {
+              amv.setitem(py::cast<py::str>(kv.first),
+                          py::reinterpret_borrow<py::object>(kv.second));
+            }
+          },
+          DOC(attributes))
       .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0,
            DOC(GenEvent.reserve))
       .def(py::self == py::self)
@@ -668,6 +764,20 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
+      .def_property(
+          "attributes",
+          [](GenParticle& self) {
+            return AttributesView{self.parent_event(), self.id()};
+          },
+          [](GenParticle& self, py::dict obj) {
+            auto amv = AttributesView{self.parent_event(), self.id()};
+            py::cast(amv).attr("clear")();
+            for (const auto& kv : obj) {
+              amv.setitem(py::cast<py::str>(kv.first),
+                          py::reinterpret_borrow<py::object>(kv.second));
+            }
+          },
+          DOC(attributes))
       // clang-format off
       PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
       PROP_RO(in_event, GenParticle)
@@ -696,6 +806,20 @@ PYBIND11_MODULE(_core, m) {
              repr(os, self);
              return os.str();
            })
+      .def_property(
+          "attributes",
+          [](GenVertex& self) {
+            return AttributesView{self.parent_event(), self.id()};
+          },
+          [](GenVertex& self, py::dict obj) {
+            auto amv = AttributesView{self.parent_event(), self.id()};
+            py::cast(amv).attr("clear")();
+            for (const auto& kv : obj) {
+              amv.setitem(py::cast<py::str>(kv.first),
+                          py::reinterpret_borrow<py::object>(kv.second));
+            }
+          },
+          DOC(GenVertex.attributes))
       // clang-format off
       PROP_RO_OL(parent_event, GenVertex, const GenEvent*)
       PROP_RO(in_event, GenVertex)

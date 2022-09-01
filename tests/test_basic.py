@@ -98,6 +98,160 @@ def evt():
     return evt
 
 
+def test_GenHeavyIon():
+    hi = hep.GenHeavyIon()
+    assert hi == hep.GenHeavyIon()
+    hi.Ncoll_hard = 3
+    assert hi != hep.GenHeavyIon()
+
+
+def test_GenCrossSection():
+    cs = hep.GenCrossSection(1.2, 0.2, 3, 10)
+    assert cs.event is None
+    cs.set_xsec(0, 1.2)
+    with pytest.raises(KeyError):
+        cs.set_xsec_err("foo", 0.2)
+    with pytest.raises(KeyError):
+        cs.xsec("foo")
+    assert cs.xsec(0) == 1.2
+    assert cs.xsec_err(0) == 0.2
+    assert cs.xsec() == 1.2
+    with pytest.raises(IndexError):
+        assert cs.xsec(1)
+
+    evt = hep.GenEvent()
+    evt.run_info = hep.GenRunInfo()
+    evt.run_info.weight_names = ("foo", "bar")  # optional
+    evt.weights = [1.0, 2.0]
+    evt.cross_section = cs
+    assert evt.cross_section.event is evt
+    cs = evt.cross_section
+    cs.set_xsec("foo", 1.3)
+    cs.set_xsec("bar", 2.3)
+    assert cs.xsec("foo") == 1.3
+    assert cs.xsec("bar") == 2.3
+    assert cs.xsec(0) == 1.3
+    assert cs.xsec(1) == 2.3
+    with pytest.raises(IndexError):
+        cs.xsec(2)
+    with pytest.raises(KeyError):
+        cs.xsec("baz")
+    with pytest.raises(KeyError):
+        cs.xsec_err("baz")
+
+
+def test_attributes_0():
+    ri = hep.GenRunInfo()
+    att = ri.attributes
+    assert att == {}
+    assert len(att) == 0
+    assert repr(att) == r"<RunInfoAttributesView>{}"
+    att["foo"] = 1
+    att["bar"] = "xy"
+    att["baz"] = True
+    assert att["foo"] == 1
+    assert att["bar"] == "xy"
+    assert att["baz"] is True
+    with pytest.raises(KeyError):
+        att["xyz"]
+    assert len(att) == 3
+    assert att == {"baz": True, "foo": 1, "bar": "xy"}
+    # AttributeMapView has sorted keys
+    assert repr(att) == r"<RunInfoAttributesView>{'bar': 'xy', 'baz': True, 'foo': 1}"
+
+    del att["bar"]
+    assert len(att) == 2
+    assert att == {"baz": True, "foo": 1}
+
+    keys = [k for k in att]
+    assert keys == ["baz", "foo"]
+
+    assert len(ri.attributes) == 2
+    assert ri.attributes == att
+    att.clear()
+    assert len(att) == 0
+    assert att == {}
+
+    del ri
+    # att should keep GenRunInfo alive through shared_ptr
+    assert len(att) == 0
+
+
+def test_attributes_1():
+    pass
+
+
+def test_attributes_2(evt):
+    att = evt.attributes
+    assert att == {}
+    assert len(att) == 0
+    assert repr(att) == r"<AttributesView>{}"
+    att["foo"] = 1
+    att["bar"] = "xy"
+    att["baz"] = True
+    assert att["foo"] == 1
+    assert att["bar"] == "xy"
+    assert att["baz"] is True
+    with pytest.raises(KeyError):
+        att["xyz"]
+    assert len(att) == 3
+    assert att == {"baz": True, "foo": 1, "bar": "xy"}
+    # AttributeMapView has sorted keys
+    assert repr(att) == r"<AttributesView>{'bar': 'xy', 'baz': True, 'foo': 1}"
+
+    del att["bar"]
+    assert len(att) == 2
+    assert att == {"baz": True, "foo": 1}
+
+    keys = [k for k in att]
+    assert keys == ["baz", "foo"]
+
+    assert len(evt.attributes) == 2
+    assert evt.attributes == att
+    att.clear()
+    assert len(att) == 0
+    assert att == {}
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        True,
+        2,
+        1.5,
+        "baz",
+        [1, 2],
+        ["foo", "bar"],
+        [True, False],
+        hep.GenCrossSection(1.2, 0.2, 3, 10),
+        hep.GenHeavyIon(),
+        hep.GenPdfInfo(),
+        hep.HEPRUPAttribute(),
+        hep.HEPEUPAttribute(),
+    ],
+)
+def test_attributes_3(evt, value):
+    p1 = evt.particles[0]
+    assert p1.id == 1
+    assert p1.attributes == {}
+    p1.attributes = {"foo": value}
+    assert p1.attributes == {"foo": value}
+    p1.attributes = {"bar": value}
+    assert p1.attributes == {"bar": value}
+    p1.attributes = {}
+    assert p1.attributes == {}
+
+    v1 = evt.vertices[0]
+    assert v1.id != p1.id
+    assert v1.attributes == {}
+    v1.attributes = {"foo": value}
+    assert v1.attributes == {"foo": value}
+    v1.attributes = {"bar": value}
+    assert v1.attributes == {"bar": value}
+    v1.attributes = {}
+    assert v1.attributes == {}
+
+
 def test_FourVector():
     a = hep.FourVector(1, 2, 3, 4)
     b = hep.FourVector([1, 2, 3, 4])

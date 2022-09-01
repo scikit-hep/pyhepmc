@@ -1,5 +1,5 @@
-#ifndef PYHEPMC_PYBIND_HEADER
-#define PYHEPMC_PYBIND_HEADER
+#ifndef PYHEPMC_PYBIND_HPP
+#define PYHEPMC_PYBIND_HPP
 
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>

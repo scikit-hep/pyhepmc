@@ -1,8 +1,7 @@
-#include "HepMC3/GenEvent.h"
-#include "HepMC3/GenParticle.h"
-#include "HepMC3/GenVertex.h"
-#include "pybind.h"
-
+#include "pybind.hpp"
+#include <HepMC3/GenEvent.h>
+#include <HepMC3/GenParticle.h>
+#include <HepMC3/GenVertex.h>
 #include <array>
 #include <cassert>
 #include <map>
