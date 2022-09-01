@@ -119,9 +119,10 @@ def test_GenCrossSection():
     with pytest.raises(IndexError):
         assert cs.xsec(1)
 
+    ri = hep.GenRunInfo()
+    ri.weight_names = ("foo", "bar")  # optional
     evt = hep.GenEvent()
-    evt.run_info = hep.GenRunInfo()
-    evt.run_info.weight_names = ("foo", "bar")  # optional
+    evt.run_info = ri
     evt.weights = [1.0, 2.0]
     evt.cross_section = cs
     assert evt.cross_section.event is evt
