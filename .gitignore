@@ -5,6 +5,7 @@ dist
 *.so
 *.egg-info
 tests/__pycache__
+.eggs
 .cache
 .compiler_support_cache
 .flag_filter_cache

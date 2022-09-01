@@ -541,11 +541,13 @@ PYBIND11_MODULE(_core, m) {
               throw py::type_error("int or str required");
           },
           "index_or_name"_a, "value"_a, DOC(GenCrossSection.set_xsec_err))
+      .def("set_cross_section", &GenCrossSection::set_cross_section, "cross_section"_a,
+           "cross_section_error"_a, "accepted_events"_a = -1, "attempted_events"_a = -1,
+           DOC(GenCrossSection.set_cross_section))
       // clang-format off
       PROP2(accepted_events, GenCrossSection)
       PROP2(attempted_events, GenCrossSection)
       PROP_RO(is_valid, GenCrossSection)
-      METH(set_cross_section, GenCrossSection)
       // clang-format on
       ;
 
