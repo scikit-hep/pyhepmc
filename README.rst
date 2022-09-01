@@ -9,8 +9,8 @@ A Pythonic wrapper for the HepMC3 C++ library.
 .. image:: https://badge.fury.io/py/pyhepmc.svg
   :target: https://pypi.org/project/pyhepmc
 
-.. image:: https://coveralls.io/repos/github/scikit-hep/pyhepmc/badge.svg?branch=main
-  :target: https://coveralls.io/github/scikit-hep/pyhepmc?branch=main
+.. image:: https://coveralls.io/repos/github/scikit-hep/pyhepmc/badge.svg?branch=develop
+  :target: https://coveralls.io/github/scikit-hep/pyhepmc?branch=develop
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.7013498.svg
   :target: https://doi.org/10.5281/zenodo.7013498
