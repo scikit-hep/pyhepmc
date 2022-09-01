@@ -260,25 +260,8 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   return os;
 }
 
-inline int gencrosssection_validate_index(GenCrossSection& cs, py::object obj) {
-  auto idx = py::cast<int>(obj);
-  const auto size =
-      cs.event() ? (std::max)(cs.event()->weights().size(), static_cast<std::size_t>(1))
-                 : 1u;
-  if (idx < 0) idx += size;
-  if (idx < 0 || idx >= size) throw py::index_error();
-  return idx;
-}
-
-inline std::string gencrosssection_validate_name(GenCrossSection& cs, py::object obj) {
-  auto name = py::cast<std::string>(obj);
-  if (cs.event() && cs.event()->run_info()) {
-    const auto& wnames = cs.event()->run_info()->weight_names();
-    if (std::find(wnames.begin(), wnames.end(), name) != wnames.end()) return name;
-  }
-  throw py::key_error(name);
-  return {};
-}
+int crosssection_safe_index(GenCrossSection& cs, py::object obj);
+std::string crosssection_safe_name(GenCrossSection& cs, py::object obj);
 
 void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> py, py::array_t<double> pz, py::array_t<double> en,
@@ -502,22 +485,16 @@ PYBIND11_MODULE(_core, m) {
 
   py::class_<GenCrossSection, GenCrossSectionPtr, Attribute>(m, "GenCrossSection",
                                                              DOC(GenCrossSection))
-      .def(py::init([](double cs, double cse, long acc, long att) {
-             auto p = std::make_shared<GenCrossSection>();
-             p->set_cross_section(cs, cse, acc, att);
-             return p;
-           }),
-           "cross_section"_a, "cross_section_error"_a, "accepted_events"_a,
-           "attempted_events"_a)
+      .def(py::init<>())
       .def(
           "xsec",
           [](GenCrossSection& self, py::object obj) {
             // need to do checks for invalid indices because they are missing in C++
             if (py::isinstance<py::int_>(obj)) {
-              auto idx = gencrosssection_validate_index(self, obj);
+              auto idx = crosssection_safe_index(self, obj);
               return self.xsec(idx);
             } else if (py::isinstance<py::str>(obj)) {
-              auto name = gencrosssection_validate_name(self, obj);
+              auto name = crosssection_safe_name(self, obj);
               return self.xsec(name);
             } else
               throw py::type_error("int or str required");
@@ -528,10 +505,10 @@ PYBIND11_MODULE(_core, m) {
           "xsec_err",
           [](GenCrossSection& self, py::object obj) {
             if (py::isinstance<py::int_>(obj)) {
-              auto idx = gencrosssection_validate_index(self, obj);
+              auto idx = crosssection_safe_index(self, obj);
               return self.xsec_err(idx);
             } else if (py::isinstance<py::str>(obj)) {
-              auto name = gencrosssection_validate_name(self, obj);
+              auto name = crosssection_safe_name(self, obj);
               return self.xsec_err(name);
             } else
               throw py::type_error("int or str required");
@@ -542,10 +519,10 @@ PYBIND11_MODULE(_core, m) {
           "set_xsec",
           [](GenCrossSection& self, py::object obj, double value) {
             if (py::isinstance<py::int_>(obj)) {
-              auto idx = gencrosssection_validate_index(self, obj);
+              auto idx = crosssection_safe_index(self, obj);
               self.set_xsec(idx, value);
             } else if (py::isinstance<py::str>(obj)) {
-              auto name = gencrosssection_validate_name(self, obj);
+              auto name = crosssection_safe_name(self, obj);
               self.set_xsec(name, value);
             } else
               throw py::type_error("int or str required");
@@ -555,10 +532,10 @@ PYBIND11_MODULE(_core, m) {
           "set_xsec_err",
           [](GenCrossSection& self, py::object obj, double value) {
             if (py::isinstance<py::int_>(obj)) {
-              auto idx = gencrosssection_validate_index(self, obj);
+              auto idx = crosssection_safe_index(self, obj);
               self.set_xsec_err(idx, value);
             } else if (py::isinstance<py::str>(obj)) {
-              auto name = gencrosssection_validate_name(self, obj);
+              auto name = crosssection_safe_name(self, obj);
               self.set_xsec_err(name, value);
             } else
               throw py::type_error("int or str required");
@@ -568,6 +545,7 @@ PYBIND11_MODULE(_core, m) {
       PROP2(accepted_events, GenCrossSection)
       PROP2(attempted_events, GenCrossSection)
       PROP_RO(is_valid, GenCrossSection)
+      METH(set_cross_section, GenCrossSection)
       // clang-format on
       ;
 
