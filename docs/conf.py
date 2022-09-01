@@ -18,9 +18,8 @@ version = release = pyhepmc.__version__
 
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.coverage",
-    "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
+    "nbsphinx",
 ]
 
 # templates_path = ["_templates"]

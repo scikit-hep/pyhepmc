@@ -7,8 +7,8 @@ cdir = Path(__file__).parent
 sys.path.append(cdir)
 os.chdir(cdir)
 
-import generate_about  # noqa
+import generate_index  # noqa
 
-cmd = "sphinx-build -W -b html -d _build/doctrees . _build/html"
+cmd = "sphinx-build -W -a -E -b html -d _build/doctrees . _build/html"
 
 sys.exit(subp.call(cmd.split()))
