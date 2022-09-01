@@ -253,8 +253,7 @@ This variable may contain anything a generator feels is reasonable for estimatin
 Constructor based on particle data.""",
     "GenParticle.add_attribute": """Add an attribute to this particle.
 
-This will overwrite existing attribute if an attribute with the same name is present. The attribute will be stored in the parent_event().
-            false if there is no parent_event();.""",
+This will overwrite existing attribute if an attribute with the same name is present. The attribute will be stored in the parent_event(). false if there is no parent_event();.""",
     "GenParticle.attribute": """Get attribute of type T.""",
     "GenParticle.attribute_as_string": """Get attribute of any type as string.""",
     "GenParticle.attribute_names": """Get list of names of attributes assigned to this particle.""",
@@ -378,7 +377,6 @@ Parameters
 ----------
 evt:
     Event to be filled.""",
-    "ReaderAscii.run_info": """Get the global GenRunInfo object.""",
     "ReaderAscii.skip": """skip events.""",
     "ReaderAsciiHepMC2": """Parser for HepMC2 I/O files.""",
     "ReaderAsciiHepMC2.__init__": """Default constructor.
@@ -390,7 +388,6 @@ The ctor to read from temp stream.""",
     "ReaderAsciiHepMC2.failed": """Return status of the stream.""",
     "ReaderAsciiHepMC2.options": """Access options.""",
     "ReaderAsciiHepMC2.read_event": """Implementation of Reader::read_event.""",
-    "ReaderAsciiHepMC2.run_info": """Get the global GenRunInfo object.""",
     "ReaderAsciiHepMC2.skip": """skip events.""",
     "ReaderGZ": """GenEvent I/O parsing for compressed files.""",
     "ReaderGZ.__init__": """Constructor.
@@ -405,7 +402,6 @@ Parameters
 ----------
 evt:
     Event to be filled.""",
-    "ReaderGZ.run_info": """Get the global GenRunInfo object.""",
     "ReaderGZ.skip": """skip events.""",
     "ReaderHEPEVT": """GenEvent I/O parsing and serialization for HEPEVT files.""",
     "ReaderHEPEVT.__init__": """Default constructor.
@@ -425,7 +421,6 @@ Parameters
 ----------
 i:
     Particle id.""",
-    "ReaderHEPEVT.run_info": """Get the global GenRunInfo object.""",
     "ReaderHEPEVT.skip": """skip events.""",
     "ReaderLHEF": """GenEvent I/O parsing and serialization for LHEF files.""",
     "ReaderLHEF.__init__": """The ctor to read from stream.
@@ -437,14 +432,12 @@ The ctor to read from temp stream.""",
     "ReaderLHEF.failed": """State.""",
     "ReaderLHEF.options": """Access options.""",
     "ReaderLHEF.read_event": """Reading event.""",
-    "ReaderLHEF.run_info": """Get the global GenRunInfo object.""",
     "ReaderLHEF.skip": """skip events.""",
     "ReaderMT": """Multithreader GenEvent I/O parsing.""",
     "ReaderMT.close": """Close file and/or stream.""",
     "ReaderMT.failed": """Get file and/or stream error state.""",
     "ReaderMT.options": """Access options.""",
     "ReaderMT.read_event": """Fill next event from input into evt.""",
-    "ReaderMT.run_info": """Get the global GenRunInfo object.""",
     "ReaderMT.skip": """skip or fast forward reading of some events.""",
     "Setup": """Configuration for HepMC.
 
