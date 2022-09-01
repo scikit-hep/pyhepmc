@@ -7,8 +7,7 @@ on:
       - '*.rst'
       - '*.md'
   push:
-    branch:
-      - 'main'
+    branch: [main]
     paths-ignore:
       - 'docs/**'
       - '*.rst'
