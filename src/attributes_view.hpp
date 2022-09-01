@@ -41,7 +41,7 @@ struct RunInfoAttributesView {
   using AttributeMap = std::map<std::string, AttributePtr>;
   using iterator = typename AttributeMap::iterator;
 
-  GenRunInfo* run_info_;
+  GenRunInfoPtr run_info_;
 
   struct Iter {
     using iterator = AttributeMap::iterator;

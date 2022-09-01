@@ -12,8 +12,8 @@
 #include <sstream>
 #include <string>
 
-// To avoid a superfluous copy, use legal evil to get private access
-// to attribute map of GenRunInfo
+// To avoid the superfluous copy, we use the legal crowbar
+// to access the private attribute map of GenRunInfo
 MEMBER_ACCESSOR(MA2, HepMC3::GenRunInfo, m_attributes,
                 HepMC3::RunInfoAttributesView::AttributeMap)
 

@@ -9,7 +9,9 @@ class Attribute;
 class HEPEUPAttribute;
 class HEPRUPAttribute;
 class GenRunInfo;
+class GenEvent;
 
+using GenEventPtr = std::shared_ptr<GenEvent>;
 using AttributePtr = std::shared_ptr<Attribute>;
 using HEPEUPAttributePtr = std::shared_ptr<HEPEUPAttribute>;
 using HEPRUPAttributePtr = std::shared_ptr<HEPRUPAttribute>;

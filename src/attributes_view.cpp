@@ -12,8 +12,8 @@
 #include <sstream>
 #include <string>
 
-// To avoid a superfluous copy, use legal evil to get private access
-// to attribute map of GenEvent
+// To avoid the superfluous copy, we use the legal crowbar
+// to access the private attribute map of GenEvent
 MEMBER_ACCESSOR(MA1, HepMC3::GenEvent, m_attributes,
                 HepMC3::AttributesView::AttributeMap)
 

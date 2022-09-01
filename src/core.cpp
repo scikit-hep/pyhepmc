@@ -578,9 +578,9 @@ PYBIND11_MODULE(_core, m) {
                       self.tools() = py::cast<std::vector<GenRunInfo::ToolInfo>>(seq);
                     })
       .def_property(
-          "attributes", [](GenRunInfo& self) { return RunInfoAttributesView{&self}; },
-          [](GenRunInfo& self, py::dict obj) {
-            auto amv = RunInfoAttributesView{&self};
+          "attributes", [](GenRunInfoPtr self) { return RunInfoAttributesView{self}; },
+          [](GenRunInfoPtr self, py::dict obj) {
+            auto amv = RunInfoAttributesView{self};
             py::cast(amv).attr("clear")();
             for (const auto& kv : obj) {
               amv.setitem(py::cast<py::str>(kv.first),
@@ -625,7 +625,7 @@ PYBIND11_MODULE(_core, m) {
 
   py::implicitly_convertible<py::sequence, GenRunInfo::ToolInfo>();
 
-  py::class_<GenEvent>(m, "GenEvent", DOC(GenEvent))
+  py::class_<GenEvent, GenEventPtr>(m, "GenEvent", DOC(GenEvent))
       .def(py::init<GenRunInfoPtr, Units::MomentumUnit, Units::LengthUnit>(), "run"_a,
            "momentum_unit"_a = Units::GEV, "length_unit"_a = Units::MM)
       .def(py::init<Units::MomentumUnit, Units::LengthUnit>(),
