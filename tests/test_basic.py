@@ -105,6 +105,41 @@ def test_GenHeavyIon():
     assert hi != hep.GenHeavyIon()
 
 
+def test_GenCrossSection():
+    cs = hep.GenCrossSection(1.2, 0.2, 3, 10)
+    assert cs.event is None
+    cs.set_xsec(0, 1.2)
+    with pytest.raises(KeyError):
+        cs.set_xsec_err("foo", 0.2)
+    with pytest.raises(KeyError):
+        cs.xsec("foo")
+    assert cs.xsec(0) == 1.2
+    assert cs.xsec_err(0) == 0.2
+    assert cs.xsec() == 1.2
+    with pytest.raises(IndexError):
+        assert cs.xsec(1)
+
+    evt = hep.GenEvent()
+    evt.run_info = hep.GenRunInfo()
+    evt.run_info.weight_names = ("foo", "bar")  # optional
+    evt.weights = [1.0, 2.0]
+    evt.cross_section = cs
+    assert evt.cross_section.event is evt
+    cs = evt.cross_section
+    cs.set_xsec("foo", 1.3)
+    cs.set_xsec("bar", 2.3)
+    assert cs.xsec("foo") == 1.3
+    assert cs.xsec("bar") == 2.3
+    assert cs.xsec(0) == 1.3
+    assert cs.xsec(1) == 2.3
+    with pytest.raises(IndexError):
+        cs.xsec(2)
+    with pytest.raises(KeyError):
+        cs.xsec("baz")
+    with pytest.raises(KeyError):
+        cs.xsec_err("baz")
+
+
 def test_attributes_0():
     ri = hep.GenRunInfo()
     att = ri.attributes
@@ -137,8 +172,16 @@ def test_attributes_0():
     assert len(att) == 0
     assert att == {}
 
+    del ri
+    # att should keep GenRunInfo alive through shared_ptr
+    assert len(att) == 0
 
-def test_attributes_1(evt):
+
+def test_attributes_1():
+    pass
+
+
+def test_attributes_2(evt):
     att = evt.attributes
     assert att == {}
     assert len(att) == 0
@@ -180,14 +223,14 @@ def test_attributes_1(evt):
         [1, 2],
         ["foo", "bar"],
         [True, False],
-        hep.GenCrossSection(),
+        hep.GenCrossSection(1.2, 0.2, 3, 10),
         hep.GenHeavyIon(),
         hep.GenPdfInfo(),
         hep.HEPRUPAttribute(),
         hep.HEPEUPAttribute(),
     ],
 )
-def test_attributes_2(evt, value):
+def test_attributes_3(evt, value):
     p1 = evt.particles[0]
     assert p1.id == 1
     assert p1.attributes == {}

@@ -1,0 +1,47 @@
+name: docs
+
+on:
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        fetch-depth: 3
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.9"
+    - run: python -m pip install -v -e .[doc]
+    - run: python docs/build.py
+    - uses: actions/upload-pages-artifact@v1
+      with:
+        path: 'docs/_build/html'
+
+  deploy:
+    if: github.ref_type == 'tag' || github.ref_name == 'main'
+    needs: build
+    # Set permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/configure-pages@v2
+    - uses: actions/deploy-pages@v1

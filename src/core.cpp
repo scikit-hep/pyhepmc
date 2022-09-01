@@ -260,6 +260,24 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
   return os;
 }
 
+inline int gencrosssection_validate_index(GenCrossSection& cs, py::object obj) {
+  auto idx = py::cast<int>(obj);
+  const auto size = cs.event() ? std::max(cs.event()->weights().size(), 1ul) : 1ul;
+  if (idx < 0) idx += size;
+  if (idx < 0 || idx >= size) throw py::index_error();
+  return idx;
+}
+
+inline std::string gencrosssection_validate_name(GenCrossSection& cs, py::object obj) {
+  auto name = py::cast<std::string>(obj);
+  if (cs.event() && cs.event()->run_info()) {
+    const auto& wnames = cs.event()->run_info()->weight_names();
+    if (std::find(wnames.begin(), wnames.end(), name) != wnames.end()) return name;
+  }
+  throw py::key_error(name);
+  return {};
+}
+
 void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> py, py::array_t<double> pz, py::array_t<double> en,
                  py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
@@ -482,14 +500,23 @@ PYBIND11_MODULE(_core, m) {
 
   py::class_<GenCrossSection, GenCrossSectionPtr, Attribute>(m, "GenCrossSection",
                                                              DOC(GenCrossSection))
-      .def(py::init<>())
+      .def(py::init([](double cs, double cse, long acc, long att) {
+             auto p = std::make_shared<GenCrossSection>();
+             p->set_cross_section(cs, cse, acc, att);
+             return p;
+           }),
+           "cross_section"_a, "cross_section_error"_a, "accepted_events"_a,
+           "attempted_events"_a)
       .def(
           "xsec",
           [](GenCrossSection& self, py::object obj) {
+            // need to do checks for invalid indices because they are missing in C++
             if (py::isinstance<py::int_>(obj)) {
-              return self.xsec(py::cast<int>(obj));
+              auto idx = gencrosssection_validate_index(self, obj);
+              return self.xsec(idx);
             } else if (py::isinstance<py::str>(obj)) {
-              return self.xsec(py::cast<std::string>(obj));
+              auto name = gencrosssection_validate_name(self, obj);
+              return self.xsec(name);
             } else
               throw py::type_error("int or str required");
             return 0.0;
@@ -499,9 +526,11 @@ PYBIND11_MODULE(_core, m) {
           "xsec_err",
           [](GenCrossSection& self, py::object obj) {
             if (py::isinstance<py::int_>(obj)) {
-              return self.xsec_err(py::cast<int>(obj));
+              auto idx = gencrosssection_validate_index(self, obj);
+              return self.xsec_err(idx);
             } else if (py::isinstance<py::str>(obj)) {
-              return self.xsec_err(py::cast<std::string>(obj));
+              auto name = gencrosssection_validate_name(self, obj);
+              return self.xsec_err(name);
             } else
               throw py::type_error("int or str required");
             return 0.0;
@@ -511,9 +540,11 @@ PYBIND11_MODULE(_core, m) {
           "set_xsec",
           [](GenCrossSection& self, py::object obj, double value) {
             if (py::isinstance<py::int_>(obj)) {
-              self.set_xsec(py::cast<int>(obj), value);
+              auto idx = gencrosssection_validate_index(self, obj);
+              self.set_xsec(idx, value);
             } else if (py::isinstance<py::str>(obj)) {
-              self.set_xsec(py::cast<std::string>(obj), value);
+              auto name = gencrosssection_validate_name(self, obj);
+              self.set_xsec(name, value);
             } else
               throw py::type_error("int or str required");
           },
@@ -522,9 +553,11 @@ PYBIND11_MODULE(_core, m) {
           "set_xsec_err",
           [](GenCrossSection& self, py::object obj, double value) {
             if (py::isinstance<py::int_>(obj)) {
-              self.set_xsec_err(py::cast<int>(obj), value);
+              auto idx = gencrosssection_validate_index(self, obj);
+              self.set_xsec_err(idx, value);
             } else if (py::isinstance<py::str>(obj)) {
-              self.set_xsec_err(py::cast<std::string>(obj), value);
+              auto name = gencrosssection_validate_name(self, obj);
+              self.set_xsec_err(name, value);
             } else
               throw py::type_error("int or str required");
           },
@@ -587,7 +620,7 @@ PYBIND11_MODULE(_core, m) {
                           py::reinterpret_borrow<py::object>(kv.second));
             }
           },
-          DOC(GenRunInfo.attributes))
+          DOC(attributes))
       .def("__repr__",
            [](const GenRunInfo& self) {
              std::ostringstream os;
@@ -657,7 +690,7 @@ PYBIND11_MODULE(_core, m) {
           [](GenEvent& self, const std::string& name, double v) {
             self.weight(name) = v;
           },
-          "name"_a, "value"_a, DOC(GenEvent.weight))
+          "name"_a, "value"_a, DOC(GenEvent.set_weight))
       .def_property("heavy_ion",
                     overload_cast<GenHeavyIonPtr, GenEvent>(&GenEvent::heavy_ion),
                     &GenEvent::set_heavy_ion, DOC(GenEvent.heavy_ion))
@@ -681,7 +714,7 @@ PYBIND11_MODULE(_core, m) {
                           py::reinterpret_borrow<py::object>(kv.second));
             }
           },
-          DOC(GenEvent.attributes))
+          DOC(attributes))
       .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0,
            DOC(GenEvent.reserve))
       .def(py::self == py::self)
@@ -744,7 +777,7 @@ PYBIND11_MODULE(_core, m) {
                           py::reinterpret_borrow<py::object>(kv.second));
             }
           },
-          DOC(GenParticles.attributes))
+          DOC(attributes))
       // clang-format off
       PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
       PROP_RO(in_event, GenParticle)
