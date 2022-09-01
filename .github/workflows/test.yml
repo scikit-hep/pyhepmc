@@ -6,6 +6,7 @@ on:
       - 'docs/**'
       - '*.rst'
       - '*.md'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
@@ -30,6 +31,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: true
+        fetch-depth: 3
     - uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}

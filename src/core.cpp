@@ -262,7 +262,9 @@ inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
 
 inline int gencrosssection_validate_index(GenCrossSection& cs, py::object obj) {
   auto idx = py::cast<int>(obj);
-  const auto size = cs.event() ? (std::max)(cs.event()->weights().size(), 1ul) : 1ul;
+  const auto size =
+      cs.event() ? (std::max)(cs.event()->weights().size(), static_cast<std::size_t>(1))
+                 : 1u;
   if (idx < 0) idx += size;
   if (idx < 0 || idx >= size) throw py::index_error();
   return idx;
