@@ -4,7 +4,7 @@ are compatibly licensed.  We list these here.
 Name: HepMC3
 Files: extern/HepMC3/*
 License: LGPL-v3
-  For details, see extern/HepMC3/LICENCE
+  For details, see extern/HepMC3/LICENCE and extern/HepMC3/COPYING.
 
 Name: pybind11
 Files: extern/pybind11/*

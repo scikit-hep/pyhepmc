@@ -26,8 +26,8 @@ endif()
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB SOURCES2 "extern/HepMC3/src/*.cc")
 
-# To satisfy LGPL, we must compile all LGPL code into a library and then link to
-# that library.
+# To compy with LGPL-v3, we must compile all licensed code into a library and
+# then link to that library.
 add_library(HepMC3 STATIC ${SOURCES2})
 target_include_directories(HepMC3 PUBLIC extern/HepMC3/include)
 set_target_properties(HepMC3 PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
@@ -35,7 +35,6 @@ set_target_properties(HepMC3 PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 pybind11_add_module(_core MODULE ${SOURCES})
 target_include_directories(_core PRIVATE extern/cpp-member-accessor/include)
 target_include_directories(_core PRIVATE extern/mp11/include)
-target_compile_definitions(_core PRIVATE HepMC3_EXPORTS=1)
 target_link_libraries(_core PRIVATE HepMC3)
 set_target_properties(_core PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 
