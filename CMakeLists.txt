@@ -32,7 +32,6 @@ pybind11_add_module(_core MODULE ${SOURCES} ${HEPMC3_SOURCES})
 target_include_directories(_core PRIVATE extern/cpp-member-accessor/include)
 target_include_directories(_core PRIVATE extern/mp11/include)
 target_include_directories(_core PRIVATE extern/HepMC3/include)
-target_link_libraries(_core PRIVATE HepMC3)
 
 if(MSVC)
   target_compile_options(_core PRIVATE /bigobj)
