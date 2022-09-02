@@ -24,14 +24,11 @@ else()
 endif()
 
 file(GLOB SOURCES "src/*.cpp")
-file(GLOB SOURCES2 "extern/HepMC3/src/*.cc")
+file(GLOB HEPMC3_SOURCES "extern/HepMC3/src/*.cc")
 
-# To compy with LGPL-v3, we must compile all licensed code into a library and
-# then link to that library.
-add_library(HepMC3 OBJECT ${SOURCES2})
-target_include_directories(HepMC3 PUBLIC extern/HepMC3/include)
-
-pybind11_add_module(_core MODULE ${SOURCES})
+# pyhepmc falls under Section 5 "Combined Libraries" of the LGPL-v3. Since we
+# satisfy a) and b), we do not need to compile the code into a separate library.
+pybind11_add_module(_core MODULE ${SOURCES} ${HEPMC3_SOURCES})
 target_include_directories(_core PRIVATE extern/cpp-member-accessor/include)
 target_include_directories(_core PRIVATE extern/mp11/include)
 target_link_libraries(_core PRIVATE HepMC3)
