@@ -25,8 +25,6 @@ endif()
 
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB HEPMC3_SOURCES "extern/HepMC3/src/*.cc")
-list(REMOVE_ITEM HEPMC3_SOURCES
-     "${CMAKE_SOURCE_DIR}/extern/HepMC3/src/HEPEVT_Wrapper.cc")
 
 # pyhepmc falls under Section 5 "Combined Libraries" of the LGPL-v3. Since we
 # satisfy a) and b), we do not need to compile the code into a separate library.
