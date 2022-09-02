@@ -51,4 +51,4 @@ pyhepmc largely mirrors the C++ interface of the `HepMC3 library, which is docum
 License
 -------
 
-The pyhepmc code is covered by the BSD 3-clause license, but its main functionality comes from bundled software which is released under different licenses, see the files ``LICENSE`` and ``LICENSE_bundled`` in the source directory for details.
+The pyhepmc code is covered by the BSD 3-clause license, but its main functionality comes from bundled software which is released under different licenses. The HepMC3 library is licensed under LGPL-v3 and bundles other software which is released under different licenses. See the files ``LICENSE`` and ``LICENSE_bundled`` in the source directory for details.

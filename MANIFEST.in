@@ -1,13 +1,15 @@
+recursive-include extern/HepMC3/include *.h
+recursive-include extern/HepMC3/src *.cc
+include extern/HepMC3/LICENCE
+include extern/HepMC3/COPYING
+recursive-include extern/pybind11/include *.h
+include extern/pybind11/CMakeLists.txt
+include extern/pybind11/tools/*.cmake
+recursive-include extern/cpp-member-accessor/include *.hpp
+recursive-include extern/mp11/include *.hpp
 include src/*.cpp
 include src/*.hpp
 include src/pyhepmc/*.py
-recursive-include extern/HepMC3/include *.h
-recursive-include extern/HepMC3/src *.cc
-recursive-include extern/pybind11/include *.h
-recursive-include extern/cpp-member-accessor/include *.hpp
-recursive-include extern/mp11/include *.hpp
-include extern/pybind11/CMakeLists.txt
-include extern/pybind11/tools/*.cmake
 include cmake_ext.py
 include CMakeLists.txt
 include LICENSE
