@@ -1,7 +1,7 @@
 pyhepmc
 =======
 
-A Pythonic wrapper for the HepMC3 C++ library.
+A Pythonic wrapper for the `HepMC3 C++ library <http://hepmc.web.cern.ch/hepmc>`_.
 
 .. image:: https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg
   :target: https://scikit-hep.org
@@ -27,15 +27,7 @@ However, building from source is also easy. External software is not required. J
 
 **pyhepmc is Pythonic and Jupyter notebook-friendly**
 
-pyhepmc is a hand-crafted mapping of C++ code to Python, see documentation for details. Python idioms are supported where appropriate. The classes are designed to render well in Jupyter notebooks.
-
-- C++ methods which act like properties are represented as properties,
-  e.g. ``GenParticle::set_status`` and ``GenParticle::status`` are mapped to a single
-  ``GenParticle.status`` field in Python.
-- Tuples and lists are implicitly convertible to ``FourVector`` and ``ToolInfo`` objects.
-- Vectors of objects on the C++ side are mapped to Python lists.
-- ``Reader`` and ``Writer`` classes support the context manager protocol. ``Reader`` objects can be iterated over.
-- A convenient ``open`` function is provided for reading and writing HepMC files.
+pyhepmc is a hand-crafted mapping of C++ code to Python, see documentation for details. Python idioms are supported where appropriate. The classes are designed to render well in Jupyter notebooks. IO is simplified. Events can be visualized in Jupyter notebooks.
 
 **pyhepmc supports visualizations powered by graphviz**
 
@@ -54,9 +46,9 @@ We aim for 100% coverage, not quite there yet.
 Documentation
 -------------
 
-pyhepmc mirrors the C++ interface of the `HepMC3 library, which is documented here <http://hepmc.web.cern.ch/hepmc>`_. The documentation is mostly copied from HepMC3 and available as Python docstrings, so you can use Python's ``help()`` browser to learn about the API. Alternatively, you can consult our online reference generated from these docstrings.
+pyhepmc largely mirrors the C++ interface of the `HepMC3 library, which is documented here <http://hepmc.web.cern.ch/hepmc>`_. The documentation has been copied from HepMC3 where appropriate (. It is available as Python docstrings, so you can use Python's ``help()`` browser to learn about the API. Alternatively, you can consult `our online reference generated from these docstrings <https://scikit-hep.org/pyhepmc/>`_.
 
 License
 -------
 
-pyhepmc is covered by the BSD 3-clause license, see the ``LICENSE`` file for details. This license only applies to the pyhepmc code. The connected external libraries HepMC3 and pybind11 are covered by other licenses, as described in their respective ``LICENSE`` files.
+pyhepmc is covered by the BSD 3-clause license, but its main functionality comes from bundled software which is released under different licenses, see the files ``LICENSE`` and ``LICENSE_bundled`` in the source directory for details.

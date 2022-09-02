@@ -8,9 +8,6 @@ recursive-include extern/cpp-member-accessor/include *.hpp
 recursive-include extern/mp11/include *.hpp
 include extern/pybind11/CMakeLists.txt
 include extern/pybind11/tools/*.cmake
-include extern/pybind11/LICENSE
-include extern/HepMC3/LICENCE
-include extern/cpp-member-accessor/LICENSE
 include cmake_ext.py
 include CMakeLists.txt
 include LICENSE
@@ -18,3 +15,4 @@ include pyproject.toml
 include README.rst
 include setup.cfg
 include setup.py
+include setup_utils.py
