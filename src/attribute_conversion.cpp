@@ -34,6 +34,7 @@ py::object attribute_to_python(AttributePtr a) {
     if (auto x = std::dynamic_pointer_cast<AttributeType>(a)) result = py::cast(x);
   });
 
+  // AssociatedParticle derives from IntAttribute, so skip cast below if match found
   if (auto x = std::dynamic_pointer_cast<AssociatedParticle>(a))
     result = py::cast(x->associated());
 
