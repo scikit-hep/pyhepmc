@@ -36,6 +36,7 @@ _T overload_cast(_T x) {
 #define METH_OL(name, cls, rval, args) \
   .def(#name, (rval(cls::*)(args)) & cls::name, doc[#cls "." #name].c_str())
 #define ATTR(name, cls) .def_readwrite(#name, &cls::name, doc[#cls "." #name].c_str())
+#define REPR(name) .def("__repr__", repr<name>)
 
 #define DOC(name) doc[#name].c_str()
 
