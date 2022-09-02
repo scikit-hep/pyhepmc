@@ -1,3 +1,4 @@
+#include "HepMC3/AssociatedParticle.h"
 #include "attributes_view.hpp"
 #include "pointer.hpp"
 #include "pybind.hpp"

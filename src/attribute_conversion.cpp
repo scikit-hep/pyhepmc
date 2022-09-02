@@ -1,3 +1,5 @@
+#include "HepMC3/AssociatedParticle.h"
+#include "HepMC3/GenParticle_fwd.h"
 #include "pointer.hpp"
 #include "pybind.hpp"
 #include <HepMC3/Attribute.h>
@@ -9,6 +11,8 @@
 #include <boost/mp11/algorithm.hpp>
 #include <boost/mp11/list.hpp>
 #include <boost/mp11/utility.hpp>
+#include <memory>
+#include <pybind11/pytypes.h>
 #include <stdexcept>
 
 namespace HepMC3 {
@@ -30,8 +34,10 @@ py::object attribute_to_python(AttributePtr a) {
     if (auto x = std::dynamic_pointer_cast<AttributeType>(a)) result = py::cast(x);
   });
 
-  if (!result) {
+  if (auto x = std::dynamic_pointer_cast<AssociatedParticle>(a))
+    result = py::cast(x->associated());
 
+  if (!result) {
     using RawTypes =
         mp_list<IntAttribute, LongAttribute, DoubleAttribute, FloatAttribute,
                 StringAttribute, CharAttribute, LongLongAttribute, LongDoubleAttribute,
@@ -69,6 +75,9 @@ AttributePtr attribute_from_python(py::object obj) {
     result = py::cast<HEPRUPAttributePtr>(obj);
   } else if (py::isinstance<HEPEUPAttribute>(obj)) {
     result = py::cast<HEPEUPAttributePtr>(obj);
+  } else if (py::isinstance<GenParticle>(obj)) {
+    auto p = py::cast<GenParticlePtr>(obj);
+    result = std::make_shared<AssociatedParticle>(p);
   }
 
   if (!result) {
