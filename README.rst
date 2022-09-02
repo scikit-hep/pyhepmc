@@ -37,7 +37,7 @@ pyhepmc can optionally visualize events, using the mature `graphviz <https://gra
 
 **pyhepmc is actively maintained**
 
-pyhepmc is part of the Scikit-HEP project, which aims to provide all tools needed by particle physicists to do data analysis in Python. There is also official collaboration with the HepMC3 project.
+pyhepmc is part of the Scikit-HEP project, which aims to provide all tools needed by particle physicists to do data analysis in Python. It is developed in close collaboration with the HepMC3 project.
 
 **pyhepmc is thoroughly unit tested**
 
@@ -51,4 +51,4 @@ pyhepmc largely mirrors the C++ interface of the `HepMC3 library, which is docum
 License
 -------
 
-pyhepmc is covered by the BSD 3-clause license, but its main functionality comes from bundled software which is released under different licenses, see the files ``LICENSE`` and ``LICENSE_bundled`` in the source directory for details.
+The pyhepmc code is covered by the BSD 3-clause license, but its main functionality comes from bundled software which is released under different licenses, see the files ``LICENSE`` and ``LICENSE_bundled`` in the source directory for details.
