@@ -476,7 +476,6 @@ PYBIND11_MODULE(_core, m) {
           DOC(attributes))
       .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0,
            DOC(GenEvent.reserve))
-      .def(py::self == py::self)
       .def("__str__",
            [](GenEvent& self) {
              std::ostringstream os;
@@ -487,6 +486,7 @@ PYBIND11_MODULE(_core, m) {
            "m"_a, "pid"_a, "status"_a, "parents"_a = py::none(),
            "children"_a = py::none(), "vx"_a = py::none(), "vy"_a = py::none(),
            "vz"_a = py::none(), "vt"_a = py::none(), DOC(GenEvent.from_hepevt))
+      .def(py::self == py::self)
       // clang-format off
       REPR(GenEvent)
       METH(clear, GenEvent)
@@ -564,7 +564,7 @@ PYBIND11_MODULE(_core, m) {
           DOC(GenVertex.attributes))
       .def(py::self == py::self)
       // clang-format off
-      REPR(GenParticle)
+      REPR(GenVertex)
       PROP_RO_OL(parent_event, GenVertex, const GenEvent*)
       PROP_RO(in_event, GenVertex)
       PROP_RO(id, GenVertex)
