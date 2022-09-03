@@ -11,6 +11,7 @@
 #include <boost/mp11/algorithm.hpp>
 #include <boost/mp11/list.hpp>
 #include <boost/mp11/utility.hpp>
+#include <cassert>
 #include <memory>
 #include <pybind11/pytypes.h>
 #include <stdexcept>
@@ -34,9 +35,14 @@ py::object attribute_to_python(AttributePtr a) {
     if (auto x = std::dynamic_pointer_cast<AttributeType>(a)) result = py::cast(x);
   });
 
-  // AssociatedParticle derives from IntAttribute, so skip cast below if match found
-  if (auto x = std::dynamic_pointer_cast<AssociatedParticle>(a))
-    result = py::cast(x->associated());
+  // AssociatedParticle derives from IntAttribute; skip cast below if match found
+  if (auto x = std::dynamic_pointer_cast<AssociatedParticle>(a)) {
+    auto id = x->associatedId();
+    if (!x->event()) throw std::runtime_error("AssociatedParticle.event() is nullptr");
+    auto p = x->event()->particles().at(id - 1);
+    assert(p->id() == id);
+    result = py::cast(p);
+  }
 
   if (!result) {
     using RawTypes =

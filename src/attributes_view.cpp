@@ -4,6 +4,7 @@
 #include <HepMC3/GenEvent.h>
 #include <accessor/accessor.hpp>
 #include <algorithm>
+#include <cassert>
 #include <map>
 #include <pybind11/detail/common.h>
 #include <pybind11/pytypes.h>
@@ -45,12 +46,16 @@ py::object AttributesView::getitem(py::str name) {
 }
 
 void AttributesView::setitem(py::str name, py::object value) {
-  auto& amap = attributes();
-  auto& amap2 = amap[py::cast<std::string>(name)];
-  amap2.emplace(id_, attribute_from_python(value));
+  auto a = attribute_from_python(value);
+  // add_attribute has desired side-effects:
+  // it connects Attribute to event, particle, vertex
+  assert(event_);
+  event_->add_attribute(py::cast<std::string>(name), a, id_);
 }
 
 void AttributesView::delitem(py::str name) {
+  // cannot use GenEvent::remove_attribute because it does
+  // not signal when attribute does not exist
   auto& amap = attributes();
   auto it = amap.find(py::cast<std::string>(name));
   if (it != amap.end()) {
