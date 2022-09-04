@@ -6,6 +6,7 @@ from test_basic import evt  # noqa
 from pyhepmc._core import stringstream
 from pathlib import Path
 import numpy as np
+import typing
 
 
 def test_read_write(evt):  # noqa
@@ -149,3 +150,54 @@ def test_open_with_writer(evt, writer):  # noqa
 def test_deprecated_import():
     with pytest.warns(np.VisibleDeprecationWarning):
         from pyhepmc import ReaderAscii  # noqa F401
+
+
+def test_attributes():
+    filename = "test_attributes.dat"
+
+    evt = hep.GenEvent()  # noqa
+    p = hep.GenParticle((1, 2, 3, 4), 5, 6)
+    evt.add_particle(p)
+    evt.attributes = {
+        "1": True,
+        "2": 2,
+        "3": 3.3,
+        "4": hep.GenPdfInfo(),
+        "5": hep.GenHeavyIon(),
+        "6": hep.GenCrossSection(),
+        "7": p,
+        "8": [1, 2],
+        "9": [1.3, 2.4],
+        # cannot test this yet
+        # "8": hep.HEPRUPAttribute(),
+        # "9": hep.HEPEUPAttribute(),
+    }
+
+    with io.open(filename, "w") as f:
+        f.write(evt)
+
+    with io.open(filename) as f:
+        evt2 = f.read()
+
+    with pytest.raises(TypeError):
+        evt2.attributes["1"].astype(hep.GenPdfInfo)
+
+    with pytest.raises(TypeError, match="untyped list"):
+        evt2.attributes["8"].astype(list)
+
+    for k, v in evt.attributes.items():
+        if k == "8":
+            t = typing.List[int]
+        elif k == "9":
+            t = typing.List[float]
+        else:
+            t = type(v)
+
+        v2 = evt2.attributes[k].astype(t)
+
+        assert v == v2
+        # UnparsedAttribute is replaced with parsed Attribute
+        v3 = evt2.attributes[k]
+        assert v == v3
+
+    os.unlink(filename)

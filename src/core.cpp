@@ -1,6 +1,9 @@
+#include "HepMC3/AssociatedParticle.h"
+#include "HepMC3/GenPdfInfo_fwd.h"
 #include "attributes_view.hpp"
 #include "pointer.hpp"
 #include "pybind.hpp"
+#include "repr.hpp"
 #include <HepMC3/Attribute.h>
 #include <HepMC3/FourVector.h>
 #include <HepMC3/GenCrossSection.h>
@@ -30,235 +33,23 @@
 
 void register_io(py::module& m);
 
-template <class Iterator, class Streamer>
-std::ostream& ostream_range(std::ostream& os, Iterator begin, Iterator end,
-                            Streamer streamer, const char bracket_left = '[',
-                            const char bracket_right = ']') {
-  os << bracket_left;
-  bool first = true;
-  for (; begin != end; ++begin) {
-    if (first) {
-      first = false;
-    } else {
-      os << ", ";
-    }
-    streamer(os, begin);
-  }
-  os << bracket_right;
-  return os;
-}
-
 namespace HepMC3 {
 
-template <class T>
-bool operator!=(const T& a, const T& b) {
-  return !operator==(a, b);
-}
+bool operator==(const GenParticle& a, const GenParticle& b);
+bool operator==(const GenVertex& a, const GenVertex& b);
+bool operator==(const GenRunInfo& a, const GenRunInfo& b);
+bool operator==(const GenRunInfo::ToolInfo& a, const GenRunInfo::ToolInfo& b);
+bool operator==(const GenEvent& a, const GenEvent& b);
+bool operator==(const GenHeavyIon& a, const GenHeavyIon& b);
+bool operator==(const GenPdfInfo& a, const GenPdfInfo& b);
+bool operator==(const GenCrossSection& a, const GenCrossSection& b);
+bool operator==(const HEPRUPAttribute& a, const HEPRUPAttribute& b);
+bool operator==(const HEPEUPAttribute& a, const HEPEUPAttribute& b);
 
-// equality comparions used by unit tests
-bool is_close(const FourVector& a, const FourVector& b, double rel_eps = 1e-7) {
-  auto is_close = [rel_eps](double a, double b) { return std::abs(a - b) < rel_eps; };
-  return is_close(a.x(), b.x()) && is_close(a.y(), b.y()) && is_close(a.z(), b.z()) &&
-         is_close(a.t(), b.t());
-}
-
-// compares all real qualities of two particles, but ignores the .id() field
-bool operator==(const GenParticle& a, const GenParticle& b) {
-  return a.pid() == b.pid() && a.status() == b.status() &&
-         is_close(a.momentum(), b.momentum());
-}
-
-// compares all real qualities of both particle sets,
-// but ignores the .id() fields and the particle order
 bool equal_particle_sets(const std::vector<ConstGenParticlePtr>& a,
-                         const std::vector<ConstGenParticlePtr>& b) {
-  if (a.size() != b.size()) return false;
-  auto unmatched = b;
-  for (auto&& ai : a) {
-    auto it = std::find_if(unmatched.begin(), unmatched.end(),
-                           [ai](ConstGenParticlePtr x) { return *ai == *x; });
-    if (it == unmatched.end()) return false;
-    unmatched.erase(it);
-  }
-  return unmatched.empty();
-}
-
-// compares all real qualities of two vertices, but ignores the .id() field
-bool operator==(const GenVertex& a, const GenVertex& b) {
-  return a.status() == b.status() && is_close(a.position(), b.position()) &&
-         equal_particle_sets(a.particles_in(), b.particles_in()) &&
-         equal_particle_sets(a.particles_out(), b.particles_out());
-}
-
-// compares all real qualities of both vertex sets,
-// but ignores the .id() fields and the vertex order
+                         const std::vector<ConstGenParticlePtr>& b);
 bool equal_vertex_sets(const std::vector<ConstGenVertexPtr>& a,
-                       const std::vector<ConstGenVertexPtr>& b) {
-  if (a.size() != b.size()) return false;
-  auto unmatched = b;
-  for (auto&& ai : a) {
-    auto it = std::find_if(unmatched.begin(), unmatched.end(),
-                           [ai](ConstGenVertexPtr x) { return *ai == *x; });
-    if (it == unmatched.end()) return false;
-    unmatched.erase(it);
-  }
-  return unmatched.empty();
-}
-
-bool operator==(const GenRunInfo::ToolInfo& a, const GenRunInfo::ToolInfo& b) {
-  return a.name == b.name && a.version == b.version && a.description == b.description;
-}
-
-bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
-  const auto a_attr = a.attributes();
-  const auto b_attr = b.attributes();
-  return a.tools().size() == b.tools().size() &&
-         a.weight_names().size() == b.weight_names().size() &&
-         a_attr.size() == b_attr.size() &&
-         std::equal(a.tools().begin(), a.tools().end(), b.tools().begin()) &&
-         std::equal(a.weight_names().begin(), a.weight_names().end(),
-                    b.weight_names().begin()) &&
-         std::equal(a_attr.begin(), a_attr.end(), b_attr.begin(),
-                    [](const std::pair<std::string, AttributePtr>& a,
-                       const std::pair<std::string, AttributePtr>& b) {
-                      if (a.first != b.first) return false;
-                      if (bool(a.second) != bool(b.second)) return false;
-                      if (!a.second) return true;
-                      std::string sa, sb;
-                      a.second->to_string(sa);
-                      b.second->to_string(sb);
-                      return sa == sb;
-                    });
-}
-
-bool operator==(const GenEvent& a, const GenEvent& b) {
-  // incomplete:
-  // missing comparison of GenHeavyIon, GenPdfInfo, GenCrossSection
-
-  if (a.event_number() != b.event_number() || a.momentum_unit() != b.momentum_unit() ||
-      a.length_unit() != b.length_unit())
-    return false;
-
-  // run_info may be missing
-  if (a.run_info() && b.run_info()) {
-    if (!(*a.run_info() == *b.run_info())) return false;
-  } else if (!a.run_info() && b.run_info()) {
-    if (*b.run_info() != GenRunInfo()) return false;
-  } else if (a.run_info() && !b.run_info()) {
-    if (*a.run_info() != GenRunInfo()) return false;
-  }
-
-  // if all vertices compare equal, then also all particles are equal
-  return equal_vertex_sets(a.vertices(), b.vertices());
-}
-
-bool operator==(const GenHeavyIon& a, const GenHeavyIon& b) {
-  return a.Ncoll_hard == b.Ncoll_hard && a.Npart_proj == b.Npart_proj &&
-         a.Npart_targ == b.Npart_targ && a.Ncoll == b.Ncoll &&
-         a.N_Nwounded_collisions == b.N_Nwounded_collisions &&
-         a.Nwounded_N_collisions == b.Nwounded_N_collisions &&
-         a.Nwounded_Nwounded_collisions == b.Nwounded_Nwounded_collisions &&
-         a.impact_parameter == b.impact_parameter &&
-         a.event_plane_angle == b.event_plane_angle &&
-         a.sigma_inel_NN == b.sigma_inel_NN && a.centrality == b.centrality &&
-         a.user_cent_estimate == b.user_cent_estimate;
-}
-
-template <class T>
-std::ostream& repr(std::ostream& os, const std::shared_ptr<T>& x) {
-  if (x)
-    repr(os, *x.get());
-  else
-    os << "None";
-  return os;
-}
-
-inline std::ostream& repr(std::ostream& os, const std::string& s) {
-  os << "'" << s << "'";
-  return os;
-}
-
-inline std::ostream& repr(std::ostream& os, const HepMC3::Attribute& a) {
-  std::string s;
-  a.to_string(s);
-  os << s;
-  return os;
-}
-
-inline std::ostream& repr(std::ostream& os, const HepMC3::GenRunInfo::ToolInfo& x) {
-  os << "ToolInfo(name=";
-  repr(os, x.name) << ", version=";
-  repr(os, x.version) << ", description=";
-  repr(os, x.description) << ")";
-  return os;
-}
-
-inline std::ostream& repr(std::ostream& os, const HepMC3::FourVector& x) {
-  const int saved = os.precision();
-  os.precision(3);
-  os << "FourVector(" << x.x() << ", " << x.y() << ", " << x.z() << ", " << x.t()
-     << ")";
-  os.precision(saved);
-  return os;
-}
-
-template <class T, class A>
-std::ostream& repr(std::ostream& os, const std::vector<T, A>& v) {
-  return ostream_range(
-      os, v.begin(), v.end(),
-      [](std::ostream& os, typename std::vector<T, A>::const_iterator it) {
-        repr(os, *it);
-      });
-}
-
-template <class K, class V, class... Ts>
-std::ostream& repr(std::ostream& os, const std::map<K, V, Ts...>& m) {
-  return ostream_range(
-      os, m.begin(), m.end(),
-      [](std::ostream& os, typename std::map<K, V, Ts...>::const_iterator it) {
-        os << it->first << ": ";
-        repr(os, it->second);
-      },
-      '{', '}');
-}
-
-inline std::ostream& repr(std::ostream& os, const HepMC3::GenRunInfo& x) {
-  os << "GenRunInfo(tools=";
-  repr(os, x.tools()) << ", weight_names=";
-  repr(os, x.weight_names()) << ", attributes=";
-  repr(os, x.attributes()) << ")";
-  return os;
-}
-
-inline std::ostream& repr(std::ostream& os, const HepMC3::GenParticle& x) {
-  os << "GenParticle(";
-  repr(os, x.momentum());
-  if (x.is_generated_mass_set()) os << ", mass=" << x.data().mass;
-  os << ", pid=" << x.pid() << ", status=" << x.status() << ")";
-  return os;
-}
-
-inline std::ostream& repr(std::ostream& os, const HepMC3::GenVertex& x) {
-  os << "GenVertex(";
-  repr(os, x.position());
-  os << ")";
-  return os;
-}
-
-inline std::ostream& repr(std::ostream& os, const HepMC3::GenEvent& x) {
-  // incomplete:
-  // missing comparison of GenHeavyIon, GenPdfInfo, GenCrossSection
-
-  os << "GenEvent("
-     << "momentum_unit=" << x.momentum_unit() << ", "
-     << "length_unit=" << x.length_unit() << ", "
-     << "event_number=" << x.event_number() << ", "
-     << "particles=";
-  repr(os, x.particles()) << ", vertices=";
-  repr(os, x.vertices()) << ", run_info=";
-  repr(os, x.run_info()) << ")";
-  return os;
-}
+                       const std::vector<ConstGenVertexPtr>& b);
 
 int crosssection_safe_index(GenCrossSection& cs, py::object obj);
 std::string crosssection_safe_name(GenCrossSection& cs, py::object obj);
@@ -343,13 +134,8 @@ PYBIND11_MODULE(_core, m) {
       .def(py::self -= py::self)
       .def(py::self *= double())
       .def(py::self /= double())
-      .def("__repr__",
-           [](const FourVector& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
       // clang-format off
+      REPR(FourVector)
       METH(length2, FourVector)
       METH(length, FourVector)
       METH(perp2, FourVector)
@@ -422,8 +208,6 @@ PYBIND11_MODULE(_core, m) {
 
   py::class_<GenHeavyIon, GenHeavyIonPtr, Attribute>(m, "GenHeavyIon", DOC(GenHeavyIon))
       .def(py::init<>())
-      .def("__eq__", py::overload_cast<const GenHeavyIon&, const GenHeavyIon&>(
-                         HepMC3::operator==))
       // clang-format off
       ATTR(Ncoll_hard, GenHeavyIon)
       ATTR(Npart_proj, GenHeavyIon)
@@ -443,11 +227,22 @@ PYBIND11_MODULE(_core, m) {
       ATTR(Nspec_targ_p, GenHeavyIon)
       ATTR(participant_plane_angles, GenHeavyIon)
       ATTR(eccentricities, GenHeavyIon)
+      EQ(GenHeavyIon)
       // clang-format on
       ;
 
   py::class_<GenPdfInfo, GenPdfInfoPtr, Attribute>(m, "GenPdfInfo", DOC(GenPdfInfo))
       .def(py::init<>())
+      .def(py::init([](int parton_id1, int parton_id2, double x1, double x2,
+                       double scale_in, double xf1, double xf2, int pdf_id1,
+                       int pdf_id2) {
+             auto p = std::make_shared<GenPdfInfo>();
+             p->set(parton_id1, parton_id2, x1, x2, scale_in, xf1, xf2, pdf_id1,
+                    pdf_id2);
+             return p;
+           }),
+           "parton_id1"_a, "parton_id2"_a, "x1"_a, "x2"_a, "scale"_a, "xf1"_a, "xf2"_a,
+           "pdf_id1"_a = 0, "pdf_id2"_a = 0)
       .def_property(
           "parton_id1", [](const GenPdfInfo& self) { return self.parton_id[0]; },
           [](GenPdfInfo& self, int value) { self.parton_id[0] = value; },
@@ -479,7 +274,9 @@ PYBIND11_MODULE(_core, m) {
           [](GenPdfInfo& self, double value) { self.xf[1] = value; },
           DOC(GenPdfInfo.xf))
       // clang-format off
+      EQ(GenPdfInfo)
       ATTR(scale, GenPdfInfo)
+      REPR(GenPdfInfo)
       // clang-format on
       ;
 
@@ -545,6 +342,7 @@ PYBIND11_MODULE(_core, m) {
            "cross_section_error"_a, "accepted_events"_a = -1, "attempted_events"_a = -1,
            DOC(GenCrossSection.set_cross_section))
       // clang-format off
+      EQ(GenCrossSection)
       PROP2(accepted_events, GenCrossSection)
       PROP2(attempted_events, GenCrossSection)
       PROP_RO(is_valid, GenCrossSection)
@@ -603,14 +401,9 @@ PYBIND11_MODULE(_core, m) {
             }
           },
           DOC(attributes))
-      .def("__repr__",
-           [](const GenRunInfo& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
-      .def(py::self == py::self)
       // clang-format off
+      EQ(GenRunInfo)
+      REPR(GenRunInfo)
       PROP(weight_names, GenRunInfo)
       // clang-format on
       ;
@@ -624,14 +417,9 @@ PYBIND11_MODULE(_core, m) {
                                          py::cast<std::string>(seq[1]),
                                          py::cast<std::string>(seq[2])});
       }))
-      .def("__repr__",
-           [](const GenRunInfo::ToolInfo& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
-      .def(py::self == py::self)
       // clang-format off
+      EQ(GenRunInfo::ToolInfo)
+      REPR(GenRunInfo::ToolInfo)
       ATTR(name, GenRunInfo::ToolInfo)
       ATTR(version, GenRunInfo::ToolInfo)
       ATTR(description, GenRunInfo::ToolInfo)
@@ -699,13 +487,6 @@ PYBIND11_MODULE(_core, m) {
           DOC(attributes))
       .def("reserve", &GenEvent::reserve, "particles"_a, "vertices"_a = 0,
            DOC(GenEvent.reserve))
-      .def(py::self == py::self)
-      .def("__repr__",
-           [](GenEvent& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
       .def("__str__",
            [](GenEvent& self) {
              std::ostringstream os;
@@ -717,6 +498,8 @@ PYBIND11_MODULE(_core, m) {
            "children"_a = py::none(), "vx"_a = py::none(), "vy"_a = py::none(),
            "vz"_a = py::none(), "vt"_a = py::none(), DOC(GenEvent.from_hepevt))
       // clang-format off
+      EQ(GenEvent)
+      REPR(GenEvent)
       METH(clear, GenEvent)
       PROP(run_info, GenEvent)
       PROP(event_number, GenEvent)
@@ -739,13 +522,6 @@ PYBIND11_MODULE(_core, m) {
   py::class_<GenParticle, GenParticlePtr>(m, "GenParticle", DOC(GenParticle))
       .def(py::init<const FourVector&, int, int>(),
            "momentum"_a = py::make_tuple(0, 0, 0, 0), "pid"_a = 0, "status"_a = 0)
-      .def(py::self == py::self)
-      .def("__repr__",
-           [](const GenParticlePtr& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
       .def_property(
           "attributes",
           [](GenParticle& self) {
@@ -761,6 +537,8 @@ PYBIND11_MODULE(_core, m) {
           },
           DOC(attributes))
       // clang-format off
+      EQ(GenParticle)
+      REPR(GenParticle)
       PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
       PROP_RO(in_event, GenParticle)
       PROP_RO(id, GenParticle)
@@ -781,13 +559,6 @@ PYBIND11_MODULE(_core, m) {
 
   py::class_<GenVertex, GenVertexPtr>(m, "GenVertex", DOC(GenVertex))
       .def(py::init<const FourVector&>(), "position"_a = FourVector())
-      .def(py::self == py::self)
-      .def("__repr__",
-           [](const GenVertexPtr& self) {
-             std::ostringstream os;
-             repr(os, self);
-             return os.str();
-           })
       .def_property(
           "attributes",
           [](GenVertex& self) {
@@ -803,6 +574,8 @@ PYBIND11_MODULE(_core, m) {
           },
           DOC(GenVertex.attributes))
       // clang-format off
+      EQ(GenVertex)
+      REPR(GenVertex)
       PROP_RO_OL(parent_event, GenVertex, const GenEvent*)
       PROP_RO(in_event, GenVertex)
       PROP_RO(id, GenVertex)
