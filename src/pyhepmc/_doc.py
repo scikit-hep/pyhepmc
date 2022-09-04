@@ -136,7 +136,10 @@ The units of cross-sections are expected to be pb.""",
     Parameters
     ----------
     pytype: type
-        The Python type of the attribute (int, float, bool, ...). Can also be typed list (typing.List[int], ...).
+        Type of the attribute. Allowed values: bool, int, float, str, GenParticle,
+        GenPdfInfo, GenHeavyIon, GenCrossSection, HEPRUPAttribute, HEPEUPAttribute,
+        typing.List[int], typing.List[float], typing.List[str]. In Python-3.9+,
+        typing.List can be replaced by list.
     """,
 }
 
