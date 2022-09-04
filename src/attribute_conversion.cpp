@@ -93,6 +93,7 @@ py::object unparsed_attribute_to_python(AttributePtr& unparsed, py::object pytyp
   auto int_type = builtins.attr("int");
   auto float_type = builtins.attr("float");
   auto str_type = builtins.attr("str");
+  auto list_type = builtins.attr("list");
   py::module_ pyhepmc = py::module_::import("pyhepmc");
   auto particle_type = pyhepmc.attr("GenParticle");
   auto pdfinfo_type = pyhepmc.attr("GenPdfInfo");
@@ -101,9 +102,9 @@ py::object unparsed_attribute_to_python(AttributePtr& unparsed, py::object pytyp
   auto heprup_type = pyhepmc.attr("HEPRUPAttribute");
   auto hepeup_type = pyhepmc.attr("HEPEUPAttribute");
   py::module_ typing = py::module_::import("typing");
-  auto get_args = typing.attr("get_args");
-  auto get_origin = typing.attr("get_origin");
-  auto list1_type = builtins.attr("list");
+  // typing.get_origin and typing.get_args are only available in Python-3.8+
+  auto get_origin = pyhepmc.attr("_get_origin");
+  auto get_args = pyhepmc.attr("_get_args");
   auto list2_type = typing.attr("List");
 
   // Convert the internal attribute as well as the Python return value;
@@ -113,11 +114,10 @@ py::object unparsed_attribute_to_python(AttributePtr& unparsed, py::object pytyp
   py::object result;
 
   // handle lists first
-  if ((pytype.is(list1_type) || pytype.is(list2_type)))
+  if ((pytype.is(list_type) || pytype.is(list2_type)))
     throw py::type_error("cannot convert UnparsedAttribute to untyped list");
 
-  py::object origin = get_origin(pytype);
-  if (origin.is(list1_type) || origin.is(list2_type)) {
+  if (get_origin(pytype).is(list_type)) {
     py::object subtype = get_args(pytype)[py::int_(0)];
     if (!(convert<VectorIntAttribute>(unparsed, subtype, int_type, result) ||
           convert<VectorDoubleAttribute>(unparsed, subtype, float_type, result) ||
