@@ -1,4 +1,5 @@
 #include "repr.hpp"
+#include "HepMC3/GenPdfInfo.h"
 #include <HepMC3/Attribute.h>
 #include <HepMC3/FourVector.h>
 #include <HepMC3/GenParticle.h>
@@ -15,6 +16,11 @@ std::ostream& repr_ostream(std::ostream& os, const HepMC3::Attribute& a) {
   std::string s;
   a.to_string(s);
   os << s;
+  return os;
+}
+
+std::ostream& repr_ostream(std::ostream& os, const HepMC3::UnparsedAttribute& a) {
+  os << "<UnparsedAttribute>('" << a.parent_->unparsed_string() << "')";
   return os;
 }
 
@@ -40,6 +46,15 @@ std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenRunInfo& x) {
   repr_ostream(os, x.tools()) << ", weight_names=";
   repr_ostream(os, x.weight_names()) << ", attributes=";
   repr_ostream(os, x.attributes()) << ")";
+  return os;
+}
+
+std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenPdfInfo& x) {
+  os << "GenPdfInfo(";
+  os << "parton_id1=" << x.parton_id[0] << ", parton_id2=" << x.parton_id[1]
+     << ", x1=" << x.x[0] << ", x2=" << x.x[1] << ", scale=" << x.scale
+     << ", xf1=" << x.xf[0] << ", xf2=" << x.xf[1] << ", pdf_id1=" << x.pdf_id[0]
+     << ", pdf_id2=" << x.pdf_id[1] << ")";
   return os;
 }
 

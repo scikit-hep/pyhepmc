@@ -1,3 +1,5 @@
+#include "HepMC3/GenPdfInfo.h"
+#include "HepMC3/LHEFAttributes.h"
 #include "pointer.hpp"
 #include <HepMC3/GenEvent.h>
 #include <HepMC3/GenHeavyIon.h>
@@ -89,15 +91,38 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
 }
 
 bool operator==(const GenHeavyIon& a, const GenHeavyIon& b) {
-  return a.Ncoll_hard == b.Ncoll_hard && a.Npart_proj == b.Npart_proj &&
-         a.Npart_targ == b.Npart_targ && a.Ncoll == b.Ncoll &&
-         a.N_Nwounded_collisions == b.N_Nwounded_collisions &&
-         a.Nwounded_N_collisions == b.Nwounded_N_collisions &&
-         a.Nwounded_Nwounded_collisions == b.Nwounded_Nwounded_collisions &&
-         a.impact_parameter == b.impact_parameter &&
-         a.event_plane_angle == b.event_plane_angle &&
-         a.sigma_inel_NN == b.sigma_inel_NN && a.centrality == b.centrality &&
-         a.user_cent_estimate == b.user_cent_estimate;
+  std::string as, bs;
+  a.to_string(as);
+  b.to_string(bs);
+  return as == bs;
+}
+
+bool operator==(const GenPdfInfo& a, const GenPdfInfo& b) {
+  std::string as, bs;
+  a.to_string(as);
+  b.to_string(bs);
+  return as == bs;
+}
+
+bool operator==(const GenCrossSection& a, const GenCrossSection& b) {
+  std::string as, bs;
+  a.to_string(as);
+  b.to_string(bs);
+  return as == bs;
+}
+
+bool operator==(const HEPRUPAttribute& a, const HEPRUPAttribute& b) {
+  std::string as, bs;
+  a.to_string(as);
+  b.to_string(bs);
+  return as == bs;
+}
+
+bool operator==(const HEPEUPAttribute& a, const HEPEUPAttribute& b) {
+  std::string as, bs;
+  a.to_string(as);
+  b.to_string(bs);
+  return as == bs;
 }
 
 bool operator==(const GenEvent& a, const GenEvent& b) {

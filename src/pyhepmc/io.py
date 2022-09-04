@@ -18,6 +18,7 @@ from ._core import (
     WriterAscii,
     WriterAsciiHepMC2,
     WriterHEPEVT,
+    UnparsedAttribute,
 )
 from pathlib import PurePath
 import typing as _tp
@@ -31,6 +32,7 @@ __all__ = [
     "WriterAscii",
     "WriterAsciiHepMC2",
     "WriterHEPEVT",
+    "UnparsedAttribute",
 ]
 
 _open = open

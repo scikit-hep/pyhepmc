@@ -149,3 +149,41 @@ def test_open_with_writer(evt, writer):  # noqa
 def test_deprecated_import():
     with pytest.warns(np.VisibleDeprecationWarning):
         from pyhepmc import ReaderAscii  # noqa F401
+
+
+def test_attributes():
+    filename = "test_attributes.dat"
+
+    evt = hep.GenEvent()  # noqa
+    p = hep.GenParticle((1, 2, 3, 4), 5, 6)
+    evt.add_particle(p)
+    evt.attributes = {
+        "1": True,
+        "2": 2,
+        "3": 3.3,
+        "4": hep.GenPdfInfo(),
+        "5": hep.GenHeavyIon(),
+        "6": hep.GenCrossSection(),
+        "7": p,
+        # "8": np.array([1, 2]),
+        # "9": np.array([1.3, 2.4]),
+        # cannot test this yet
+        # "8": hep.HEPRUPAttribute(),
+        # "9": hep.HEPEUPAttribute(),
+    }
+
+    with io.open(filename, "w") as f:
+        f.write(evt)
+
+    with io.open(filename) as f:
+        evt2 = f.read()
+
+    for k, v in evt.attributes.items():
+        t = type(v)
+        v2 = evt2.attributes[k].astype(t)
+        assert v == v2
+        # UnparsedAttribute is replaced with parsed Attribute
+        v3 = evt2.attributes[k]
+        assert v == v3
+
+    os.unlink(filename)

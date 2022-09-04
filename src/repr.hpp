@@ -1,6 +1,7 @@
 #ifndef PYHEPMC_REPR_HPP
 #define PYHEPMC_REPR_HPP
 
+#include "UnparsedAttribute.hpp"
 #include <HepMC3/Attribute.h>
 #include <HepMC3/FourVector.h>
 #include <HepMC3/GenCrossSection.h>
@@ -19,11 +20,14 @@
 std::ostream& repr_ostream(std::ostream& os, const std::string& s);
 std::ostream& repr_ostream(std::ostream& os, const HepMC3::Attribute& a);
 std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenRunInfo& x);
+std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenPdfInfo& x);
 std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenRunInfo::ToolInfo& x);
 std::ostream& repr_ostream(std::ostream& os, const HepMC3::FourVector& x);
 std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenParticle& x);
 std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenVertex& x);
 std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenEvent& x);
+
+std::ostream& repr_ostream(std::ostream& os, const HepMC3::UnparsedAttribute& a);
 
 template <class Iterator, class Streamer>
 std::ostream& ostream_range(std::ostream& os, Iterator begin, Iterator end,
@@ -70,6 +74,13 @@ std::ostream& repr_ostream(std::ostream& os, const std::map<K, V, Ts...>& m) {
         repr_ostream(os, it->second);
       },
       '{', '}');
+}
+
+template <class T>
+py::str repr(const T& t) {
+  std::ostringstream os;
+  repr_ostream(os, t);
+  return py::cast(os.str());
 }
 
 #endif

@@ -19,6 +19,7 @@ MEMBER_ACCESSOR(MA1, HepMC3::GenEvent, m_attributes,
                 HepMC3::AttributesView::AttributeMap)
 
 namespace HepMC3 {
+
 py::object AttributesView::Iter::next() {
   while (it_ != end_) {
     auto& amap2 = it_->second;

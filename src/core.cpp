@@ -1,4 +1,5 @@
 #include "HepMC3/AssociatedParticle.h"
+#include "HepMC3/GenPdfInfo_fwd.h"
 #include "attributes_view.hpp"
 #include "pointer.hpp"
 #include "pybind.hpp"
@@ -32,13 +33,6 @@
 
 void register_io(py::module& m);
 
-template <class T>
-py::str repr(const T& t) {
-  std::ostringstream os;
-  repr_ostream(os, t);
-  return py::cast(os.str());
-}
-
 namespace HepMC3 {
 
 bool operator==(const GenParticle& a, const GenParticle& b);
@@ -47,6 +41,10 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b);
 bool operator==(const GenRunInfo::ToolInfo& a, const GenRunInfo::ToolInfo& b);
 bool operator==(const GenEvent& a, const GenEvent& b);
 bool operator==(const GenHeavyIon& a, const GenHeavyIon& b);
+bool operator==(const GenPdfInfo& a, const GenPdfInfo& b);
+bool operator==(const GenCrossSection& a, const GenCrossSection& b);
+bool operator==(const HEPRUPAttribute& a, const HEPRUPAttribute& b);
+bool operator==(const HEPEUPAttribute& a, const HEPEUPAttribute& b);
 
 bool equal_particle_sets(const std::vector<ConstGenParticlePtr>& a,
                          const std::vector<ConstGenParticlePtr>& b);
@@ -210,8 +208,6 @@ PYBIND11_MODULE(_core, m) {
 
   py::class_<GenHeavyIon, GenHeavyIonPtr, Attribute>(m, "GenHeavyIon", DOC(GenHeavyIon))
       .def(py::init<>())
-      .def("__eq__", py::overload_cast<const GenHeavyIon&, const GenHeavyIon&>(
-                         HepMC3::operator==))
       // clang-format off
       ATTR(Ncoll_hard, GenHeavyIon)
       ATTR(Npart_proj, GenHeavyIon)
@@ -231,11 +227,22 @@ PYBIND11_MODULE(_core, m) {
       ATTR(Nspec_targ_p, GenHeavyIon)
       ATTR(participant_plane_angles, GenHeavyIon)
       ATTR(eccentricities, GenHeavyIon)
+      EQ(GenHeavyIon)
       // clang-format on
       ;
 
   py::class_<GenPdfInfo, GenPdfInfoPtr, Attribute>(m, "GenPdfInfo", DOC(GenPdfInfo))
       .def(py::init<>())
+      .def(py::init([](int parton_id1, int parton_id2, double x1, double x2,
+                       double scale_in, double xf1, double xf2, int pdf_id1,
+                       int pdf_id2) {
+             auto p = std::make_shared<GenPdfInfo>();
+             p->set(parton_id1, parton_id2, x1, x2, scale_in, xf1, xf2, pdf_id1,
+                    pdf_id2);
+             return p;
+           }),
+           "parton_id1"_a, "parton_id2"_a, "x1"_a, "x2"_a, "scale"_a, "xf1"_a, "xf2"_a,
+           "pdf_id1"_a = 0, "pdf_id2"_a = 0)
       .def_property(
           "parton_id1", [](const GenPdfInfo& self) { return self.parton_id[0]; },
           [](GenPdfInfo& self, int value) { self.parton_id[0] = value; },
@@ -267,7 +274,9 @@ PYBIND11_MODULE(_core, m) {
           [](GenPdfInfo& self, double value) { self.xf[1] = value; },
           DOC(GenPdfInfo.xf))
       // clang-format off
+      EQ(GenPdfInfo)
       ATTR(scale, GenPdfInfo)
+      REPR(GenPdfInfo)
       // clang-format on
       ;
 
@@ -333,6 +342,7 @@ PYBIND11_MODULE(_core, m) {
            "cross_section_error"_a, "accepted_events"_a = -1, "attempted_events"_a = -1,
            DOC(GenCrossSection.set_cross_section))
       // clang-format off
+      EQ(GenCrossSection)
       PROP2(accepted_events, GenCrossSection)
       PROP2(attempted_events, GenCrossSection)
       PROP_RO(is_valid, GenCrossSection)
@@ -391,8 +401,8 @@ PYBIND11_MODULE(_core, m) {
             }
           },
           DOC(attributes))
-      .def(py::self == py::self)
       // clang-format off
+      EQ(GenRunInfo)
       REPR(GenRunInfo)
       PROP(weight_names, GenRunInfo)
       // clang-format on
@@ -407,8 +417,8 @@ PYBIND11_MODULE(_core, m) {
                                          py::cast<std::string>(seq[1]),
                                          py::cast<std::string>(seq[2])});
       }))
-      .def(py::self == py::self)
       // clang-format off
+      EQ(GenRunInfo::ToolInfo)
       REPR(GenRunInfo::ToolInfo)
       ATTR(name, GenRunInfo::ToolInfo)
       ATTR(version, GenRunInfo::ToolInfo)
@@ -487,8 +497,8 @@ PYBIND11_MODULE(_core, m) {
            "m"_a, "pid"_a, "status"_a, "parents"_a = py::none(),
            "children"_a = py::none(), "vx"_a = py::none(), "vy"_a = py::none(),
            "vz"_a = py::none(), "vt"_a = py::none(), DOC(GenEvent.from_hepevt))
-      .def(py::self == py::self)
       // clang-format off
+      EQ(GenEvent)
       REPR(GenEvent)
       METH(clear, GenEvent)
       PROP(run_info, GenEvent)
@@ -526,8 +536,8 @@ PYBIND11_MODULE(_core, m) {
             }
           },
           DOC(attributes))
-      .def(py::self == py::self)
       // clang-format off
+      EQ(GenParticle)
       REPR(GenParticle)
       PROP_RO_OL(parent_event, GenParticle, const GenEvent*)
       PROP_RO(in_event, GenParticle)
@@ -563,8 +573,8 @@ PYBIND11_MODULE(_core, m) {
             }
           },
           DOC(GenVertex.attributes))
-      .def(py::self == py::self)
       // clang-format off
+      EQ(GenVertex)
       REPR(GenVertex)
       PROP_RO_OL(parent_event, GenVertex, const GenEvent*)
       PROP_RO(in_event, GenVertex)

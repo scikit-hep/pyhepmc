@@ -60,7 +60,7 @@ struct RunInfoAttributesView {
   iterator end();
 };
 
-py::object attribute_to_python(AttributePtr a);
+py::object attribute_to_python(AttributePtr& a);
 AttributePtr attribute_from_python(py::object obj);
 
 } // namespace HepMC3

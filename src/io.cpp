@@ -1,4 +1,6 @@
+#include "UnparsedAttribute.hpp"
 #include "pybind.hpp"
+#include "repr.hpp"
 #include <HepMC3/GenRunInfo.h>
 #include <HepMC3/ReaderAscii.h>
 #include <HepMC3/ReaderAsciiHepMC2.h>
@@ -85,6 +87,14 @@ void register_io(py::module& m) {
   py::class_<WriterHEPEVT>(m, "WriterHEPEVT")
       .def(py::init<const std::string&>(), "filename"_a) METH(write_event, WriterHEPEVT)
           METH(failed, WriterHEPEVT) METH(close, WriterHEPEVT);
+
+  py::class_<UnparsedAttribute>(m, "UnparsedAttribute", DOC(UnparsedAttribute))
+      .def("__str__", [](UnparsedAttribute& a) { return a.parent_->unparsed_string(); })
+      // clang-format off
+      METH(astype, UnparsedAttribute, "pytype"_a)
+      REPR(UnparsedAttribute)
+      // clang-format on
+      ;
 
 #ifdef HEPMC3_ROOTIO
 

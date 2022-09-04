@@ -118,6 +118,26 @@ The units of cross-sections are expected to be pb.""",
 
     It is possible to read and write attributes. Primitive C++ types (and vectors therefore) are converted from/to native Python types.
     """,
+    "UnparsedAttribute": """Unparsed attribute after deserialization.
+
+    HepMC3 does not serialize the type of attributes, therefore the correct
+    type cannot be restored upon deserialization (this is a limition of the HepMC3 C++
+    library and its serialization format). Use the :meth:`astype` method to parse the
+    attribute into a concrete type; this has important side-effects, see method
+    description.
+    """,
+    "UnparsedAttribute.astype": """
+    Convert unparsed attribute to concrete type.
+
+    If the conversion is successful, the unparsed attribute is replaced with the parsed
+    attribute, so this method has to be called only once. If the conversion fails, a
+    TypeError is raised.
+
+    Parameters
+    ----------
+    pytype: type
+        The Python type of the attribute (int, float, bool, ...). Can also be typed list (typing.List[int], ...).
+    """,
 }
 
 doc.update(override)
