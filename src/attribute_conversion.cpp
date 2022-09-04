@@ -116,7 +116,8 @@ py::object unparsed_attribute_to_python(AttributePtr& unparsed, py::object pytyp
   if ((pytype.is(list1_type) || pytype.is(list2_type)))
     throw py::type_error("cannot convert UnparsedAttribute to untyped list");
 
-  if (get_origin(pytype).is(list1_type) || get_origin(pytype).is(list2_type)) {
+  py::object origin = get_origin(pytype);
+  if (origin.is(list1_type) || origin.is(list2_type)) {
     py::object args = get_args(pytype);
     py::object subtype = args[py::int_(0)];
     if (!(convert<VectorIntAttribute>(unparsed, subtype, int_type, result) ||
