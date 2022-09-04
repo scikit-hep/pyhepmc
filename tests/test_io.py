@@ -6,6 +6,7 @@ from test_basic import evt  # noqa
 from pyhepmc._core import stringstream
 from pathlib import Path
 import numpy as np
+import typing
 
 
 def test_read_write(evt):  # noqa
@@ -165,8 +166,8 @@ def test_attributes():
         "5": hep.GenHeavyIon(),
         "6": hep.GenCrossSection(),
         "7": p,
-        # "8": np.array([1, 2]),
-        # "9": np.array([1.3, 2.4]),
+        "8": [1, 2],
+        "9": [1.3, 2.4],
         # cannot test this yet
         # "8": hep.HEPRUPAttribute(),
         # "9": hep.HEPEUPAttribute(),
@@ -178,9 +179,22 @@ def test_attributes():
     with io.open(filename) as f:
         evt2 = f.read()
 
+    with pytest.raises(TypeError):
+        evt2.attributes["1"].astype(hep.GenPdfInfo)
+
+    with pytest.raises(TypeError, match="untyped list"):
+        evt2.attributes["8"].astype(list)
+
     for k, v in evt.attributes.items():
-        t = type(v)
+        if k == "8":
+            t = typing.List[int]
+        elif k == "9":
+            t = typing.List[float]
+        else:
+            t = type(v)
+
         v2 = evt2.attributes[k].astype(t)
+
         assert v == v2
         # UnparsedAttribute is replaced with parsed Attribute
         v3 = evt2.attributes[k]

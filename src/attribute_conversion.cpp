@@ -15,6 +15,7 @@
 #include <boost/mp11/utility.hpp>
 #include <cassert>
 #include <memory>
+#include <pybind11/detail/common.h>
 #include <pybind11/pytypes.h>
 #include <sstream>
 #include <stdexcept>
@@ -99,26 +100,49 @@ py::object unparsed_attribute_to_python(AttributePtr& unparsed, py::object pytyp
   auto crosssection_type = pyhepmc.attr("GenCrossSection");
   auto heprup_type = pyhepmc.attr("HEPRUPAttribute");
   auto hepeup_type = pyhepmc.attr("HEPEUPAttribute");
+  py::module_ typing = py::module_::import("typing");
+  auto get_args = typing.attr("get_args");
+  auto get_origin = typing.attr("get_origin");
+  auto list1_type = builtins.attr("list");
+  auto list2_type = typing.attr("List");
 
   // Convert the internal attribute as well as the Python return value;
   // see template<class T> std::shared_ptr<T>
   // GenEvent::attribute(const std::string &name,  const int& id) const
 
   py::object result;
-  if (!(convert<BoolAttribute>(unparsed, pytype, bool_type, result) ||
-        convert<IntAttribute>(unparsed, pytype, int_type, result) ||
-        convert<DoubleAttribute>(unparsed, pytype, float_type, result) ||
-        convert<StringAttribute>(unparsed, pytype, str_type, result) ||
-        convert<AssociatedParticle>(unparsed, pytype, particle_type, result) ||
-        convert<GenPdfInfo>(unparsed, pytype, pdfinfo_type, result) ||
-        convert<GenCrossSection>(unparsed, pytype, crosssection_type, result) ||
-        convert<GenHeavyIon>(unparsed, pytype, heavyion_type, result) ||
-        convert<HEPRUPAttribute>(unparsed, pytype, heprup_type, result) ||
-        convert<HEPEUPAttribute>(unparsed, pytype, hepeup_type, result))) {
-    std::ostringstream msg;
-    msg << "cannot convert UnparsedAttribute to type "
-        << py::cast<std::string>(pytype.attr("__name__"));
-    throw py::type_error(msg.str());
+
+  // handle lists first
+  if ((pytype.is(list1_type) || pytype.is(list2_type)))
+    throw py::type_error("cannot convert UnparsedAttribute to untyped list");
+
+  if (get_origin(pytype).is(list1_type) || get_origin(pytype).is(list2_type)) {
+    py::object args = get_args(pytype);
+    py::object subtype = args[py::int_(0)];
+    if (!(convert<VectorIntAttribute>(unparsed, subtype, int_type, result) ||
+          convert<VectorDoubleAttribute>(unparsed, subtype, float_type, result) ||
+          convert<VectorStringAttribute>(unparsed, subtype, str_type, result))) {
+      std::ostringstream msg;
+      msg << "cannot convert UnparsedAttribute to type List["
+          << py::cast<std::string>(subtype.attr("__name__")) << "]";
+      throw py::type_error(msg.str());
+    }
+  } else {
+    if (!(convert<BoolAttribute>(unparsed, pytype, bool_type, result) ||
+          convert<IntAttribute>(unparsed, pytype, int_type, result) ||
+          convert<DoubleAttribute>(unparsed, pytype, float_type, result) ||
+          convert<StringAttribute>(unparsed, pytype, str_type, result) ||
+          convert<AssociatedParticle>(unparsed, pytype, particle_type, result) ||
+          convert<GenPdfInfo>(unparsed, pytype, pdfinfo_type, result) ||
+          convert<GenCrossSection>(unparsed, pytype, crosssection_type, result) ||
+          convert<GenHeavyIon>(unparsed, pytype, heavyion_type, result) ||
+          convert<HEPRUPAttribute>(unparsed, pytype, heprup_type, result) ||
+          convert<HEPEUPAttribute>(unparsed, pytype, hepeup_type, result))) {
+      std::ostringstream msg;
+      msg << "cannot convert UnparsedAttribute to type "
+          << py::cast<std::string>(pytype.attr("__name__"));
+      throw py::type_error(msg.str());
+    }
   }
   return result;
 }
@@ -182,7 +206,12 @@ AttributePtr attribute_from_python(py::object obj) {
     });
   }
 
-  if (!result) throw std::runtime_error("Python type not convertible to Attribute");
+  if (!result) {
+    std::ostringstream msg;
+    msg << py::cast<std::string>(obj.attr("__class__").attr("__name__"))
+        << " not convertible to Attribute";
+    throw std::runtime_error(msg.str());
+  }
   return result;
 }
 
