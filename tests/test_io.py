@@ -7,6 +7,12 @@ from pyhepmc._core import stringstream
 from pathlib import Path
 import numpy as np
 import typing
+from sys import version_info
+
+if version_info >= (3, 9):
+    list_type = list
+else:
+    list_type = typing.List
 
 
 def test_read_event_write_event(evt):  # noqa
@@ -319,9 +325,9 @@ def test_attributes():
 
     for k, v in evt.attributes.items():
         if k == "8":
-            t = typing.List[int]
+            t = list_type[int]
         elif k == "9":
-            t = typing.List[float]
+            t = list_type[float]
         else:
             t = type(v)
 
