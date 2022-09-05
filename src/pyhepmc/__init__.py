@@ -30,7 +30,7 @@ Missing functionality
 - Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``,
   ``ReaderGZ``, ``Setup``, ``WriterGZ``. These will be added in the future.
 """
-# flake8: F401
+from sys import version_info
 from ._core import (  # noqa: F401
     Units,
     FourVector,
@@ -96,6 +96,19 @@ try:
     GenEvent._repr_html_ = _genevent_repr_html
 except ModuleNotFoundError:
     pass
+
+
+if version_info >= (3, 8):
+    from typing import get_origin as _get_origin, get_args as _get_args
+else:
+
+    def _get_origin(pytype):  # type: ignore
+        if hasattr(pytype, "__origin__"):
+            return pytype.__origin__
+        return None
+
+    def _get_args(pytype):  # type: ignore
+        return pytype.__args__
 
 
 def __getattr__(name: str) -> _tp.Any:

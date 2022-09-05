@@ -105,6 +105,12 @@ def test_GenHeavyIon():
     assert hi != hep.GenHeavyIon()
 
 
+def test_GenParticle_as_attribute(evt):
+    p = evt.particles[3]
+    evt.attributes["foo"] = p
+    assert evt.attributes == {"foo": p}
+
+
 def test_GenCrossSection():
     cs = hep.GenCrossSection()
     cs.set_cross_section(1.2, 0.2, 3, 10)
