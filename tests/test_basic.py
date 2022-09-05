@@ -160,6 +160,9 @@ def test_attributes_1():
     assert att["foo"] == 1
     assert att["bar"] == "xy"
     assert att["baz"] is True
+    assert att != {}
+    assert att != {"foo": 2, "bar": "xy", "baz": True}
+    assert att != {"foo": 1, "bra": "xy", "baz": True}
     with pytest.raises(KeyError):
         att["xyz"]
     assert len(att) == 3

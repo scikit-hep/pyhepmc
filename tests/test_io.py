@@ -27,23 +27,34 @@ def test_read_write(evt):  # noqa
     assert evt == evt2
 
 
-def test_pythonic_read_write(evt):  # noqa
+def test_pythonic_read_write_from_stream(evt):  # noqa
     oss = stringstream()
     with io.WriterAscii(oss) as f:
         f.write(evt)
 
     with io.ReaderAscii(oss) as f:
-        for i, evt2 in enumerate(f):
-            assert i == 0
+        n = 0
+        for evt2 in f:
             assert evt.particles == evt2.particles
             assert evt.vertices == evt2.vertices
             assert evt.run_info == evt2.run_info
             assert evt == evt2
+            n += 1
+            break
+        assert n == 1
+
+        for evt2 in f:
+            n += 1
+        assert n == 1
 
 
 def test_failed_read_file():
     with io.ReaderAscii("test_failed_read_file.dat") as f:
-        assert f.read() is None
+        n = 0
+        with pytest.raises(IOError):
+            for ev in f:
+                n += 1
+        assert n == 0
 
 
 def test_read_empty_stream(evt):  # noqa
@@ -81,23 +92,28 @@ def test_open_1(evt, format):  # noqa
 
 
 def test_open_2(evt):  # noqa
-    with hep.open("test_read_write_file.dat", "w", precision=3) as f:
+    filename = "test_read_write_file.dat"
+    with hep.open(filename, "w", precision=3) as f:
         f.write(evt)
 
-    with hep.open("test_read_write_file.dat") as f:
-        evt2 = f.read()
+    with hep.open(filename) as f:
+        for i, evt2 in enumerate(f):
+            assert i == 0
+            pass
 
     assert evt != evt2
 
-    with hep.open("test_read_write_file.dat", "w") as f:
+    with hep.open(filename, "w") as f:
         f.write(evt)
 
-    with hep.open("test_read_write_file.dat") as f:
-        evt3 = f.read()
+    with hep.open(filename) as f:
+        for i, evt3 in enumerate(f):
+            assert i == 0
+            pass
 
     assert evt == evt3
 
-    os.unlink("test_read_write_file.dat")
+    os.unlink(filename)
 
 
 def test_open_3(evt):  # noqa
@@ -127,6 +143,64 @@ def test_open_3(evt):  # noqa
     filename.unlink()
 
 
+def test_open_4():
+    filename = "test_open_4.dat"
+
+    with hep.open(filename, "w") as f:
+        for i in range(3):
+            ev = hep.GenEvent()
+            ev.event_number = i + 1
+            for k in range(i):
+                ev.add_particle(hep.GenParticle((1, 2, 3, 4), 1, 1))
+            f.write(ev)
+
+    with hep.open(filename) as f:
+        n = 0
+        for ev in f:
+            n += 1
+            assert ev.event_number == n
+            assert len(ev.particles) == n - 1
+        assert n == 3
+
+    # iterator is itself iterable
+    with hep.open(filename) as f:
+        fiter = iter(f)
+        n = 0
+        for ev in fiter:
+            n += 1
+        assert n == 3
+
+    os.unlink(filename)
+
+
+def test_open_5():
+    cdir = Path(__file__).parent / "pp.lhe"
+    with hep.open(cdir) as f:
+        n = 0
+        for ev in f:
+            n += 1
+        assert n == 1
+
+
+def test_open_broken():
+    cdir = Path(__file__).parent / "broken.dat"
+    with hep.open(cdir) as f:
+        n = 0
+        with pytest.raises(IOError):
+            for ev in f:
+                n += 1
+        assert n == 0
+
+
+def test_open_good():
+    cdir = Path(__file__).parent / "sibyll21.dat"
+    with hep.open(cdir) as f:
+        n = 0
+        for ev in f:
+            n += 1
+        assert n == 1
+
+
 @pytest.mark.parametrize(
     "writer", (io.WriterAscii, io.WriterAsciiHepMC2, io.WriterHEPEVT)
 )
@@ -143,24 +217,6 @@ def test_open_with_writer(evt, writer):  # noqa
         evt2.run_info.tools = evt.run_info.tools
 
     assert evt == evt2
-
-    os.unlink(filename)
-
-
-def test_open_with_multiple_events():
-    filename = "test_open_with_multiple_events.dat"
-
-    with hep.open(filename, "w") as f:
-        for i in range(3):
-            ev = hep.GenEvent()
-            ev.event_number = i + 1
-            for k in range(i):
-                ev.add_particle(hep.GenParticle((1, 2, 3, 4), 1, 1))
-            f.write(ev)
-
-    with hep.open(filename) as f:
-        for i, ev in enumerate(f):
-            assert ev.event_number == i + 1
 
     os.unlink(filename)
 

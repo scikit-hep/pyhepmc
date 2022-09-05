@@ -41,10 +41,19 @@ _open = open
 class _Iter:
     def __init__(self, parent: _tp.Any):
         self.parent = parent
+        self.eof = False
 
     def __next__(self) -> GenEvent:
-        evt = self.parent.read()
-        if evt is None:
+        if self.eof:
+            raise StopIteration
+        evt = GenEvent()
+        success = self.parent.read_event(evt)
+        print(success, self.parent.failed())
+        if self.parent.failed():
+            if success:  # indicates EOF
+                raise StopIteration
+            raise IOError("error reading event")
+        elif not success:  # also indicates EOF
             raise StopIteration
         return evt
 
@@ -75,6 +84,13 @@ def _read(self: _tp.Any) -> _tp.Union[GenEvent, None]:
     return evt if success else None
 
 
+def _read_event_lhef_patch(self: _tp.Any, evt: GenEvent) -> bool:
+    failed = ReaderLHEF_read_event(self, evt)
+    if failed and self.failed():  # probably EOF
+        return True
+    return not failed
+
+
 # add pythonic interface to IO classes
 ReaderAscii.__enter__ = _enter
 ReaderAscii.__exit__ = _exit
@@ -89,6 +105,8 @@ ReaderAsciiHepMC2.read = _read
 ReaderLHEF.__enter__ = _enter
 ReaderLHEF.__exit__ = _exit
 ReaderLHEF.__iter__ = _iter
+ReaderLHEF_read_event = ReaderLHEF.read_event
+ReaderLHEF.read_event = _read_event_lhef_patch
 ReaderLHEF.read = _read
 
 ReaderHEPEVT.__enter__ = _enter

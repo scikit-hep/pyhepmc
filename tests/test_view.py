@@ -28,3 +28,8 @@ def test_dot_2():
     d = view.to_dot(ev)
     s = str(d)
     assert "Internal" in s
+
+
+def test_repr_html(evt):  # noqa
+    d = view.to_dot(evt)
+    assert d._repr_image_svg_xml() == evt._repr_html_()
