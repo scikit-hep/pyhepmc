@@ -245,6 +245,7 @@ def test_open_failures():
         with pytest.raises(IOError):
             f.write(hep.GenEvent())
 
+    foo.chmod(mode=0o666)
     foo.unlink()
 
 
