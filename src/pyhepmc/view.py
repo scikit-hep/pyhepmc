@@ -89,10 +89,7 @@ def to_dot(
 
         tooltip = f"{pname} [PDGID: {int(p.pid)}]"
         tooltip += f"\n{p.momentum} GeV"
-        if p.generated_mass is not None:
-            tooltip += f"\nm = {p.generated_mass:.4g} GeV"
-        else:
-            tooltip += "\nm = not specified"
+        tooltip += f"\nm = {p.generated_mass:.4g} GeV"
         tooltip += f"\nstatus = {p.status}"
 
         try:
@@ -112,8 +109,8 @@ def to_dot(
                     style = "dashed"
             except (ParticleNotFound, InvalidParticle):
                 pass
-        except ModuleNotFoundError:
-            pass
+        except ModuleNotFoundError:  # pragma: no cover
+            pass  # pragma: no cover
 
         label = f"{pname} {en:.2g} {unit}"
 

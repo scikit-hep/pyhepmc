@@ -9,15 +9,20 @@ import numpy as np
 import typing
 
 
-def test_read_write(evt):  # noqa
+def test_read_event_write_event(evt):  # noqa
     oss = stringstream()
     with io.WriterAscii(oss) as f:
         f.write_event(evt)
 
     evt2 = hep.GenEvent()
+    evt3 = hep.GenEvent()
     assert evt != evt2
     with io.ReaderAscii(oss) as f:
-        f.read_event(evt2)
+        assert f.read_event(evt2)
+        assert not f.failed()
+        success = f.read_event(evt3)
+        assert success  # for EOF success is true and failed() is true
+        assert f.failed()
 
     assert evt.event_number == evt2.event_number
     assert evt.momentum_unit == evt2.momentum_unit
@@ -50,19 +55,45 @@ def test_pythonic_read_write_from_stream(evt):  # noqa
 
 def test_failed_read_file():
     with io.ReaderAscii("test_failed_read_file.dat") as f:
-        n = 0
+        with pytest.raises(IOError):
+            f.read()
+
+    n = 0
+    with io.ReaderAscii("test_failed_read_file.dat") as f:
         with pytest.raises(IOError):
             for ev in f:
                 n += 1
-        assert n == 0
+    assert n == 0
 
 
-def test_read_empty_stream(evt):  # noqa
+def test_failed_read_file_2():
+    fn = str(Path(__file__).parent / "broken.dat")
+    with io.ReaderAscii(fn) as f:
+        with pytest.raises(IOError):
+            f.read()
+
+    n = 0
+    with io.ReaderAscii(fn) as f:
+        with pytest.raises(IOError):
+            for ev in f:
+                n += 1
+    assert n == 0
+
+
+def test_read_empty_stream():
     oss = stringstream()
     with io.ReaderAscii(oss) as f:
-        evt = hep.GenEvent()
-        ok = f.read_event(evt)
-        assert ok is True  # reading empty stream is ok in HepMC
+        ev = hep.GenEvent()
+        success = f.read_event(ev)
+        # reading empty stream is EOF
+        assert success
+        assert f.failed()
+
+    with io.ReaderAscii(oss) as f:
+        ev = f.read()
+        # reading empty stream is EOF
+        assert ev is None
+        assert f.failed()
 
 
 @pytest.mark.parametrize("format", ("hepmc3", "hepmc2", "hepevt"))
@@ -174,31 +205,57 @@ def test_open_4():
 
 
 def test_open_5():
-    cdir = Path(__file__).parent / "pp.lhe"
-    with hep.open(cdir) as f:
-        n = 0
+    fn = Path(__file__).parent / "pp.lhe"
+    n = 0
+    with hep.open(fn) as f:
         for ev in f:
             n += 1
-        assert n == 1
+    assert n == 1
+
+
+def test_open_failures():
+    fn = Path(__file__).parent / "pp.lhe"
+    n = 0
+    with hep.open(fn, format="hepmc3") as f:
+        # ReaderAscii just skips unreadable parts of file
+        for ev in f:
+            n += 1
+    assert n == 0
+
+    with pytest.raises(ValueError, match="format"):
+        with hep.open(fn, format="foo") as f:
+            pass
+
+    with pytest.raises(ValueError, match="format"):
+        with hep.open("test.dat", "w", format="foo") as f:
+            pass
+
+    with pytest.raises(ValueError, match="mode"):
+        with hep.open("test.dat", "x") as f:
+            pass
+
+    with pytest.raises(ValueError, match="mode"):
+        with hep.open("test.dat", "rb") as f:
+            pass
+
+    foo = Path("foo.dat")
+    foo.touch(mode=0o000)  # not writeable
+
+    with hep.open(foo, "w") as f:
+        with pytest.raises(IOError):
+            f.write(hep.GenEvent())
+
+    foo.unlink()
 
 
 def test_open_broken():
-    cdir = Path(__file__).parent / "broken.dat"
-    with hep.open(cdir) as f:
-        n = 0
+    fn = Path(__file__).parent / "broken.dat"
+    n = 0
+    with hep.open(fn) as f:
         with pytest.raises(IOError):
             for ev in f:
                 n += 1
-        assert n == 0
-
-
-def test_open_good():
-    cdir = Path(__file__).parent / "sibyll21.dat"
-    with hep.open(cdir) as f:
-        n = 0
-        for ev in f:
-            n += 1
-        assert n == 1
+    assert n == 0
 
 
 @pytest.mark.parametrize(

@@ -41,20 +41,14 @@ _open = open
 class _Iter:
     def __init__(self, parent: _tp.Any):
         self.parent = parent
-        self.eof = False
 
     def __next__(self) -> GenEvent:
-        if self.eof:
-            raise StopIteration
         evt = GenEvent()
         success = self.parent.read_event(evt)
-        print(success, self.parent.failed())
         if self.parent.failed():
             if success:  # indicates EOF
                 raise StopIteration
             raise IOError("error reading event")
-        elif not success:  # also indicates EOF
-            raise StopIteration
         return evt
 
     def __iter__(self) -> "_Iter":
@@ -79,8 +73,10 @@ def _iter(self: _tp.Any) -> _Iter:
 def _read(self: _tp.Any) -> _tp.Union[GenEvent, None]:
     evt = GenEvent()
     success = self.read_event(evt)
-    if self.failed():  # usually EOF
-        return None
+    if self.failed():
+        if success:  # indicates EOF
+            return None
+        raise IOError("error reading event")
     return evt if success else None
 
 
