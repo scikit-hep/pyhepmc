@@ -147,6 +147,24 @@ def test_open_with_writer(evt, writer):  # noqa
     os.unlink(filename)
 
 
+def test_open_with_multiple_events():
+    filename = "test_open_with_multiple_events.dat"
+
+    with hep.open(filename, "w") as f:
+        for i in range(3):
+            ev = hep.GenEvent()
+            ev.event_number = i + 1
+            for k in range(i):
+                ev.add_particle(hep.GenParticle((1, 2, 3, 4), 1, 1))
+            f.write(ev)
+
+    with hep.open(filename) as f:
+        for i, ev in enumerate(f):
+            assert ev.event_number == i + 1
+
+    os.unlink(filename)
+
+
 def test_deprecated_import():
     with pytest.warns(np.VisibleDeprecationWarning):
         from pyhepmc import ReaderAscii  # noqa F401
