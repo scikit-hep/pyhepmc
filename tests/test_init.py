@@ -14,6 +14,8 @@ def test_init():
     core_names.remove("stringstream")
     core_names.remove("Attribute")
     core_names.remove("AttributesView")
+    core_names.remove("Reader")
+    core_names.remove("Writer")
     core_names.remove("RunInfoAttributesView")
 
     names = set()
