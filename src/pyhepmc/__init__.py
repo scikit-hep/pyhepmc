@@ -94,21 +94,21 @@ try:
         return g._repr_image_svg_xml()
 
     GenEvent._repr_html_ = _genevent_repr_html
-except ModuleNotFoundError:
-    pass
+except ModuleNotFoundError:  # pragma: no cover
+    pass  # pragma: no cover
 
 
 if version_info >= (3, 8):
     from typing import get_origin as _get_origin, get_args as _get_args
 else:
 
-    def _get_origin(pytype):  # type: ignore
-        if hasattr(pytype, "__origin__"):
-            return pytype.__origin__
-        return None
+    def _get_origin(pytype):  # type: ignore  # pragma: no cover
+        if hasattr(pytype, "__origin__"):  # pragma: no cover
+            return pytype.__origin__  # pragma: no cover
+        return None  # pragma: no cover
 
-    def _get_args(pytype):  # type: ignore
-        return pytype.__args__
+    def _get_args(pytype):  # type: ignore # pragma: no cover
+        return pytype.__args__  # pragma: no cover
 
 
 def __getattr__(name: str) -> _tp.Any:

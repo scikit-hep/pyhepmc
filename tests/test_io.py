@@ -7,17 +7,28 @@ from pyhepmc._core import stringstream
 from pathlib import Path
 import numpy as np
 import typing
+from sys import version_info
+
+if version_info >= (3, 9):
+    list_type = list
+else:
+    list_type = typing.List
 
 
-def test_read_write(evt):  # noqa
+def test_read_event_write_event(evt):  # noqa
     oss = stringstream()
     with io.WriterAscii(oss) as f:
         f.write_event(evt)
 
     evt2 = hep.GenEvent()
+    evt3 = hep.GenEvent()
     assert evt != evt2
     with io.ReaderAscii(oss) as f:
-        f.read_event(evt2)
+        assert f.read_event(evt2)
+        assert not f.failed()
+        success = f.read_event(evt3)
+        assert success  # for EOF success is true and failed() is true
+        assert f.failed()
 
     assert evt.event_number == evt2.event_number
     assert evt.momentum_unit == evt2.momentum_unit
@@ -27,31 +38,68 @@ def test_read_write(evt):  # noqa
     assert evt == evt2
 
 
-def test_pythonic_read_write(evt):  # noqa
+def test_pythonic_read_write_from_stream(evt):  # noqa
     oss = stringstream()
     with io.WriterAscii(oss) as f:
         f.write(evt)
 
     with io.ReaderAscii(oss) as f:
-        for i, evt2 in enumerate(f):
-            assert i == 0
+        n = 0
+        for evt2 in f:
             assert evt.particles == evt2.particles
             assert evt.vertices == evt2.vertices
             assert evt.run_info == evt2.run_info
             assert evt == evt2
+            n += 1
+            break
+        assert n == 1
+
+        for evt2 in f:
+            n += 1
+        assert n == 1
 
 
 def test_failed_read_file():
     with io.ReaderAscii("test_failed_read_file.dat") as f:
-        assert f.read() is None
+        with pytest.raises(IOError):
+            f.read()
+
+    n = 0
+    with io.ReaderAscii("test_failed_read_file.dat") as f:
+        with pytest.raises(IOError):
+            for ev in f:
+                n += 1
+    assert n == 0
 
 
-def test_read_empty_stream(evt):  # noqa
+def test_failed_read_file_2():
+    fn = str(Path(__file__).parent / "broken.dat")
+    with io.ReaderAscii(fn) as f:
+        with pytest.raises(IOError):
+            f.read()
+
+    n = 0
+    with io.ReaderAscii(fn) as f:
+        with pytest.raises(IOError):
+            for ev in f:
+                n += 1
+    assert n == 0
+
+
+def test_read_empty_stream():
     oss = stringstream()
     with io.ReaderAscii(oss) as f:
-        evt = hep.GenEvent()
-        ok = f.read_event(evt)
-        assert ok is True  # reading empty stream is ok in HepMC
+        ev = hep.GenEvent()
+        success = f.read_event(ev)
+        # reading empty stream is EOF
+        assert success
+        assert f.failed()
+
+    with io.ReaderAscii(oss) as f:
+        ev = f.read()
+        # reading empty stream is EOF
+        assert ev is None
+        assert f.failed()
 
 
 @pytest.mark.parametrize("format", ("hepmc3", "hepmc2", "hepevt"))
@@ -81,23 +129,28 @@ def test_open_1(evt, format):  # noqa
 
 
 def test_open_2(evt):  # noqa
-    with hep.open("test_read_write_file.dat", "w", precision=3) as f:
+    filename = "test_read_write_file.dat"
+    with hep.open(filename, "w", precision=3) as f:
         f.write(evt)
 
-    with hep.open("test_read_write_file.dat") as f:
-        evt2 = f.read()
+    with hep.open(filename) as f:
+        for i, evt2 in enumerate(f):
+            assert i == 0
+            pass
 
     assert evt != evt2
 
-    with hep.open("test_read_write_file.dat", "w") as f:
+    with hep.open(filename, "w") as f:
         f.write(evt)
 
-    with hep.open("test_read_write_file.dat") as f:
-        evt3 = f.read()
+    with hep.open(filename) as f:
+        for i, evt3 in enumerate(f):
+            assert i == 0
+            pass
 
     assert evt == evt3
 
-    os.unlink("test_read_write_file.dat")
+    os.unlink(filename)
 
 
 def test_open_3(evt):  # noqa
@@ -125,6 +178,91 @@ def test_open_3(evt):  # noqa
     assert evt == evt2
 
     filename.unlink()
+
+
+def test_open_4():
+    filename = "test_open_4.dat"
+
+    with hep.open(filename, "w") as f:
+        for i in range(3):
+            ev = hep.GenEvent()
+            ev.event_number = i + 1
+            for k in range(i):
+                ev.add_particle(hep.GenParticle((1, 2, 3, 4), 1, 1))
+            f.write(ev)
+
+    with hep.open(filename) as f:
+        n = 0
+        for ev in f:
+            n += 1
+            assert ev.event_number == n
+            assert len(ev.particles) == n - 1
+        assert n == 3
+
+    # iterator is itself iterable
+    with hep.open(filename) as f:
+        fiter = iter(f)
+        n = 0
+        for ev in fiter:
+            n += 1
+        assert n == 3
+
+    os.unlink(filename)
+
+
+def test_open_5():
+    fn = Path(__file__).parent / "pp.lhe"
+    n = 0
+    with hep.open(fn) as f:
+        for ev in f:
+            n += 1
+    assert n == 1
+
+
+def test_open_failures():
+    fn = Path(__file__).parent / "pp.lhe"
+    n = 0
+    with hep.open(fn, format="hepmc3") as f:
+        # ReaderAscii just skips unreadable parts of file
+        for ev in f:
+            n += 1
+    assert n == 0
+
+    with pytest.raises(ValueError, match="format"):
+        with hep.open(fn, format="foo") as f:
+            pass
+
+    with pytest.raises(ValueError, match="format"):
+        with hep.open("test.dat", "w", format="foo") as f:
+            pass
+
+    with pytest.raises(ValueError, match="mode"):
+        with hep.open("test.dat", "x") as f:
+            pass
+
+    with pytest.raises(ValueError, match="mode"):
+        with hep.open("test.dat", "rb") as f:
+            pass
+
+    foo = Path("foo.dat")
+    foo.touch(mode=0o000)  # not writeable
+
+    with hep.open(foo, "w") as f:
+        with pytest.raises(IOError):
+            f.write(hep.GenEvent())
+
+    foo.chmod(mode=0o666)
+    foo.unlink()
+
+
+def test_open_broken():
+    fn = Path(__file__).parent / "broken.dat"
+    n = 0
+    with hep.open(fn) as f:
+        with pytest.raises(IOError):
+            for ev in f:
+                n += 1
+    assert n == 0
 
 
 @pytest.mark.parametrize(
@@ -187,9 +325,9 @@ def test_attributes():
 
     for k, v in evt.attributes.items():
         if k == "8":
-            t = typing.List[int]
+            t = list_type[int]
         elif k == "9":
-            t = typing.List[float]
+            t = list_type[float]
         else:
             t = type(v)
 

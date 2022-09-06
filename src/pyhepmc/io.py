@@ -43,9 +43,12 @@ class _Iter:
         self.parent = parent
 
     def __next__(self) -> GenEvent:
-        evt = self.parent.read()
-        if evt is None:
-            raise StopIteration
+        evt = GenEvent()
+        success = self.parent.read_event(evt)
+        if self.parent.failed():
+            if success:  # indicates EOF
+                raise StopIteration
+            raise IOError("error reading event")
         return evt
 
     def __iter__(self) -> "_Iter":
@@ -70,9 +73,18 @@ def _iter(self: _tp.Any) -> _Iter:
 def _read(self: _tp.Any) -> _tp.Union[GenEvent, None]:
     evt = GenEvent()
     success = self.read_event(evt)
-    if self.failed():  # usually EOF
-        return None
+    if self.failed():
+        if success:  # indicates EOF
+            return None
+        raise IOError("error reading event")
     return evt if success else None
+
+
+def _read_event_lhef_patch(self: _tp.Any, evt: GenEvent) -> bool:
+    failed = ReaderLHEF_read_event(self, evt)
+    if failed and self.failed():  # probably EOF
+        return True
+    return not failed
 
 
 # add pythonic interface to IO classes
@@ -89,6 +101,8 @@ ReaderAsciiHepMC2.read = _read
 ReaderLHEF.__enter__ = _enter
 ReaderLHEF.__exit__ = _exit
 ReaderLHEF.__iter__ = _iter
+ReaderLHEF_read_event = ReaderLHEF.read_event
+ReaderLHEF.read_event = _read_event_lhef_patch
 ReaderLHEF.read = _read
 
 ReaderHEPEVT.__enter__ = _enter
