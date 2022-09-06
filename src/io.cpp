@@ -2,6 +2,7 @@
 #include "pybind.hpp"
 #include "repr.hpp"
 #include <HepMC3/GenRunInfo.h>
+#include <HepMC3/Reader.h>
 #include <HepMC3/ReaderAscii.h>
 #include <HepMC3/ReaderAsciiHepMC2.h>
 #include <HepMC3/ReaderHEPEVT.h>
@@ -9,10 +10,6 @@
 #include <HepMC3/WriterAscii.h>
 #include <HepMC3/WriterAsciiHepMC2.h>
 #include <HepMC3/WriterHEPEVT.h>
-#ifdef HEPMC3_ROOTIO
-#include "HepMC3/ReaderRoot.h"
-#include "HepMC3/ReaderRootTree.h"
-#endif
 #include <map>
 #include <memory>
 #include <sstream>
@@ -44,49 +41,64 @@ void register_io(py::module& m) {
                           std::stringstream::str) METH(flush, std::stringstream)
           METH(write, std::stringstream) METH(read, std::stringstream);
 
-  py::class_<ReaderAscii, ReaderAsciiPtr>(m, "ReaderAscii")
+  py::class_<Reader>(m, "Reader")
+      // clang-format off
+      METH(read_event, Reader, "event"_a)
+      METH(failed, Reader)
+      METH(close, Reader)
+      PROP2(options, Reader)
+      // clang-format on
+      ;
+
+  py::class_<ReaderAscii, Reader>(m, "ReaderAscii")
       .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<std::stringstream&>()) METH(read_event, ReaderAscii)
-          METH(failed, ReaderAscii) METH(close, ReaderAscii);
+      .def(py::init<std::stringstream&>());
 
-  py::class_<ReaderAsciiHepMC2, ReaderAsciiHepMC2Ptr>(m, "ReaderAsciiHepMC2")
+  py::class_<ReaderAsciiHepMC2, Reader>(m, "ReaderAsciiHepMC2")
       .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<std::stringstream&>()) METH(read_event, ReaderAsciiHepMC2)
-          METH(failed, ReaderAsciiHepMC2) METH(close, ReaderAsciiHepMC2);
+      .def(py::init<std::stringstream&>());
 
-  py::class_<ReaderLHEF, ReaderLHEFPtr>(m, "ReaderLHEF")
+  py::class_<ReaderLHEF, Reader>(m, "ReaderLHEF")
       .def(py::init<const std::string>(), "filename"_a)
-      // This will be enabled a bit later: .def(py::init<std::stringstream&>())
-      METH(read_event, ReaderLHEF) METH(failed, ReaderLHEF) METH(close, ReaderLHEF);
+      .def(py::init<std::stringstream&>());
 
-  py::class_<ReaderHEPEVT, ReaderHEPEVTPtr>(m, "ReaderHEPEVT")
+  py::class_<ReaderHEPEVT, Reader>(m, "ReaderHEPEVT")
       .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<std::stringstream&>())
-      .def("read_event", (bool(ReaderHEPEVT::*)(GenEvent&)) & ReaderHEPEVT::read_event)
-      .def("read_event",
-           (bool(ReaderHEPEVT::*)(GenEvent&, bool)) & ReaderHEPEVT::read_event)
-          METH(failed, ReaderHEPEVT) METH(close, ReaderHEPEVT);
+      .def(py::init<std::stringstream&>());
 
-  py::class_<WriterAscii>(m, "WriterAscii")
-      .def(py::init<const std::string&, GenRunInfoPtr>(), "filename"_a,
-           "run"_a = nullptr)
-      .def(py::init<std::stringstream&, GenRunInfoPtr>(), "ostringstream"_a,
-           "run"_a = nullptr, py::keep_alive<1, 2>()) METH(write_event, WriterAscii)
-          METH(write_run_info, WriterAscii) METH(failed, WriterAscii)
-              METH(close, WriterAscii) PROP(precision, WriterAscii);
+  py::class_<Writer>(m, "Writer")
+      // clang-format off
+      METH(write_event, Writer, "event"_a)
+      METH(failed, Writer)
+      METH(close, Writer)
+      PROP2(options, Writer)
+      // clang-format on
+      ;
 
-  py::class_<WriterAsciiHepMC2>(m, "WriterAsciiHepMC2")
+  py::class_<WriterAscii, Writer>(m, "WriterAscii")
       .def(py::init<const std::string&, GenRunInfoPtr>(), "filename"_a,
            "run"_a = nullptr)
       .def(py::init<std::stringstream&, GenRunInfoPtr>(), "ostringstream"_a,
            "run"_a = nullptr, py::keep_alive<1, 2>())
-          METH(write_event, WriterAsciiHepMC2) METH(write_run_info, WriterAsciiHepMC2)
-              METH(failed, WriterAsciiHepMC2) METH(close, WriterAsciiHepMC2)
-                  PROP(precision, WriterAsciiHepMC2);
+      // clang-format off
+      // not needed: METH(write_run_info, WriterAscii)
+      PROP(precision, WriterAscii)
+      // clang-format on
+      ;
 
-  py::class_<WriterHEPEVT>(m, "WriterHEPEVT")
-      .def(py::init<const std::string&>(), "filename"_a) METH(write_event, WriterHEPEVT)
-          METH(failed, WriterHEPEVT) METH(close, WriterHEPEVT);
+  py::class_<WriterAsciiHepMC2, Writer>(m, "WriterAsciiHepMC2")
+      .def(py::init<const std::string&, GenRunInfoPtr>(), "filename"_a,
+           "run"_a = nullptr)
+      .def(py::init<std::stringstream&, GenRunInfoPtr>(), "ostringstream"_a,
+           "run"_a = nullptr)
+      // clang-format off
+      // not needed: METH(write_run_info, WriterAscii)
+      PROP(precision, WriterAsciiHepMC2)
+      // clang-format on
+      ;
+
+  py::class_<WriterHEPEVT, Writer>(m, "WriterHEPEVT")
+      .def(py::init<const std::string&>(), "filename"_a);
 
   py::class_<UnparsedAttribute>(m, "UnparsedAttribute", DOC(UnparsedAttribute))
       .def("__str__", [](UnparsedAttribute& a) { return a.parent_->unparsed_string(); })
@@ -95,18 +107,4 @@ void register_io(py::module& m) {
       REPR(UnparsedAttribute)
       // clang-format on
       ;
-
-#ifdef HEPMC3_ROOTIO
-
-  py::class_<ReaderRootTree, ReaderRootTreePtr>(m, "ReaderRootTree")
-      .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<const std::string, const std::string, const std::string>(),
-           "filename"_a, "treename"_a, "branchname"_a) METH(read_event, ReaderRootTree)
-          METH(failed, ReaderRootTree) METH(close, ReaderRootTree);
-
-  py::class_<ReaderRoot, ReaderRootPtr>(m, "ReaderRoot")
-      .def(py::init<const std::string>(), "filename"_a) METH(read_event, ReaderRoot)
-          METH(failed, ReaderRoot) METH(close, ReaderRoot);
-
-#endif
 }
