@@ -339,3 +339,21 @@ def test_attributes():
         assert v == v3
 
     os.unlink(filename)
+
+
+@pytest.mark.parametrize("format", ["hepmc3", "hepmc2", "hepevt"])
+def test_roundtrip(format):
+    if format == "hepevt":
+        # this is a bug in HepMC3, see https://gitlab.cern.ch/hepmc/HepMC3/-/issues/21
+        pytest.xfail()
+    ev = hep.GenEvent()
+    ev.run_info = hep.GenRunInfo()
+    with io.open("test", "w", format=format) as f:
+        f.write(ev)
+
+    with io.open("test", "r", format=format) as f:
+        ev2 = f.read()
+
+    assert ev == ev2
+
+    os.unlink("test")
