@@ -49,7 +49,7 @@ pyhepmc is part of the Scikit-HEP project, which aims to provide all tools neede
 
 **pyhepmc is thoroughly unit tested**
 
-We aim for 100% coverage, not quite there yet.
+We have 100% coverage for the Python API.
 
 Documentation
 -------------
