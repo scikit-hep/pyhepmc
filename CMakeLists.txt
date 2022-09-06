@@ -24,9 +24,11 @@ else()
 endif()
 
 file(GLOB SOURCES "src/*.cpp")
-file(GLOB SOURCES2 "extern/HepMC3/src/*.cc")
+file(GLOB HEPMC3_SOURCES "extern/HepMC3/src/*.cc")
 
-pybind11_add_module(_core MODULE ${SOURCES} ${SOURCES2})
+# pyhepmc falls under Section 5 "Combined Libraries" of the LGPL-v3. Since we
+# satisfy a) and b), we do not need to compile the code into a separate library.
+pybind11_add_module(_core MODULE ${SOURCES} ${HEPMC3_SOURCES})
 target_include_directories(_core PRIVATE extern/cpp-member-accessor/include)
 target_include_directories(_core PRIVATE extern/mp11/include)
 target_include_directories(_core PRIVATE extern/HepMC3/include)
@@ -36,8 +38,5 @@ if(MSVC)
   target_compile_options(_core PRIVATE /bigobj)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 else()
-  target_compile_options(_core PRIVATE -fvisibility=hidden -Wall
-                                       -Wno-self-assign-overloaded)
+  target_compile_options(_core PRIVATE -Wall -Wno-self-assign-overloaded)
 endif()
-set_target_properties(_core PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-target_compile_definitions(_core PRIVATE HEPMC3_HEPEVT_NMXHEP=10000)
