@@ -1,5 +1,6 @@
 #include "UnparsedAttribute.hpp"
 #include "pybind.hpp"
+#include "pystream.hpp"
 #include "repr.hpp"
 #include <HepMC3/GenRunInfo.h>
 #include <HepMC3/Reader.h>
@@ -13,6 +14,7 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <streambuf>
 #include <string>
 
 using namespace HepMC3;
@@ -33,8 +35,12 @@ void register_io(py::module& m) {
   py::module_ m_doc = py::module_::import("pyhepmc._doc");
   auto doc = py::cast<std::map<std::string, std::string>>(m_doc.attr("doc"));
 
+  py::class_<std::istream>(m, "istream");
+
+  py::class_<pyistream, std::istream>(m, "pyistream").def(py::init<py::object, int>());
+
   // this class is here to simplify unit testing of Readers and Writers
-  py::class_<std::stringstream>(m, "stringstream")
+  py::class_<std::stringstream, std::istream>(m, "stringstream")
       .def(py::init<>())
       .def(py::init<std::string>())
       .def("__str__", (std::string(std::stringstream::*)() const) &
@@ -52,7 +58,7 @@ void register_io(py::module& m) {
 
   py::class_<ReaderAscii, Reader>(m, "ReaderAscii")
       .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<std::stringstream&>());
+      .def(py::init<std::istream&>());
 
   py::class_<ReaderAsciiHepMC2, Reader>(m, "ReaderAsciiHepMC2")
       .def(py::init<const std::string>(), "filename"_a)

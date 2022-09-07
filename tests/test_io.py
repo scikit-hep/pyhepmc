@@ -7,12 +7,42 @@ from pyhepmc._core import stringstream
 from pathlib import Path
 import numpy as np
 import typing
+import gzip
 from sys import version_info
 
 if version_info >= (3, 9):
     list_type = list
 else:
     list_type = typing.List
+
+
+def test_pystream_1():
+    from pyhepmc._core import pyistream
+
+    fn = str(Path(__file__).parent / "sibyll21.dat")
+    with open(fn, "rb") as f:
+        pis = pyistream(f, 1000)
+        with io.ReaderAscii(pis) as r:
+            ev1 = r.read()
+    with io.ReaderAscii(fn) as r:
+        ev2 = r.read()
+    assert ev1 == ev2
+
+
+def test_pystream_2():
+    from pyhepmc._core import pyistream
+
+    fn1 = str(Path(__file__).parent / "sibyll21.dat.gz")
+    with gzip.open(fn1) as f:
+        pis = pyistream(f, 1000)
+        with io.ReaderAscii(pis) as r:
+            ev1 = r.read()
+
+    fn2 = str(Path(__file__).parent / "sibyll21.dat")
+    with io.ReaderAscii(fn2) as r:
+        ev2 = r.read()
+
+    assert ev1 == ev2
 
 
 def test_read_event_write_event(evt):  # noqa
