@@ -6,20 +6,29 @@
 #include <streambuf>
 
 class pystreambuf : public std::streambuf {
-  py::object iohandle_;
   py::object readinto_;
-  py::array_t<char> buffer_;
-  char* cbuffer_;
-  // context for the compression
+  py::object write_;
+  py::array_t<char_type> buffer_;
+  char_type* cbuffer_;
+
 public:
   pystreambuf(py::object iohandle, int size);
-  int underflow() override;
+  ~pystreambuf() override;
+
+  int_type underflow() override;
+  int_type overflow(int_type c) override;
+  int sync() override;
+
+  // see pybind11/include/iostream.h
+  int sync_();
+  int pyreadinto_buffer();
+  void pywrite_buffer();
 };
 
 class pyiostream : public std::iostream {
 public:
   pyiostream(py::object iohandle, int size);
-  virtual ~pyiostream();
+  ~pyiostream() override;
 };
 
 #endif

@@ -14,6 +14,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <pybind11/attr.h>
 #include <string>
 
 using namespace HepMC3;
@@ -37,7 +38,8 @@ void register_io(py::module& m) {
   py::class_<std::iostream>(m, "iostream"); // NOLINT
 
   py::class_<pyiostream, std::iostream>(m, "pyiostream")
-      .def(py::init<py::object, int>());
+      .def(py::init<py::object, int>())
+      .def("flush", &pyiostream::flush);
 
   // this class is here to simplify unit testing of Readers and Writers
   py::class_<std::stringstream, std::iostream>(m, "stringstream")
@@ -57,19 +59,19 @@ void register_io(py::module& m) {
 
   py::class_<ReaderAscii, Reader>(m, "ReaderAscii")
       .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<std::iostream&>(), "istream"_a);
+      .def(py::init<std::iostream&>(), "istream"_a, py::keep_alive<1, 2>());
 
   py::class_<ReaderAsciiHepMC2, Reader>(m, "ReaderAsciiHepMC2")
       .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<std::iostream&>(), "istream"_a);
+      .def(py::init<std::iostream&>(), "istream"_a, py::keep_alive<1, 2>());
 
   py::class_<ReaderLHEF, Reader>(m, "ReaderLHEF")
       .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<std::iostream&>(), "istream"_a);
+      .def(py::init<std::iostream&>(), "istream"_a, py::keep_alive<1, 2>());
 
   py::class_<ReaderHEPEVT, Reader>(m, "ReaderHEPEVT")
       .def(py::init<const std::string>(), "filename"_a)
-      .def(py::init<std::iostream&>(), "istream"_a);
+      .def(py::init<std::iostream&>(), "istream"_a, py::keep_alive<1, 2>());
 
   py::class_<Writer>(m, "Writer")
       // clang-format off
@@ -83,7 +85,8 @@ void register_io(py::module& m) {
   py::class_<WriterAscii, Writer>(m, "WriterAscii")
       .def(py::init<const std::string&, GenRunInfoPtr>(), "filename"_a,
            "run"_a = nullptr)
-      .def(py::init<std::iostream&, GenRunInfoPtr>(), "ostream"_a, "run"_a = nullptr)
+      .def(py::init<std::iostream&, GenRunInfoPtr>(), "ostream"_a, "run"_a = nullptr,
+           py::keep_alive<1, 2>())
       // clang-format off
       // not needed: METH(write_run_info, WriterAscii)
       PROP(precision, WriterAscii)
@@ -93,7 +96,8 @@ void register_io(py::module& m) {
   py::class_<WriterAsciiHepMC2, Writer>(m, "WriterAsciiHepMC2")
       .def(py::init<const std::string&, GenRunInfoPtr>(), "filename"_a,
            "run"_a = nullptr)
-      .def(py::init<std::iostream&, GenRunInfoPtr>(), "ostream"_a, "run"_a = nullptr)
+      .def(py::init<std::iostream&, GenRunInfoPtr>(), "ostream"_a, "run"_a = nullptr,
+           py::keep_alive<1, 2>())
       // clang-format off
       // not needed: METH(write_run_info, WriterAscii)
       PROP(precision, WriterAsciiHepMC2)
@@ -102,7 +106,7 @@ void register_io(py::module& m) {
 
   py::class_<WriterHEPEVT, Writer>(m, "WriterHEPEVT")
       .def(py::init<const std::string&>(), "filename"_a)
-      .def(py::init<std::iostream&>(), "ostream"_a);
+      .def(py::init<std::iostream&>(), "ostream"_a, py::keep_alive<1, 2>());
 
   py::class_<UnparsedAttribute>(m, "UnparsedAttribute", DOC(UnparsedAttribute))
       .def("__str__", [](UnparsedAttribute& a) { return a.parent_->unparsed_string(); })

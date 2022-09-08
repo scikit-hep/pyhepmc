@@ -41,6 +41,25 @@ def test_pystream_2():
     assert ev1 == ev2
 
 
+def test_pystream_3(evt):  # noqa
+    fn = "test_pystream_3.dat.gz"
+    with gzip.open(fn, "w") as f:
+        pis = pyiostream(f, 1000)
+        with io.WriterAscii(pis) as w:
+            w.write(evt)
+        del pis
+        del w
+
+    with gzip.open(fn) as f:
+        pis = pyiostream(f, 1000)
+        with io.ReaderAscii(pis) as r:
+            evt2 = r.read()
+
+    assert evt == evt2
+
+    os.unlink(fn)
+
+
 def test_read_event_write_event(evt):  # noqa
     oss = stringstream()
     with io.WriterAscii(oss) as f:
