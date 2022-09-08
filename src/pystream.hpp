@@ -2,7 +2,7 @@
 #define PYHEPMC_PYSTREAM_HPP
 
 #include "pybind.hpp"
-#include <istream>
+#include <iostream>
 #include <streambuf>
 
 class pystreambuf : public std::streambuf {
@@ -16,10 +16,10 @@ public:
   int underflow() override;
 };
 
-class pyistream : public std::istream {
+class pyiostream : public std::iostream {
 public:
-  pyistream(py::object iohandle, int size);
-  virtual ~pyistream();
+  pyiostream(py::object iohandle, int size);
+  virtual ~pyiostream();
 };
 
 #endif

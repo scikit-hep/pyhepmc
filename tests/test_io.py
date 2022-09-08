@@ -3,7 +3,7 @@ import pyhepmc as hep
 import pyhepmc.io as io
 import pytest
 from test_basic import evt  # noqa
-from pyhepmc._core import stringstream
+from pyhepmc._core import stringstream, pyiostream
 from pathlib import Path
 import numpy as np
 import typing
@@ -17,11 +17,9 @@ else:
 
 
 def test_pystream_1():
-    from pyhepmc._core import pyistream
-
     fn = str(Path(__file__).parent / "sibyll21.dat")
     with open(fn, "rb") as f:
-        pis = pyistream(f, 1000)
+        pis = pyiostream(f, 1000)
         with io.ReaderAscii(pis) as r:
             ev1 = r.read()
     with io.ReaderAscii(fn) as r:
@@ -30,11 +28,9 @@ def test_pystream_1():
 
 
 def test_pystream_2():
-    from pyhepmc._core import pyistream
-
     fn1 = str(Path(__file__).parent / "sibyll21.dat.gz")
     with gzip.open(fn1) as f:
-        pis = pyistream(f, 1000)
+        pis = pyiostream(f, 1000)
         with io.ReaderAscii(pis) as r:
             ev1 = r.read()
 

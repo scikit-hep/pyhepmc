@@ -18,7 +18,7 @@ int pystreambuf::underflow() {
 // pystreambuf must be created before istream is constructed,
 // we use placement new to achieve this AND store the object
 // locally in pyistream
-pyistream::pyistream(py::object iohandle, int size)
-    : std::istream(new pystreambuf(iohandle, size)) {}
+pyiostream::pyiostream(py::object iohandle, int size)
+    : std::iostream(new pystreambuf(iohandle, size)) {}
 
-pyistream::~pyistream() { delete rdbuf(nullptr); }
+pyiostream::~pyiostream() { delete rdbuf(nullptr); }

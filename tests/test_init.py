@@ -12,8 +12,8 @@ def test_init():
         core_names.add(name)
 
     core_names.remove("stringstream")
-    core_names.remove("istream")
-    core_names.remove("pyistream")
+    core_names.remove("iostream")
+    core_names.remove("pyiostream")
     core_names.remove("Attribute")
     core_names.remove("AttributesView")
     core_names.remove("Reader")
