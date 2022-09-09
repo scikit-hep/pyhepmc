@@ -6,14 +6,16 @@
 #include <streambuf>
 
 class pystreambuf : public std::streambuf {
+  py::array_t<char_type> buffer_;
   py::object iohandle_;
   py::object readinto_;
   py::object write_;
-  py::array_t<char_type> buffer_;
-  char_type* cbuffer_;
 
 public:
   pystreambuf(py::object iohandle, int size);
+  pystreambuf(const pystreambuf&);
+  pystreambuf& operator=(const pystreambuf&);
+
   ~pystreambuf();
 
   int_type underflow() override;
@@ -26,7 +28,14 @@ public:
   void pywrite_buffer();
 };
 
-class pyiostream : public std::iostream {
+// need to call pystreambuf ctor before calling iostream ctor,
+// so make pystreambuf a base of pyiostream
+struct pyiostream_base {
+  pystreambuf buf_;
+  pyiostream_base(py::object iohandle, int size) : buf_(iohandle, size) {}
+};
+
+class pyiostream : pyiostream_base, public std::iostream {
 public:
   pyiostream(py::object iohandle, int size);
   ~pyiostream();

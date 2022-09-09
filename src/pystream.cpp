@@ -1,19 +1,46 @@
 #include "pystream.hpp"
 #include <algorithm>
 #include <ios>
+#include <pybind11/detail/common.h>
 #include <pybind11/gil.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <stdexcept>
 
 pystreambuf::pystreambuf(py::object iohandle, int size)
-    : iohandle_(iohandle)
-    , readinto_(
-          iohandle.attr(py::hasattr(iohandle, "readinto1") ? "readinto1" : "readinto"))
-    , write_(iohandle.attr("write"))
-    , buffer_(size)
-    , cbuffer_(buffer_.mutable_data()) {
-  setp(cbuffer_, cbuffer_ + size);
+    : buffer_(size), iohandle_(iohandle) {
+  if (!hasattr(iohandle, "readinto") && !hasattr(iohandle, "readinto1"))
+    throw std::runtime_error("file object lacks readinto or readinto1 methods");
+  readinto_ =
+      iohandle.attr(py::hasattr(iohandle, "readinto1") ? "readinto1" : "readinto");
+  if (!hasattr(iohandle, "write"))
+    throw std::runtime_error("file object lacks write method");
+  write_ = iohandle.attr("write");
+  char* b = buffer_.mutable_data();
+  setp(b, b + size);
+}
+
+pystreambuf::pystreambuf(const pystreambuf& other)
+    : buffer_(py::len(other.buffer_))
+    , iohandle_(other.iohandle_)
+    , readinto_(other.readinto_)
+    , write_(other.write_) {
+  char* b = buffer_.mutable_data();
+  const int size = py::len(buffer_);
+  setp(b, b + size);
+}
+
+pystreambuf& pystreambuf::operator=(const pystreambuf& other) {
+  if (this != &other) {
+    buffer_ = py::array_t<char_type>(py::len(other.buffer_));
+    iohandle_ = other.iohandle_;
+    readinto_ = other.readinto_;
+    write_ = other.write_;
+    char* b = buffer_.mutable_data();
+    const int size = py::len(buffer_);
+    setp(b, b + size);
+  }
+  return *this;
 }
 
 // for some reason, buffer may be partially filled although all data
@@ -37,7 +64,7 @@ pystreambuf::int_type pystreambuf::underflow() {
     // return EOF if source is empty ...
     if (size == 0) return traits_type::eof();
     // .. or update view pointers to buffer area
-    setg(cbuffer_, cbuffer_, cbuffer_ + size);
+    setg(pbase(), pbase(), pbase() + size);
   }
   // return current char from refilled buffer
   return traits_type::to_int_type(*gptr());
@@ -82,6 +109,6 @@ int pystreambuf::pyreadinto_buffer() {
 // pystreambuf must be created before istream is constructed,
 // we use new to achieve this
 pyiostream::pyiostream(py::object iohandle, int size)
-    : std::iostream(new pystreambuf(iohandle, size)) {}
+    : pyiostream_base(iohandle, size), std::iostream(&buf_) {}
 
-pyiostream::~pyiostream() { delete rdbuf(nullptr); }
+pyiostream::~pyiostream() {}
