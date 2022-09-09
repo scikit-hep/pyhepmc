@@ -229,7 +229,7 @@ def open(
             # auto-detect
             with op(fn, mode) as f:
                 chunk = f.read(256)
-            assert isinstance(chunk, bytearray)
+            assert isinstance(chunk, bytes)
             header = chunk.decode()
             if "HepMC::Asciiv3" in header:
                 Reader = ReaderAscii
