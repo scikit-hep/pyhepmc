@@ -44,11 +44,9 @@ def test_pystream_2():
 def test_pystream_3(evt):  # noqa
     fn = "test_pystream_3.dat.gz"
     with gzip.open(fn, "w") as f:
-        pis = pyiostream(f, 1000)
-        with io.WriterAscii(pis) as w:
-            w.write(evt)
-        del pis
-        del w
+        with pyiostream(f, 1000) as pis:
+            with io.WriterAscii(pis) as w:
+                w.write(evt)
 
     with gzip.open(fn) as f:
         pis = pyiostream(f, 1000)
@@ -292,8 +290,8 @@ def test_open_failures():
     foo = Path("foo.dat")
     foo.touch(mode=0o000)  # not writeable
 
-    with hep.open(foo, "w") as f:
-        with pytest.raises(IOError):
+    with pytest.raises(IOError):
+        with hep.open(foo, "w") as f:
             f.write(hep.GenEvent())
 
     foo.chmod(mode=0o666)

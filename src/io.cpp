@@ -35,11 +35,14 @@ void register_io(py::module& m) {
   py::module_ m_doc = py::module_::import("pyhepmc._doc");
   auto doc = py::cast<std::map<std::string, std::string>>(m_doc.attr("doc"));
 
-  py::class_<std::iostream>(m, "iostream"); // NOLINT
+  py::class_<std::iostream>(m, "iostream")
+      // clang-format off
+      METH(flush, pyiostream)
+      // clang-format on
+      ;
 
   py::class_<pyiostream, std::iostream>(m, "pyiostream")
-      .def(py::init<py::object, int>())
-      .def("flush", &pyiostream::flush);
+      .def(py::init<py::object, int>(), "file_object"_a, "buffer_size"_a = 4096);
 
   // this class is here to simplify unit testing of Readers and Writers
   py::class_<std::stringstream, std::iostream>(m, "stringstream")

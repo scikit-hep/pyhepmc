@@ -6,6 +6,7 @@
 #include <streambuf>
 
 class pystreambuf : public std::streambuf {
+  py::object iohandle_;
   py::object readinto_;
   py::object write_;
   py::array_t<char_type> buffer_;
@@ -13,13 +14,13 @@ class pystreambuf : public std::streambuf {
 
 public:
   pystreambuf(py::object iohandle, int size);
-  ~pystreambuf() override;
+  ~pystreambuf();
 
   int_type underflow() override;
   int_type overflow(int_type c) override;
-  int sync() override;
+  int sync() override { return sync_(); };
 
-  // see pybind11/include/iostream.h
+  // see pybind11/include/iostream.h for sync logic
   int sync_();
   int pyreadinto_buffer();
   void pywrite_buffer();
@@ -28,7 +29,7 @@ public:
 class pyiostream : public std::iostream {
 public:
   pyiostream(py::object iohandle, int size);
-  ~pyiostream() override;
+  ~pyiostream();
 };
 
 #endif

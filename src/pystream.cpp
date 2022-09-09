@@ -1,10 +1,14 @@
 #include "pystream.hpp"
 #include <algorithm>
+#include <ios>
 #include <pybind11/gil.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
+#include <stdexcept>
 
 pystreambuf::pystreambuf(py::object iohandle, int size)
-    : readinto_(
+    : iohandle_(iohandle)
+    , readinto_(
           iohandle.attr(py::hasattr(iohandle, "readinto1") ? "readinto1" : "readinto"))
     , write_(iohandle.attr("write"))
     , buffer_(size)
@@ -12,8 +16,18 @@ pystreambuf::pystreambuf(py::object iohandle, int size)
   setp(cbuffer_, cbuffer_ + size);
 }
 
-pystreambuf::~pystreambuf() { sync_(); }
-int pystreambuf::sync() { return sync_(); }
+// for some reason, buffer may be partially filled although all data
+// has already been written to sink; must prevent calling sync
+// here when file was already closed as workaround
+pystreambuf::~pystreambuf() {
+  if (py::cast<bool>(iohandle_.attr("closed"))) return;
+  try {
+    sync_();
+  } catch (py::error_already_set& e) {
+    // dtor must not throw
+    e.discard_as_unraisable("~pystreambuf");
+  };
+}
 
 pystreambuf::int_type pystreambuf::underflow() {
   // if buffer is exhausted (pos == end) ...
@@ -34,16 +48,14 @@ pystreambuf::int_type pystreambuf::overflow(pystreambuf::int_type c) {
   // if buffer is full (pos == end) or c is EOF ...
   if (pptr() == epptr() || eof) {
     // ... write buffer to sink
-    pywrite_buffer();
+    sync_();
     // pass-through EOF ...
-    if (eof) return traits_type::eof();
-    // ... or reset view pointers to buffer area
-    setp(pbase(), epptr());
+    if (eof) return c;
   }
   // put current character into buffer
   *pptr() = traits_type::to_char_type(c);
   pbump(1);
-  return traits_type::not_eof(c);
+  return c;
 }
 
 int pystreambuf::sync_() {
@@ -72,4 +84,4 @@ int pystreambuf::pyreadinto_buffer() {
 pyiostream::pyiostream(py::object iohandle, int size)
     : std::iostream(new pystreambuf(iohandle, size)) {}
 
-pyiostream::~pyiostream() { delete rdbuf(); }
+pyiostream::~pyiostream() { delete rdbuf(nullptr); }
