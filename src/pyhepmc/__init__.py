@@ -31,7 +31,8 @@ Missing functionality
 ---------------------
 
 - Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``,
- ``Setup``. These will be added in the future.
+  ``Setup``. These will be added in the future.
+
 """
 from sys import version_info
 from ._core import (  # noqa: F401
