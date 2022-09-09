@@ -21,7 +21,6 @@ from ._core import (
     UnparsedAttribute,
     pyiostream,
 )
-import gzip
 import contextlib
 from pathlib import PurePath
 import typing as _tp
@@ -199,8 +198,8 @@ def open(
     ----------
     filename : str or Path
         Filename to open for reading or writing. When writing to existing files,
-        the contents are replaced. When the filename ends with the suffix ".gz",
-        the contents are transparently compressed/decompressed.
+        the contents are replaced. When the filename ends with the suffix ".gz" or
+        ".bz2", the contents are transparently compressed/decompressed.
     mode : str, optional
         Must be either "r" (default) or "w", to indicate whether to open for reading
         or writing.
@@ -210,8 +209,8 @@ def open(
     format : str or None, optional
         Which format to use for reading or writing. If None (default), autodetect
         format when reading (this is fast and thus safe to use), and use the latest
-        HepMC3 format when writing. Allowed values: "HepMC3", "HepMC2", "LHEF",
-        "HEPEVT". "LHEF" is not supported for writing.
+        HepMC3 format when writing. Allowed values (case-insensitive): "HepMC3",
+        "HepMC2", "LHEF", "HEPEVT". "LHEF" is not supported for writing.
 
     Raises
     ------
@@ -220,7 +219,13 @@ def open(
     fn = str(filename)
 
     if fn.endswith(".gz"):
+        import gzip
+
         op = gzip.open
+    elif fn.endswith(".bz2"):
+        import bz2
+
+        op = bz2.open  # type:ignore
     else:
         op = _open  # type:ignore
         mode += "b"

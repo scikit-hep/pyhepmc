@@ -393,24 +393,14 @@ def test_attributes():
 
 
 @pytest.mark.parametrize("format", ["hepmc3", "hepmc2", "hepevt"])
-@pytest.mark.parametrize("zip", [False, True])
-def test_roundtrip(format, zip):
+def test_roundtrip(format):
     ev = hep.GenEvent()
     ev.run_info = hep.GenRunInfo()
 
-    fn = "test"
-    if zip:
-        fn += ".gz"
+    fn = "test_roundtrip.dat"
 
     with io.open(fn, "w", format=format) as f:
         f.write(ev)
-
-    if zip:
-        try:
-            out = subp.check_output(["file", fn], text=True)
-            assert "gzip" in out
-        except FileNotFoundError:
-            pass
 
     with io.open(fn, "r", format=format) as f:
         ev2 = f.read()
@@ -418,10 +408,38 @@ def test_roundtrip(format, zip):
     os.unlink(fn)
 
     assert ev.particles == ev2.particles
+    assert ev.vertices == ev2.vertices
 
     if format == "hepevt":
         pytest.xfail(
             reason="issue in HepMC3, see https://gitlab.cern.ch/hepmc/HepMC3/-/issues/21"
         )
+
+    assert ev == ev2
+
+
+@pytest.mark.parametrize("zip", ["", "gz", "bz2"])
+def test_zip(zip):
+    ev = hep.GenEvent()
+    ev.run_info = hep.GenRunInfo()
+
+    fn = "test_zip"
+    if zip:
+        fn += f".{zip}"
+
+    with io.open(fn, "w") as f:
+        f.write(ev)
+
+    if zip:
+        try:
+            out = subp.check_output(["file", fn], text=True)
+            assert {"gz": "gzip", "bz2": "bzip2"}[zip] in out
+        except FileNotFoundError:
+            pass
+
+    with io.open(fn, "r") as f:
+        ev2 = f.read()
+
+    os.unlink(fn)
 
     assert ev == ev2
