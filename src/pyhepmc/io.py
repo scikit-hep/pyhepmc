@@ -198,8 +198,8 @@ def open(
     ----------
     filename : str or Path
         Filename to open for reading or writing. When writing to existing files,
-        the contents are replaced. When the filename ends with the suffix ".gz" or
-        ".bz2", the contents are transparently compressed/decompressed.
+        the contents are replaced. When the filename ends with the suffixes ".gz",
+        ".bz2", or ".xz", the contents are transparently compressed/decompressed.
     mode : str, optional
         Must be either "r" (default) or "w", to indicate whether to open for reading
         or writing.
@@ -226,6 +226,11 @@ def open(
         import bz2
 
         op = bz2.open  # type:ignore
+
+    elif fn.endswith(".xz"):
+        import lzma
+
+        op = lzma.open  # type:ignore
     else:
         op = _open  # type:ignore
         mode += "b"

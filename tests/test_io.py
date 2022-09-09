@@ -418,24 +418,21 @@ def test_roundtrip(format):
     assert ev == ev2
 
 
-@pytest.mark.parametrize("zip", ["", "gz", "bz2"])
+@pytest.mark.parametrize("zip", ["gz", "bz2", "xz"])
 def test_zip(zip):
     ev = hep.GenEvent()
     ev.run_info = hep.GenRunInfo()
 
-    fn = "test_zip"
-    if zip:
-        fn += f".{zip}"
+    fn = f"test_zip.{zip}"
 
     with io.open(fn, "w") as f:
         f.write(ev)
 
-    if zip:
-        try:
-            out = subp.check_output(["file", fn], text=True)
-            assert {"gz": "gzip", "bz2": "bzip2"}[zip] in out
-        except FileNotFoundError:
-            pass
+    try:
+        out = subp.check_output(["file", fn], text=True)
+        assert {"gz": "gzip", "bz2": "bzip2", "xz": "XZ compressed"}[zip] in out
+    except FileNotFoundError:
+        pass
 
     with io.open(fn, "r") as f:
         ev2 = f.read()
