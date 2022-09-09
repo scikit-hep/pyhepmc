@@ -10,7 +10,7 @@ Differences between HepMC3 C++ and pyhepmc
   convertible to :class:`FourVector` und :class:`ToolInfo`.
 - In addition to the C++ Reader/Writer classes, we offer an easy to use
   :func:`open`. It can read and write any supported HepMC3 format,
-  including gzip'ed files.
+  including compressed files (gzip, bzip2, lzma are supported).
 - Attributes for :class:`GenRunInfo`, :class:`GenEvent`, :class:`GenParticle`,
   :class:`GenVertex` can be accessed via a dict-like view returned by the
   ``attributes`` property. The view automatically converts between native C++

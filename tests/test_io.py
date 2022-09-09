@@ -20,9 +20,9 @@ else:
 def test_pystream_1():
     fn = str(Path(__file__).parent / "sibyll21.dat")
     with open(fn, "rb") as f:
-        pis = pyiostream(f, 1000)
-        with io.ReaderAscii(pis) as r:
-            ev1 = r.read()
+        with pyiostream(f, 1000) as pis:
+            with io.ReaderAscii(pis) as r:
+                ev1 = r.read()
     with io.ReaderAscii(fn) as r:
         ev2 = r.read()
     assert ev1 == ev2
@@ -37,9 +37,9 @@ def test_pystream_2():
             f2.write(f.read())
 
     with gzip.open(fn2) as f:
-        pis = pyiostream(f, 1000)
-        with io.ReaderAscii(pis) as r:
-            ev1 = r.read()
+        with pyiostream(f, 1000) as pis:
+            with io.ReaderAscii(pis) as r:
+                ev1 = r.read()
 
     with io.ReaderAscii(fn) as r:
         ev2 = r.read()
