@@ -12,6 +12,8 @@ class pystreambuf : public std::streambuf {
   py::object write_;
 
 public:
+  bool initialization_error() const { return !readinto_ || !write_; }
+
   pystreambuf(py::object iohandle, int size);
   pystreambuf(const pystreambuf&);
   pystreambuf& operator=(const pystreambuf&);

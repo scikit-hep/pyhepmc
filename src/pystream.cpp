@@ -6,29 +6,20 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <stdexcept>
+#include <streambuf>
 
 pystreambuf::pystreambuf(py::object iohandle, int size)
     : buffer_(size), iohandle_(iohandle) {
-  if (!hasattr(iohandle, "readinto") && !hasattr(iohandle, "readinto1"))
-    throw std::runtime_error("file object lacks readinto or readinto1 methods");
-  readinto_ =
-      iohandle.attr(py::hasattr(iohandle, "readinto1") ? "readinto1" : "readinto");
-  if (!hasattr(iohandle, "write"))
-    throw std::runtime_error("file object lacks write method");
-  write_ = iohandle.attr("write");
+  // this ctor must not throw
+  if (hasattr(iohandle, "readinto") || hasattr(iohandle, "readinto1"))
+    readinto_ =
+        iohandle.attr(py::hasattr(iohandle, "readinto1") ? "readinto1" : "readinto");
+  if (hasattr(iohandle, "write")) write_ = iohandle.attr("write");
   char* b = buffer_.mutable_data();
   setp(b, b + size);
 }
 
-pystreambuf::pystreambuf(const pystreambuf& other)
-    : buffer_(py::len(other.buffer_))
-    , iohandle_(other.iohandle_)
-    , readinto_(other.readinto_)
-    , write_(other.write_) {
-  char* b = buffer_.mutable_data();
-  const int size = py::len(buffer_);
-  setp(b, b + size);
-}
+pystreambuf::pystreambuf(const pystreambuf& other) { operator=(other); }
 
 pystreambuf& pystreambuf::operator=(const pystreambuf& other) {
   if (this != &other) {
@@ -97,18 +88,22 @@ int pystreambuf::sync_() {
 void pystreambuf::pywrite_buffer() {
   const int s = std::distance(pbase(), pptr());
   py::gil_scoped_acquire g;
+  assert(write_);
   // TODO there is probably a more efficient way
   write_(buffer_[py::slice(0, s, 1)]);
 }
 
 int pystreambuf::pyreadinto_buffer() {
   py::gil_scoped_acquire g;
+  assert(readinto_);
   return py::cast<int>(readinto_(buffer_));
 }
 
-// pystreambuf must be created before istream is constructed,
-// we use new to achieve this
+// pystreambuf must be initialized before std::iostream
 pyiostream::pyiostream(py::object iohandle, int size)
-    : pyiostream_base(iohandle, size), std::iostream(&buf_) {}
+    : pyiostream_base(iohandle, size), std::iostream(&buf_) {
+  if (buf_.initialization_error())
+    throw std::runtime_error("file object lacks readinto or write methods");
+}
 
 pyiostream::~pyiostream() {}
