@@ -9,6 +9,7 @@ import numpy as np
 import typing
 import gzip
 from sys import version_info
+import subprocess as subp
 
 if version_info >= (3, 9):
     list_type = list
@@ -28,17 +29,24 @@ def test_pystream_1():
 
 
 def test_pystream_2():
-    fn1 = str(Path(__file__).parent / "sibyll21.dat.gz")
-    with gzip.open(fn1) as f:
+    fn = str(Path(__file__).parent / "sibyll21.dat")
+    fn2 = "sibyll21.dat.gz"
+
+    with open(fn, "rb") as f:
+        with gzip.open(fn2, "w") as f2:
+            f2.write(f.read())
+
+    with gzip.open(fn2) as f:
         pis = pyiostream(f, 1000)
         with io.ReaderAscii(pis) as r:
             ev1 = r.read()
 
-    fn2 = str(Path(__file__).parent / "sibyll21.dat")
-    with io.ReaderAscii(fn2) as r:
+    with io.ReaderAscii(fn) as r:
         ev2 = r.read()
 
     assert ev1 == ev2
+
+    os.unlink(fn2)
 
 
 def test_pystream_3(evt):  # noqa
@@ -385,19 +393,35 @@ def test_attributes():
 
 
 @pytest.mark.parametrize("format", ["hepmc3", "hepmc2", "hepevt"])
-def test_roundtrip(format):
+@pytest.mark.parametrize("zip", [False, True])
+def test_roundtrip(format, zip):
+    ev = hep.GenEvent()
+    ev.run_info = hep.GenRunInfo()
+
+    fn = "test"
+    if zip:
+        fn += ".gz"
+
+    with io.open(fn, "w", format=format) as f:
+        f.write(ev)
+
+    if zip:
+        try:
+            out = subp.check_output(["file", fn], text=True)
+            assert "gzip" in out
+        except FileNotFoundError:
+            pass
+
+    with io.open(fn, "r", format=format) as f:
+        ev2 = f.read()
+
+    os.unlink(fn)
+
+    assert ev.particles == ev2.particles
+
     if format == "hepevt":
         pytest.xfail(
             reason="issue in HepMC3, see https://gitlab.cern.ch/hepmc/HepMC3/-/issues/21"
         )
-    ev = hep.GenEvent()
-    ev.run_info = hep.GenRunInfo()
-    with io.open("test", "w", format=format) as f:
-        f.write(ev)
-
-    with io.open("test", "r", format=format) as f:
-        ev2 = f.read()
 
     assert ev == ev2
-
-    os.unlink("test")

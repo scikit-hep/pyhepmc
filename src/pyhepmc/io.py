@@ -199,7 +199,8 @@ def open(
     ----------
     filename : str or Path
         Filename to open for reading or writing. When writing to existing files,
-        the contents are replaced.
+        the contents are replaced. When the filename ends with the suffix ".gz",
+        the contents are transparently compressed/decompressed.
     mode : str, optional
         Must be either "r" (default) or "w", to indicate whether to open for reading
         or writing.

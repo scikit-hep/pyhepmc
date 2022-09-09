@@ -1,5 +1,5 @@
 """
-pyhepmc: a pythonic and Jupyter-friendly Python API for HepMC3
+pyhepmc is a pythonic and Jupyter-friendly Python API for HepMC3.
 
 Differences between HepMC3 C++ and pyhepmc
 ------------------------------------------
@@ -9,7 +9,8 @@ Differences between HepMC3 C++ and pyhepmc
 - Sequences with matching types and lengths are implicitly
   convertible to :class:`FourVector` und :class:`ToolInfo`.
 - In addition to the C++ Reader/Writer classes, we offer an easy to use
-  :func:`open`. It can read any supported format and writes in HepMC3 format.
+  :func:`open`. It can read and write any supported HepMC3 format,
+  including gzip'ed files.
 - Attributes for :class:`GenRunInfo`, :class:`GenEvent`, :class:`GenParticle`,
   :class:`GenVertex` can be accessed via a dict-like view returned by the
   ``attributes`` property. The view automatically converts between native C++
@@ -20,6 +21,8 @@ Differences between HepMC3 C++ and pyhepmc
   with two arguments.
 - ``HEPEVT_Wrapper`` and friends are missing, use :meth:`GenEvent.from_hepevt`
   instead.
+- ``ReaderGZ`` and ``WriterGZ`` are missing, since :func:`open` offers this
+  functionality.
 - API marked as deprecated in HepMC3 is not available in Python.
 - pyhepmc offers event visualization and renders in Jupyter notebooks if all
   required extra packages are installed, see :func:`pyhepmc.view.to_dot`.
@@ -28,7 +31,7 @@ Missing functionality
 ---------------------
 
 - Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``,
-  ``ReaderGZ``, ``Setup``, ``WriterGZ``. These will be added in the future.
+ ``Setup``. These will be added in the future.
 """
 from sys import version_info
 from ._core import (  # noqa: F401
