@@ -387,8 +387,9 @@ def test_attributes():
 @pytest.mark.parametrize("format", ["hepmc3", "hepmc2", "hepevt"])
 def test_roundtrip(format):
     if format == "hepevt":
-        # this is a bug in HepMC3, see https://gitlab.cern.ch/hepmc/HepMC3/-/issues/21
-        pytest.xfail()
+        pytest.xfail(
+            reason="issue in HepMC3, see https://gitlab.cern.ch/hepmc/HepMC3/-/issues/21"
+        )
     ev = hep.GenEvent()
     ev.run_info = hep.GenRunInfo()
     with io.open("test", "w", format=format) as f:

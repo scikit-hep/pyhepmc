@@ -33,7 +33,7 @@ pystreambuf::int_type pystreambuf::underflow() {
   // if buffer is exhausted (pos == end) ...
   if (gptr() == egptr()) {
     // ... refill buffer from Python source
-    int size = pyreadinto_buffer();
+    const int size = pyreadinto_buffer();
     // return EOF if source is empty ...
     if (size == 0) return traits_type::eof();
     // .. or update view pointers to buffer area
