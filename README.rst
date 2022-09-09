@@ -27,7 +27,7 @@ However, building from source is also easy. External software is not required. J
 
 **pyhepmc is Pythonic and Jupyter notebook-friendly**
 
-pyhepmc is a hand-crafted mapping of C++ code to Python, [see documentation for details](https://scikit-hep.org/pyhepmc/reference.html). Python idioms are supported where appropriate. The classes are designed to render well in Jupyter notebooks. IO is simplified. Events can be visualized in Jupyter notebooks.
+pyhepmc is a hand-crafted mapping of C++ code to Python, `see documentation for details <https://scikit-hep.org/pyhepmc/reference.html>`_. Python idioms are supported where appropriate. The classes are designed to render well in Jupyter notebooks. IO is simplified. Events can be visualized in Jupyter notebooks.
 
 **pyhepmc supports visualizations powered by graphviz**
 
