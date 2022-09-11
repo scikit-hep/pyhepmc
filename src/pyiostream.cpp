@@ -5,6 +5,7 @@
 #include <pybind11/gil.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
+#include <regex>
 #include <stdexcept>
 #include <streambuf>
 
@@ -47,11 +48,25 @@ pystreambuf::~pystreambuf() {
   };
 }
 
+void normalize_eol(char* s, int& size) {
+  std::string str(s, s + size);
+  std::string match = "\r\n";
+  while (true) {
+    const int i = str.find(match);
+    if (i == std::string::npos) break;
+    str.replace(i, match.length(), "\n");
+    --size;
+  }
+  for (auto c : str) *s++ = c;
+}
+
+// reading from python
 pystreambuf::int_type pystreambuf::underflow() {
   // if buffer is exhausted (pos == end) ...
   if (gptr() == egptr()) {
     // ... refill buffer from Python source
-    const int size = pyreadinto_buffer();
+    int size = pyreadinto_buffer();
+    normalize_eol(pbase(), size);
     // return EOF if source is empty ...
     if (size == 0) return traits_type::eof();
     // .. or update view pointers to buffer area
@@ -61,6 +76,7 @@ pystreambuf::int_type pystreambuf::underflow() {
   return traits_type::to_int_type(*gptr());
 }
 
+// writing to python
 pystreambuf::int_type pystreambuf::overflow(pystreambuf::int_type c) {
   const bool eof = traits_type::eq_int_type(c, traits_type::eof());
   // if buffer is full (pos == end) or c is EOF ...
