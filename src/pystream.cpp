@@ -106,4 +106,4 @@ pyiostream::pyiostream(py::object iohandle, int size)
     throw std::runtime_error("file object lacks readinto or write methods");
 }
 
-pyiostream::~pyiostream() {}
+pyiostream::~pyiostream() { delete rdbuf(nullptr); }
