@@ -1,6 +1,6 @@
 #include "UnparsedAttribute.hpp"
 #include "pybind.hpp"
-#include "pystream.hpp"
+#include "pyiostream.hpp"
 #include "repr.hpp"
 #include <HepMC3/GenRunInfo.h>
 #include <HepMC3/Reader.h>

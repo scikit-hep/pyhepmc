@@ -25,6 +25,16 @@ def test_pystream_1():
                 ev1 = r.read()
     with io.ReaderAscii(fn) as r:
         ev2 = r.read()
+
+    s1 = stringstream()
+    with io.WriterAscii(s1) as w:
+        w.write(ev1)
+
+    s2 = stringstream()
+    with io.WriterAscii(s2) as w:
+        w.write(ev2)
+
+    assert str(s1) == str(s2)
     assert ev1 == ev2
 
 
