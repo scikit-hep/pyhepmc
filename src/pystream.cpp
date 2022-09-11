@@ -101,8 +101,8 @@ int pystreambuf::pyreadinto_buffer() {
 
 // pystreambuf must be initialized before std::iostream
 pyiostream::pyiostream(py::object iohandle, int size)
-    : pyiostream_base(iohandle, size), std::iostream(&buf_) {
-  if (buf_.initialization_error())
+    : std::iostream(new pystreambuf(iohandle, size)) {
+  if (static_cast<pystreambuf*>(rdbuf())->initialization_error())
     throw std::runtime_error("file object lacks readinto or write methods");
 }
 

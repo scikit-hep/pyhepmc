@@ -32,12 +32,12 @@ public:
 
 // need to call pystreambuf ctor before calling iostream ctor,
 // so make pystreambuf a base of pyiostream
-struct pyiostream_base {
-  pystreambuf buf_;
-  pyiostream_base(py::object iohandle, int size) : buf_(iohandle, size) {}
-};
+// struct pyiostream_base {
+//   pystreambuf buf_;
+//   pyiostream_base(py::object iohandle, int size) : buf_(iohandle, size) {}
+// };
 
-class pyiostream : pyiostream_base, public std::iostream {
+class pyiostream : public std::iostream {
 public:
   pyiostream(py::object iohandle, int size);
   ~pyiostream();
