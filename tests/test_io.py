@@ -20,8 +20,8 @@ else:
 def test_pystream_1():
     fn = str(Path(__file__).parent / "sibyll21.dat")
     with open(fn, "rb") as f:
-        with pyiostream(f, 1000) as pis:
-            with io.ReaderAscii(pis) as r:
+        with pyiostream(f, 1000) as s:
+            with io.ReaderAscii(s) as r:
                 ev1 = r.read()
     with io.ReaderAscii(fn) as r:
         ev2 = r.read()
@@ -37,8 +37,8 @@ def test_pystream_2():
             f2.write(f.read())
 
     with gzip.open(fn2) as f:
-        with pyiostream(f, 1000) as pis:
-            with io.ReaderAscii(pis) as r:
+        with pyiostream(f, 1000) as s:
+            with io.ReaderAscii(s) as r:
                 ev1 = r.read()
 
     with io.ReaderAscii(fn) as r:
@@ -52,14 +52,14 @@ def test_pystream_2():
 def test_pystream_3(evt):  # noqa
     fn = "test_pystream_3.dat.gz"
     with gzip.open(fn, "w") as f:
-        with pyiostream(f, 1000) as pis:
-            with io.WriterAscii(pis) as w:
+        with pyiostream(f, 1000) as s:
+            with io.WriterAscii(s) as w:
                 w.write(evt)
 
     with gzip.open(fn) as f:
-        pis = pyiostream(f, 1000)
-        with io.ReaderAscii(pis) as r:
-            evt2 = r.read()
+        with pyiostream(f, 1000) as s:
+            with io.ReaderAscii(s) as r:
+                evt2 = r.read()
 
     assert evt == evt2
 

@@ -11,9 +11,9 @@
 pystreambuf::pystreambuf(py::object iohandle, int size)
     : buffer_(size), iohandle_(iohandle) {
   // this ctor must not throw
-  if (hasattr(iohandle, "readinto") || hasattr(iohandle, "readinto1"))
-    readinto_ =
-        iohandle.attr(py::hasattr(iohandle, "readinto1") ? "readinto1" : "readinto");
+  const bool has_readinto1 = hasattr(iohandle, "readinto1");
+  if (has_readinto1 || hasattr(iohandle, "readinto"))
+    readinto_ = iohandle.attr(has_readinto1 ? "readinto1" : "readinto");
   if (hasattr(iohandle, "write")) write_ = iohandle.attr("write");
   char* b = buffer_.mutable_data();
   setp(b, b + size);
@@ -86,9 +86,9 @@ int pystreambuf::sync_() {
 }
 
 void pystreambuf::pywrite_buffer() {
-  const int s = std::distance(pbase(), pptr());
   py::gil_scoped_acquire g;
   assert(write_);
+  const int s = std::distance(pbase(), pptr());
   // TODO there is probably a more efficient way
   write_(buffer_[py::slice(0, s, 1)]);
 }
