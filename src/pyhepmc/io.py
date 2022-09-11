@@ -19,7 +19,9 @@ from ._core import (
     WriterAsciiHepMC2,
     WriterHEPEVT,
     UnparsedAttribute,
+    pyiostream,
 )
+import contextlib
 from pathlib import PurePath
 import typing as _tp
 
@@ -57,12 +59,17 @@ class _Iter:
     next = __next__
 
 
-def _enter(self: _Iter) -> _Iter:
+def _enter(self: _tp.Any) -> _tp.Any:
     return self
 
 
-def _exit(self: _tp.Any, type: Exception, value: str, tb: _tp.Any) -> bool:
+def _exit_close(self: _tp.Any, type: Exception, value: str, tb: _tp.Any) -> bool:
     self.close()
+    return False
+
+
+def _exit_flush(self: _tp.Any, type: Exception, value: str, tb: _tp.Any) -> bool:
+    self.flush()
     return False
 
 
@@ -87,40 +94,44 @@ def _read_event_lhef_patch(self: _tp.Any, evt: GenEvent) -> bool:
     return not failed
 
 
-# add pythonic interface to IO classes
+# add contextmanager interface to IO classes
 ReaderAscii.__enter__ = _enter
-ReaderAscii.__exit__ = _exit
+ReaderAscii.__exit__ = _exit_close
 ReaderAscii.__iter__ = _iter
 ReaderAscii.read = _read
 
 ReaderAsciiHepMC2.__enter__ = _enter
-ReaderAsciiHepMC2.__exit__ = _exit
+ReaderAsciiHepMC2.__exit__ = _exit_close
 ReaderAsciiHepMC2.__iter__ = _iter
 ReaderAsciiHepMC2.read = _read
 
 ReaderLHEF.__enter__ = _enter
-ReaderLHEF.__exit__ = _exit
+ReaderLHEF.__exit__ = _exit_close
 ReaderLHEF.__iter__ = _iter
 ReaderLHEF_read_event = ReaderLHEF.read_event
 ReaderLHEF.read_event = _read_event_lhef_patch
 ReaderLHEF.read = _read
 
 ReaderHEPEVT.__enter__ = _enter
-ReaderHEPEVT.__exit__ = _exit
+ReaderHEPEVT.__exit__ = _exit_close
 ReaderHEPEVT.__iter__ = _iter
 ReaderHEPEVT.read = _read
 
 WriterAscii.__enter__ = _enter
-WriterAscii.__exit__ = _exit
+WriterAscii.__exit__ = _exit_close
 WriterAscii.write = WriterAscii.write_event
 
 WriterAsciiHepMC2.__enter__ = _enter
-WriterAsciiHepMC2.__exit__ = _exit
+WriterAsciiHepMC2.__exit__ = _exit_close
 WriterAsciiHepMC2.write = WriterAsciiHepMC2.write_event
 
 WriterHEPEVT.__enter__ = _enter
-WriterHEPEVT.__exit__ = _exit
+WriterHEPEVT.__exit__ = _exit_close
 WriterHEPEVT.write = WriterHEPEVT.write_event
+
+pyiostream.__enter__ = _enter
+pyiostream.__exit__ = _exit_flush
+
 
 _Filename = _tp.Union[str, PurePath]
 
@@ -129,10 +140,13 @@ class _WrappedWriter:
     # Wrapper for Writer, to be used by `open`
 
     def __init__(
-        self, filename: _Filename, precision: _tp.Optional[int], Writer: _tp.Any
+        self,
+        iostream: _tp.Any,
+        precision: _tp.Optional[int],
+        Writer: _tp.Any,
     ):
         self._writer: _tp.Any = None
-        self._init = (filename, precision, Writer)
+        self._init = (iostream, precision, Writer)
 
     @staticmethod
     def _maybe_convert(event: _tp.Any) -> GenEvent:
@@ -150,11 +164,11 @@ class _WrappedWriter:
 
         if self._writer is None:
             # first call
-            filename, precision, Writer = self._init
+            iostream, precision, Writer = self._init
             if Writer is WriterHEPEVT:
-                self._writer = Writer(filename)
+                self._writer = Writer(iostream)
             else:
-                self._writer = Writer(filename, evt.run_info)
+                self._writer = Writer(iostream, evt.run_info)
             if precision is not None and hasattr(self._writer, "precision"):
                 self._writer.precision = precision
 
@@ -167,9 +181,10 @@ class _WrappedWriter:
             self._writer.close()
 
     __enter__ = _enter
-    __exit__ = _exit
+    __exit__ = _exit_close
 
 
+@contextlib.contextmanager
 def open(
     filename: _Filename,
     mode: str = "r",
@@ -183,7 +198,8 @@ def open(
     ----------
     filename : str or Path
         Filename to open for reading or writing. When writing to existing files,
-        the contents are replaced.
+        the contents are replaced. When the filename ends with the suffixes ".gz",
+        ".bz2", or ".xz", the contents are transparently compressed/decompressed.
     mode : str, optional
         Must be either "r" (default) or "w", to indicate whether to open for reading
         or writing.
@@ -193,18 +209,39 @@ def open(
     format : str or None, optional
         Which format to use for reading or writing. If None (default), autodetect
         format when reading (this is fast and thus safe to use), and use the latest
-        HepMC3 format when writing. Allowed values: "HepMC3", "HepMC2", "LHEF",
-        "HEPEVT". "LHEF" is not supported for writing.
+        HepMC3 format when writing. Allowed values (case-insensitive): "HepMC3",
+        "HepMC2", "LHEF", "HEPEVT". "LHEF" is not supported for writing.
 
     Raises
     ------
     IOError if reading or writing fails.
     """
-    if mode == "r":
+    fn = str(filename)
+
+    if fn.endswith(".gz"):
+        import gzip
+
+        op = gzip.open
+    elif fn.endswith(".bz2"):
+        import bz2
+
+        op = bz2.open  # type:ignore
+
+    elif fn.endswith(".xz"):
+        import lzma
+
+        op = lzma.open  # type:ignore
+    else:
+        op = _open  # type:ignore
+        mode += "b"
+
+    if mode.startswith("r"):
         if format is None:
             # auto-detect
-            with _open(filename, "r") as f:
-                header = f.read(256)
+            with op(fn, mode) as f:
+                chunk = f.read(256)
+            assert isinstance(chunk, bytes)
+            header = chunk.decode()
             if "HepMC::Asciiv3" in header:
                 Reader = ReaderAscii
             elif "HepMC::IO_GenEvent" in header:
@@ -223,8 +260,11 @@ def open(
             }.get(format.lower(), None)
             if Reader is None:
                 raise ValueError(f"format {format} not recognized for reading")
-        return Reader(str(filename))
-    elif mode == "w":
+        with op(fn, mode) as f:
+            with pyiostream(f) as io:
+                with Reader(io) as r:
+                    yield r
+    elif mode.startswith("w"):
         if format is None:
             Writer = WriterAscii
         else:
@@ -235,5 +275,9 @@ def open(
             }.get(format.lower(), None)
             if Writer is None:
                 raise ValueError(f"format {format} not recognized for writing")
-        return _WrappedWriter(str(filename), precision, Writer)
-    raise ValueError("mode must be r or w")
+        with op(fn, mode) as f:
+            with pyiostream(f) as io:
+                with _WrappedWriter(io, precision, Writer) as w:
+                    yield w
+    else:
+        raise ValueError(f"mode must be r or w, got {mode}")

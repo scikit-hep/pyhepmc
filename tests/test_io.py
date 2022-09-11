@@ -3,16 +3,70 @@ import pyhepmc as hep
 import pyhepmc.io as io
 import pytest
 from test_basic import evt  # noqa
-from pyhepmc._core import stringstream
+from pyhepmc._core import stringstream, pyiostream
 from pathlib import Path
 import numpy as np
 import typing
+import gzip
 from sys import version_info
+import subprocess as subp
 
 if version_info >= (3, 9):
     list_type = list
 else:
     list_type = typing.List
+
+
+def test_pystream_1():
+    fn = str(Path(__file__).parent / "sibyll21.dat")
+    with open(fn, "rb") as f:
+        with pyiostream(f, 1000) as s:
+            with io.ReaderAscii(s) as r:
+                ev1 = r.read()
+    with io.ReaderAscii(fn) as r:
+        ev2 = r.read()
+
+    assert ev1.particles == ev2.particles
+    assert ev1.vertices == ev2.vertices
+    assert ev1.run_info == ev2.run_info
+
+
+def test_pystream_2():
+    fn = str(Path(__file__).parent / "sibyll21.dat")
+    fn2 = "sibyll21.dat.gz"
+
+    with open(fn, "rb") as f:
+        with gzip.open(fn2, "w") as f2:
+            f2.write(f.read())
+
+    with gzip.open(fn2) as f:
+        with pyiostream(f, 1000) as s:
+            with io.ReaderAscii(s) as r:
+                ev1 = r.read()
+
+    with io.ReaderAscii(fn) as r:
+        ev2 = r.read()
+
+    assert ev1 == ev2
+
+    os.unlink(fn2)
+
+
+def test_pystream_3(evt):  # noqa
+    fn = "test_pystream_3.dat.gz"
+    with gzip.open(fn, "w") as f:
+        with pyiostream(f, 1000) as s:
+            with io.WriterAscii(s) as w:
+                w.write(evt)
+
+    with gzip.open(fn) as f:
+        with pyiostream(f, 1000) as s:
+            with io.ReaderAscii(s) as r:
+                evt2 = r.read()
+
+    assert evt == evt2
+
+    os.unlink(fn)
 
 
 def test_read_event_write_event(evt):  # noqa
@@ -247,8 +301,8 @@ def test_open_failures():
     foo = Path("foo.dat")
     foo.touch(mode=0o000)  # not writeable
 
-    with hep.open(foo, "w") as f:
-        with pytest.raises(IOError):
+    with pytest.raises(IOError):
+        with hep.open(foo, "w") as f:
             f.write(hep.GenEvent())
 
     foo.chmod(mode=0o666)
@@ -343,17 +397,49 @@ def test_attributes():
 
 @pytest.mark.parametrize("format", ["hepmc3", "hepmc2", "hepevt"])
 def test_roundtrip(format):
-    if format == "hepevt":
-        # this is a bug in HepMC3, see https://gitlab.cern.ch/hepmc/HepMC3/-/issues/21
-        pytest.xfail()
     ev = hep.GenEvent()
     ev.run_info = hep.GenRunInfo()
-    with io.open("test", "w", format=format) as f:
+
+    fn = "test_roundtrip.dat"
+
+    with io.open(fn, "w", format=format) as f:
         f.write(ev)
 
-    with io.open("test", "r", format=format) as f:
+    with io.open(fn, "r", format=format) as f:
         ev2 = f.read()
+
+    os.unlink(fn)
+
+    assert ev.particles == ev2.particles
+    assert ev.vertices == ev2.vertices
+
+    if format == "hepevt":
+        pytest.xfail(
+            reason="issue in HepMC3, see https://gitlab.cern.ch/hepmc/HepMC3/-/issues/21"
+        )
 
     assert ev == ev2
 
-    os.unlink("test")
+
+@pytest.mark.parametrize("zip", ["gz", "bz2", "xz"])
+def test_zip(zip):
+    ev = hep.GenEvent()
+    ev.run_info = hep.GenRunInfo()
+
+    fn = f"test_zip.{zip}"
+
+    with io.open(fn, "w") as f:
+        f.write(ev)
+
+    try:
+        out = subp.check_output(["file", fn], text=True)
+        assert {"gz": "gzip", "bz2": "bzip2", "xz": "XZ compressed"}[zip] in out
+    except FileNotFoundError:
+        pass
+
+    with io.open(fn, "r") as f:
+        ev2 = f.read()
+
+    os.unlink(fn)
+
+    assert ev == ev2
