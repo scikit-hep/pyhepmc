@@ -36,5 +36,5 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - run: python -m pip install --upgrade pip wheel
-    - run: python -m pip install --prefer-binary -v -e .[test]
+    - run: DEBUG=1 python -m pip install --prefer-binary -v -e .[test]
     - run: python -m pytest -vv
