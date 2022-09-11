@@ -8,6 +8,24 @@
 #include <stdexcept>
 #include <streambuf>
 
+void eol_normalizer::operator()(char* s, int& size) noexcept {
+  if (size < 2 || skip_) return;
+
+  ++s;
+  for (char* end = s + size; s != end; ++s) {
+    if (*s == '\n') {
+      if (*(s - 1) == '\r') {
+        --end;
+        --size;
+        for (char* t = s - 1; t != end; ++t) *t = *(t + 1);
+      } else {
+        skip_ = true;
+        return;
+      }
+    }
+  }
+}
+
 pystreambuf::pystreambuf(py::object iohandle, int size)
     : buffer_(size), iohandle_(iohandle) {
   // this ctor must not throw
@@ -52,7 +70,8 @@ pystreambuf::int_type pystreambuf::underflow() {
   // if buffer is exhausted (pos == end) ...
   if (gptr() == egptr()) {
     // ... refill buffer from Python source
-    const int size = pyreadinto_buffer();
+    int size = pyreadinto_buffer();
+    eol_normalizer_(pbase(), size);
     // return EOF if source is empty ...
     if (size == 0) return traits_type::eof();
     // .. or update view pointers to buffer area

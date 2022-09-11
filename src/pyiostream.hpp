@@ -5,11 +5,17 @@
 #include <iostream>
 #include <streambuf>
 
+struct eol_normalizer {
+  bool skip_ = false;
+  void operator()(char* s, int& size) noexcept;
+};
+
 class pystreambuf : public std::streambuf {
   py::array_t<char_type> buffer_;
   py::object iohandle_;
   py::object readinto_;
   py::object write_;
+  eol_normalizer eol_normalizer_;
 
 public:
   bool initialization_error() const { return !readinto_ || !write_; }
