@@ -77,7 +77,7 @@ def _iter(self: _tp.Any) -> _Iter:
     return _Iter(self)
 
 
-def _read(self: _tp.Any) -> _tp.Union[GenEvent, None]:
+def _read(self: _tp.Any) -> _tp.Optional[GenEvent]:
     evt = GenEvent()
     success = self.read_event(evt)
     if self.failed():
