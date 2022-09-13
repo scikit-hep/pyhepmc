@@ -433,7 +433,8 @@ def test_zip(zip):
 
     try:
         out = subp.check_output(["file", fn], text=True)
-        assert {"gz": "gzip", "bz2": "bzip2", "xz": "XZ compressed"}[zip] in out
+        assert "compressed" in out.lower()
+        assert {"gz": "gzip", "bz2": "bzip2", "xz": "xz"}[zip] in out.lower()
     except FileNotFoundError:
         pass
 
