@@ -298,6 +298,15 @@ def test_open_failures():
         with hep.open("test.dat", "rb") as f:
             pass
 
+
+@pytest.mark.skipif(
+    any("CIBW" in key for key in os.environ),
+    reason=(
+        "does not work in cibuildwheel, "
+        "although it works in a manually set-up docker"
+    ),
+)
+def test_open_on_readonly_file():
     foo = Path("foo.dat")
     foo.touch(mode=0o000)  # not writeable
 
