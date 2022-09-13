@@ -300,7 +300,7 @@ def test_open_failures():
 
 
 @pytest.mark.skipif(
-    any("CIBW" in key for key in os.environ),
+    "CIBW" in os.environ,
     reason=(
         "does not work in cibuildwheel, "
         "although it works in a manually set-up docker"
