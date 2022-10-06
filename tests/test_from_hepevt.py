@@ -1,9 +1,6 @@
 import pyhepmc as hep
 import numpy as np
-from pathlib import Path
 import pytest
-
-cdir = Path(__file__).parent
 
 
 def test_no_vertex_info():
@@ -47,3 +44,14 @@ def test_inverted_parents_range():
     expected = [[0, 1], [2]]
     got = [[p.id - 1 for p in v.particles_in] for v in hev.vertices]
     assert expected == got
+
+
+@pytest.mark.parametrize("bad", ([-4, 1], [1, -4]))
+def test_negative_parents_range(bad):
+    px = py = pz = en = m = vx = vy = vz = vt = np.linspace(0, 1, 4)
+    pid = np.arange(4) + 1
+    sta = np.zeros(4, dtype=np.int32)
+    # inverted range is not an error (2, 1) will be converted to (1, 2)
+    parents = [(0, 0), bad, (3, 3), (3, 3)]
+    with pytest.raises(RuntimeError):
+        hep.GenEvent().from_hepevt(0, px, py, pz, en, m, pid, sta, parents)
