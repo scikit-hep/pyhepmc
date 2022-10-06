@@ -95,7 +95,9 @@ void connect_parents_and_children(GenEvent& event, bool parents,
     int m2 = vi.first.second;
     // there must be at least one parent or child when we arrive here...
     normalize(m1, m2);
-    if (m1 >= m2 || m1 >= n || m2 > n) {
+    assert(m1 < m2); // postcondition after normalize
+
+    if (m1 >= n || m2 > n) {
       std::ostringstream os;
       os << "invalid " << (parents ? "parents" : "children") << " range for vertex "
          << event.vertices().size() << "[" << m1 << ", " << m2
