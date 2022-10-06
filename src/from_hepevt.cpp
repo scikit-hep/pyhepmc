@@ -8,15 +8,6 @@
 #include <utility>
 #include <vector>
 
-// template <>
-// struct std::hash<std::pair<int, int>> {
-//   std::size_t operator()(const std::pair<int, int>& p) const noexcept {
-//     auto h1 = std::hash<int>{}(p.first);
-//     auto h2 = std::hash<int>{}(p.second);
-//     return h1 ^ (h2 << 1); // or use boost::hash_combine
-//   }
-// };
-
 template <>
 struct std::less<std::pair<int, int>> {
   bool operator()(const std::pair<int, int>& a,
@@ -35,9 +26,10 @@ void normalize(int& m1, int& m2) {
   // m1 < m2, both > 0: interaction
   // m2 < m1, both > 0: same, needs swapping
 
-  if (m1 > 0 && m2 > 0 && m2 < m1) std::swap(m1, m2);
-
-  if (m1 > 0 && m2 == 0) m2 = m1;
+  if (m1 > 0 && m2 == 0)
+    m2 = m1;
+  else if (m2 < m1)
+    std::swap(m1, m2);
 
   --m1; // fortran to c index
 }
@@ -102,14 +94,28 @@ void connect_parents_and_children(GenEvent& event, bool parents,
 
     int m1 = vi.first.first;
     int m2 = vi.first.second;
+
     // there must be at least one parent or child when we arrive here...
     normalize(m1, m2);
-    assert(m1 < m2);
+    assert(m1 < m2); // postcondition after normalize
+
+    if (m1 < 0 || m2 > n) {
+      std::ostringstream os;
+      os << "invalid " << (parents ? "parents" : "children") << " range for vertex "
+         << event.vertices().size() << " [" << m1 << ", " << m2
+         << ") total number of particles " << n;
+      throw std::runtime_error(os.str().c_str());
+    }
 
     // ...with at least one child or parent
     const auto& co = vi.second;
-    assert(!co.empty());
 
+    if (co.empty()) {
+      std::ostringstream os;
+      os << "invalid empty " << (!parents ? "parents" : "children")
+         << " list for vertex " << event.vertices().size();
+      throw std::runtime_error(os.str().c_str());
+    }
     FourVector pos;
     if (has_vertex) {
       // we assume this is a production vertex
