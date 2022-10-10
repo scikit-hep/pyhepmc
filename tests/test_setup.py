@@ -2,8 +2,6 @@ import pyhepmc
 
 
 def test_all():
-    print(pyhepmc.__version__)
-
     assert pyhepmc.print_errors()
     assert pyhepmc.print_warnings()
 
@@ -14,3 +12,7 @@ def test_all():
     pyhepmc.set_print_warnings(False)
     assert not pyhepmc.print_errors()
     assert not pyhepmc.print_warnings()
+
+    assert pyhepmc.debug_level() == 5
+    pyhepmc.set_debug_level(10)
+    assert pyhepmc.debug_level() == 10
