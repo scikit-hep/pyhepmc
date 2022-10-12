@@ -176,8 +176,6 @@ for name in list(results):
 
 # join set/get entries into properties
 for name in list(results):
-    if name.startswith("Setup"):
-        continue
     if ".set" not in name:
         continue
     i = name.find(".set")

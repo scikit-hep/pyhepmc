@@ -510,12 +510,9 @@ The ctor to read from temp stream.""",
 
 Contains macro definitions for printing debug output, feature deprecation, etc. Static class - configuration is shared among all HepMC events and program threads.""",
     "Setup.DOUBLE_EPSILON": """Default threshold for comparing double variables.""",
-    "Setup.debug_level": """Get debug level.""",
-    "Setup.print_errors": """Get error messages printing flag.""",
-    "Setup.print_warnings": """Get warning messages printing flag.""",
-    "Setup.set_debug_level": """Set debug level.""",
-    "Setup.set_print_errors": """set error messages printing flag.""",
-    "Setup.set_print_warnings": """Set warning messages printing flag.""",
+    "Setup.debug_level": """Access debug level.""",
+    "Setup.print_errors": """Access error messages printing flag.""",
+    "Setup.print_warnings": """Access warning messages printing flag.""",
     "Units": """Stores units-related enums and conversion functions.
 
 Manages units used by HepMC::GenEvent.""",

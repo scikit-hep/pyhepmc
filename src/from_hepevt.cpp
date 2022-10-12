@@ -37,6 +37,19 @@ void normalize(int& m1, int& m2) {
 
 namespace HepMC3 {
 
+void modded_add_particle_in(int vid, GenVertexPtr v, GenParticlePtr p) {
+  // Particle can only have one end vertex in HepMC3. Default is to reassign so
+  // that the later end vertex gets the particle. We change this here so that
+  // the first vertex keeps the particle. This is safer, because otherwise the
+  // first vertex may end up without incoming particles.
+  if (p->end_vertex()) {
+    // clang-format off
+    HEPMC3_DEBUG(10,"from_hepevt: vertex -" << vid << ": skipping incoming particle " << p->id() << " which already has end_vertex " << p->end_vertex()->id());
+    // clang-format on
+  } else
+    v->add_particle_in(p);
+}
+
 void connect_parents_and_children(GenEvent& event, bool parents,
                                   py::array_t<int> parents_or_children, py::object vx,
                                   py::object vy, py::object vz, py::object vt) {
@@ -127,25 +140,14 @@ void connect_parents_and_children(GenEvent& event, bool parents,
     }
 
     GenVertexPtr v{new GenVertex(pos)};
+    int vid = event.vertices().size();
 
     if (parents) {
-      for (int k = m1; k < m2; ++k) {
-        auto p = particles.at(k);
-        // particle can only have one end vertex, TODO warn about this
-        if (p->end_vertex()) {
-          // clang-format off
-          HEPMC3_DEBUG(10,"from_hepevt: vertex -" << event.vertices().size() << ": skipping incoming particle " << k + 1 << " which already has end_vertex " << p->end_vertex()->id());
-          // clang-format on
-        } else
-          v->add_particle_in(p);
-      }
-      for (const auto k : co) {
-        auto p = particles.at(k);
-        v->add_particle_out(p);
-      }
+      for (int k = m1; k < m2; ++k) modded_add_particle_in(vid, v, particles.at(k));
+      for (const auto k : co) v->add_particle_out(particles.at(k));
     } else {
       for (int k = m1; k < m2; ++k) v->add_particle_out(particles.at(k));
-      for (const auto k : co) v->add_particle_in(particles.at(k));
+      for (const auto k : co) modded_add_particle_in(vid, v, particles.at(k));
     }
 
     event.add_vertex(v);
