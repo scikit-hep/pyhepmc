@@ -613,6 +613,20 @@ PYBIND11_MODULE(_core, m) {
       },
       DOC(Print.listing));
 
+  m.def("_Setup_print_errors", &Setup::print_errors, DOC(Setup.print_errors));
+
+  m.def("_Setup_set_print_errors", &Setup::set_print_errors,
+        DOC(Setup.set_print_errors));
+
+  m.def("_Setup_print_warnings", &Setup::print_warnings, DOC(Setup.print_warnings));
+
+  m.def("_Setup_set_print_warnings", &Setup::set_print_warnings,
+        DOC(Setup.set_print_warnings));
+
+  m.def("_Setup_debug_level", &Setup::debug_level, DOC(Setup.debug_level));
+
+  m.def("_Setup_set_debug_level", &Setup::set_debug_level, DOC(Setup.set_debug_level));
+
   FUNC(equal_particle_sets);
   FUNC(equal_vertex_sets);
 

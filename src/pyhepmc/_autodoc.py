@@ -5,6 +5,9 @@ autodoc = {
     "AssociatedParticle.__init__": """Default constructor.
 
 Constructor initializing attribute value.""",
+    "AssociatedParticle.associated": """get a pointer to the associated particle.
+
+set the value associated to this Attribute.""",
     "AssociatedParticle.associatedId": """get id of the associated particle.""",
     "AssociatedParticle.event": """return the GenEvent to which this Attribute belongs, if at all.""",
     "AssociatedParticle.from_string": """Implementation of Attribute::from_string.""",
@@ -13,6 +16,9 @@ Constructor initializing attribute value.""",
     "AssociatedParticle.particle": """return the GenParticle to which this Attribute belongs, if at all.""",
     "AssociatedParticle.to_string": """Implementation of Attribute::to_string.""",
     "AssociatedParticle.unparsed_string": """Get unparsed string.""",
+    "AssociatedParticle.value": """get the value associated to this Attribute.
+
+set the value associated to this Attribute.""",
     "AssociatedParticle.vertex": """return the GenVertex to which this Attribute belongs, if at all.""",
     "FourVector": """Generic 4-vector.
 
@@ -28,6 +34,7 @@ Accesss all FourVector fields.
 Copy constructor.""",
     "FourVector.abs_eta": """Absolute pseudorapidity.""",
     "FourVector.abs_rap": """Absolute rapidity.""",
+    "FourVector.e": """Energy component of momentum.""",
     "FourVector.eta": """Pseudorapidity.""",
     "FourVector.interval": """Spacetime invariant interval s^2 = t^2 - x^2 - y^2 - z^2.""",
     "FourVector.is_zero": """Check if the length of this vertex is zero.""",
@@ -42,9 +49,16 @@ Copy constructor.""",
     "FourVector.phi": """Azimuthal angle.""",
     "FourVector.pt": """Transverse momentum.""",
     "FourVector.pt2": """Squared transverse momentum px^2 + py^2.""",
+    "FourVector.px": """x-component of momentum.""",
+    "FourVector.py": """y-component of momentum.""",
+    "FourVector.pz": """z-component of momentum.""",
     "FourVector.rap": """Rapidity.""",
     "FourVector.rho": """Magnitude of spatial (x, y, z) 3-vector, for HepMC2 compatibility.""",
+    "FourVector.t": """Time component of position/displacement.""",
     "FourVector.theta": """Polar angle w.r.t. z direction.""",
+    "FourVector.x": """x-component of position/displacement.""",
+    "FourVector.y": """y-component of position/displacement.""",
+    "FourVector.z": """z-component of position/displacement.""",
     "GenCrossSection": """Stores additional information about cross-section.
 
 This is an example of event attribute used to store cross-section information.
@@ -71,6 +85,20 @@ The units of cross_section and cross_section_error are expected to be pb.""",
     "GenCrossSection.to_string": """Implementation of Attribute::to_string.""",
     "GenCrossSection.unparsed_string": """Get unparsed string.""",
     "GenCrossSection.vertex": """return the GenVertex to which this Attribute belongs, if at all.""",
+    "GenCrossSection.xsec": """Access the cross section corresponding to the weight named wName.
+
+Access the cross section corresponding to the weight with index indx.
+
+Access the cross section corresponding to the weight named wName.
+
+Access the cross section corresponding to the weight with index indx.""",
+    "GenCrossSection.xsec_err": """Access the cross section error corresponding to the weight named wName.
+
+Access the cross section error corresponding to the weight with index indx.
+
+Access the cross section error corresponding to the weight named wName.
+
+Access the cross section error corresponding to the weight with index indx.""",
     "GenEvent": """Stores event-related information.
 
 Manages event-related information. Contains lists of GenParticle and GenVertex objects.""",
@@ -99,12 +127,16 @@ To avoid thread issues, this is returns a copy. Better solution may be needed.""
     "GenEvent.beams": """Vector of beam particles.""",
     "GenEvent.boost": """Boost event using x,y,z components of v as velocities.""",
     "GenEvent.clear": """Remove contents of this event.""",
+    "GenEvent.cross_section": """Access cross-section information.""",
+    "GenEvent.event_number": """Access event number.""",
     "GenEvent.event_pos": """Vertex representing the overall event position.""",
+    "GenEvent.heavy_ion": """Access heavy ion generator additional information.""",
     "GenEvent.length_unit": """Get length unit.""",
     "GenEvent.momentum_unit": """Get momentum unit.""",
     "GenEvent.particles": """Access list of particles.""",
     "GenEvent.particles_empty": """Particles empty, HepMC2 compatiility.""",
     "GenEvent.particles_size": """Particles size, HepMC2 compatiility.""",
+    "GenEvent.pdf_info": """Access PDF information.""",
     "GenEvent.read_data": """Fill GenEvent based on GenEventData.""",
     "GenEvent.reflect": """Change sign of axis.""",
     "GenEvent.remove_attribute": """Remove attribute.""",
@@ -121,6 +153,9 @@ This will remove all sub-trees of all outgoing particles of this vertex.""",
 
 Helps optimize event creation when size of the event is known beforehand.""",
     "GenEvent.rotate": """Rotate event using x,y,z components of v as rotation angles.""",
+    "GenEvent.run_info": """Access a pointer to the the GenRunInfo object.
+
+Access the GenRunInfo object by smart pointer.""",
     "GenEvent.set_units": """Change event units Converts event from current units to new ones.""",
     "GenEvent.shift_position_by": """Shift position of all vertices in the event by delta.""",
     "GenEvent.shift_position_to": """Shift position of all vertices in the event to op.""",
@@ -129,11 +164,11 @@ Helps optimize event creation when size of the event is known beforehand.""",
     "GenEvent.vertices_size": """Vertices size, HepMC2 compatiility.""",
     "GenEvent.weight": """Access event weight accessed by index (or the canonical/first one if there is no argument) It's the user's responsibility to ensure that the given index exists!.
 
-Access event weight accessed by weight name Requires there to be an attached GenRunInfo, otherwise will throw an exception
+Access event weight accessed by weight name Requires there to be an attached GenRunInfo, otherwise will throw an exception 
 
 It's the user's responsibility to ensure that the given name exists!.
 
-Access event weight accessed by weight name Requires there to be an attached GenRunInfo, otherwise will throw an exception
+Access event weight accessed by weight name Requires there to be an attached GenRunInfo, otherwise will throw an exception 
 
 It's the user's responsibility to ensure that the given name exists!.""",
     "GenEvent.weight_names": """Get event weight names, if there are some Requires there to be an attached GenRunInfo with registered weight names, otherwise will throw an exception.""",
@@ -251,6 +286,7 @@ This variable may contain anything a generator feels is reasonable for estimatin
     "GenParticle.__init__": """Default constructor.
 
 Constructor based on particle data.""",
+    "GenParticle.abs_pid": """Get absolute value of PDG ID.""",
     "GenParticle.add_attribute": """Add an attribute to this particle.
 
 This will overwrite existing attribute if an attribute with the same name is present. The attribute will be stored in the parent_event(). false if there is no parent_event();.""",
@@ -260,16 +296,25 @@ This will overwrite existing attribute if an attribute with the same name is pre
     "GenParticle.children": """Convenience access to immediate outgoing particles via end vertex.
 
 Less efficient than via the vertex since return must be by value (in case there is no vertex).""",
+    "GenParticle.data": """Get particle data.""",
     "GenParticle.end_vertex": """Access end vertex.""",
+    "GenParticle.generated_mass": """Access generated mass.
+
+This function will return mass as set by a generator/tool. If not set, it will return momentum().m().
+
+Access generated mass.""",
+    "GenParticle.id": """Get particle id.""",
     "GenParticle.in_event": """Check if this particle belongs to an event.""",
+    "GenParticle.is_generated_mass_set": """Check if generated mass is set.""",
+    "GenParticle.momentum": """Access momentum.""",
+    "GenParticle.parent_event": """Access parent event.""",
     "GenParticle.parents": """Convenience access to immediate incoming particles via production vertex.
 
 Less efficient than via the vertex since return must be by value (in case there is no vertex).""",
+    "GenParticle.pid": """Access PDG ID.""",
     "GenParticle.production_vertex": """Access production vertex.""",
     "GenParticle.remove_attribute": """Remove attribute.""",
-    "GenParticle.set_momentum": """Set momentum.""",
-    "GenParticle.set_pid": """Set PDG ID.""",
-    "GenParticle.set_status": """Set status code.""",
+    "GenParticle.status": """Access status code.""",
     "GenParticle.unset_generated_mass": """Declare that generated mass is not set.""",
     "GenParticleData": """Stores serializable particle information.""",
     "GenParticleData.is_mass_set": """Check if generated mass is set.""",
@@ -324,6 +369,11 @@ To avoid thread issues, this is returns a copy. Better solution may be needed.""
 
 -1 if name was not found.""",
     "GenRunInfo.weight_indices": """Returns a copy of indices map.""",
+    "GenRunInfo.weight_names": """Access the vector of weight names.
+
+Access the names of the weights in this run.
+
+For consistency, the length of the vector should be the same as the number of weights in the events in the run.""",
     "GenRunInfo.write_data": """Fill GenRunInfoData object.""",
     "GenRunInfoData": """Stores serializable run information.""",
     "GenRunInfoData.attribute_name": """Attribute name.""",
@@ -346,15 +396,26 @@ This will overwrite existing attribute if an attribute with the same name is pre
     "GenVertex.attribute_names": """Get list of names of attributes assigned to this particle.""",
     "GenVertex.data": """Get vertex data.""",
     "GenVertex.has_set_position": """Check if position of this vertex is set.""",
+    "GenVertex.id": """Access the vertex unique identifier.
+
+This is not the same as id() in HepMC v2, which is now status().
+
+set the vertex identifier.""",
     "GenVertex.in_event": """Check if this vertex belongs to an event.""",
     "GenVertex.parent_event": """Access parent event.""",
     "GenVertex.particles_in": """Access list of incoming particles.""",
     "GenVertex.particles_in_size": """Number of incoming particles, HepMC2 compatiility.""",
     "GenVertex.particles_out": """Access list of outgoing particles.""",
     "GenVertex.particles_out_size": """Number of outgoing particles, HepMC2 compatiility.""",
+    "GenVertex.position": """Access vertex position.
+
+Returns the position of this vertex. If a position is not set on this vertex, the production vertices of ancestors are searched to find the inherited position. FourVector(0,0,0,0) is returned if no position information is found.
+
+Access vertex position.""",
     "GenVertex.remove_attribute": """Remove attribute.""",
     "GenVertex.remove_particle_in": """Remove incoming particle.""",
     "GenVertex.remove_particle_out": """Remove outgoing particle.""",
+    "GenVertex.status": """Access vertex status code.""",
     "GenVertexData": """Stores serializable vertex information.""",
     "GenVertexData.is_zero": """Check if this struct fields are zero.""",
     "GenVertexData.position": """Position in time-space.""",
@@ -377,6 +438,7 @@ Parameters
 ----------
 evt:
     Event to be filled.""",
+    "ReaderAscii.run_info": """Access the global GenRunInfo object.""",
     "ReaderAscii.skip": """skip events.""",
     "ReaderAsciiHepMC2": """Parser for HepMC2 I/O files.""",
     "ReaderAsciiHepMC2.__init__": """Default constructor.
@@ -388,6 +450,7 @@ The ctor to read from temp stream.""",
     "ReaderAsciiHepMC2.failed": """Return status of the stream.""",
     "ReaderAsciiHepMC2.options": """Access options.""",
     "ReaderAsciiHepMC2.read_event": """Implementation of Reader::read_event.""",
+    "ReaderAsciiHepMC2.run_info": """Access the global GenRunInfo object.""",
     "ReaderAsciiHepMC2.skip": """skip events.""",
     "ReaderGZ": """GenEvent I/O parsing for compressed files.""",
     "ReaderGZ.__init__": """Constructor.
@@ -402,6 +465,7 @@ Parameters
 ----------
 evt:
     Event to be filled.""",
+    "ReaderGZ.run_info": """Access the global GenRunInfo object.""",
     "ReaderGZ.skip": """skip events.""",
     "ReaderHEPEVT": """GenEvent I/O parsing and serialization for HEPEVT files.""",
     "ReaderHEPEVT.__init__": """Default constructor.
@@ -421,6 +485,7 @@ Parameters
 ----------
 i:
     Particle id.""",
+    "ReaderHEPEVT.run_info": """Access the global GenRunInfo object.""",
     "ReaderHEPEVT.skip": """skip events.""",
     "ReaderLHEF": """GenEvent I/O parsing and serialization for LHEF files.""",
     "ReaderLHEF.__init__": """The ctor to read from stream.
@@ -432,17 +497,22 @@ The ctor to read from temp stream.""",
     "ReaderLHEF.failed": """State.""",
     "ReaderLHEF.options": """Access options.""",
     "ReaderLHEF.read_event": """Reading event.""",
+    "ReaderLHEF.run_info": """Access the global GenRunInfo object.""",
     "ReaderLHEF.skip": """skip events.""",
     "ReaderMT": """Multithreader GenEvent I/O parsing.""",
     "ReaderMT.close": """Close file and/or stream.""",
     "ReaderMT.failed": """Get file and/or stream error state.""",
     "ReaderMT.options": """Access options.""",
     "ReaderMT.read_event": """Fill next event from input into evt.""",
+    "ReaderMT.run_info": """Access the global GenRunInfo object.""",
     "ReaderMT.skip": """skip or fast forward reading of some events.""",
     "Setup": """Configuration for HepMC.
 
 Contains macro definitions for printing debug output, feature deprecation, etc. Static class - configuration is shared among all HepMC events and program threads.""",
     "Setup.DOUBLE_EPSILON": """Default threshold for comparing double variables.""",
+    "Setup.debug_level": """Access debug level.""",
+    "Setup.print_errors": """Access error messages printing flag.""",
+    "Setup.print_warnings": """Access warning messages printing flag.""",
     "Units": """Stores units-related enums and conversion functions.
 
 Manages units used by HepMC::GenEvent.""",
@@ -467,6 +537,12 @@ Constructor from temp ostream.""",
     "WriterAscii.close": """Close file stream.""",
     "WriterAscii.failed": """Return status of the stream.""",
     "WriterAscii.options": """Access options.""",
+    "WriterAscii.precision": """Return output precision.
+
+Access output precision.
+
+So far available range is [2,24]. Default is 16.""",
+    "WriterAscii.run_info": """Access the global GenRunInfo object.""",
     "WriterAscii.write_event": """Write event to file.
 
 Parameters
@@ -485,6 +561,12 @@ Constructor from temp ostream.""",
     "WriterAsciiHepMC2.close": """Close file stream.""",
     "WriterAsciiHepMC2.failed": """Return status of the stream.""",
     "WriterAsciiHepMC2.options": """Access options.""",
+    "WriterAsciiHepMC2.precision": """Return output precision.
+
+Access output precision.
+
+Available range is [2,24]. Default is 16.""",
+    "WriterAsciiHepMC2.run_info": """Access the global GenRunInfo object.""",
     "WriterAsciiHepMC2.write_event": """Write event to file.
 
 Parameters
@@ -501,6 +583,7 @@ Constructor from ostream.""",
     "WriterGZ.close": """Close file stream.""",
     "WriterGZ.failed": """Return status of the stream.""",
     "WriterGZ.options": """Access options.""",
+    "WriterGZ.run_info": """Access the global GenRunInfo object.""",
     "WriterGZ.write_event": """Write event to file.
 
 Parameters
@@ -518,6 +601,7 @@ Constructor from temp ostream.""",
     "WriterHEPEVT.close": """Close file stream.""",
     "WriterHEPEVT.failed": """Get stream error state flag.""",
     "WriterHEPEVT.options": """Access options.""",
+    "WriterHEPEVT.run_info": """Access the global GenRunInfo object.""",
     "WriterHEPEVT.vertices_positions_present": """get flag if vertex positions are available. The flag is deduced from m_options. If the m_options have the key "vertices_positions_are_absent" the result if false. True otherwise.
 
 set flag if vertex positions are available. Effectively this adds or removes key "vertices_positions_are_absent" to/from the m_options.""",

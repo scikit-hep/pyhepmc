@@ -30,8 +30,8 @@ Differences between HepMC3 C++ and pyhepmc
 Missing functionality
 ---------------------
 
-- Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``,
-  ``Setup``. These will be added in the future.
+- Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``.
+  These will be added in the future.
 
 """
 from sys import version_info
@@ -51,6 +51,12 @@ from ._core import (  # noqa: F401
     equal_particle_sets,
     content,
     listing,
+    _Setup_print_errors,
+    _Setup_set_print_errors,
+    _Setup_print_warnings,
+    _Setup_set_print_warnings,
+    _Setup_debug_level,
+    _Setup_set_debug_level,
     delta_phi,
     delta_eta,
     delta_r2_eta,
@@ -80,6 +86,7 @@ __all__ = (
     "equal_particle_sets",
     "content",
     "listing",
+    "Setup",
     "delta_phi",
     "delta_eta",
     "delta_r2_eta",
@@ -89,6 +96,29 @@ __all__ = (
     "delta_rap",
     "open",
 )
+
+
+class _Setup:
+    print_errors = property(
+        lambda s: _Setup_print_errors(),
+        lambda s, v: _Setup_set_print_errors(v),
+        "Whether to print errors or not.",
+    )
+
+    print_warnings = property(
+        lambda s: _Setup_print_warnings(),
+        lambda s, v: _Setup_set_print_warnings(v),
+        "Whether to print warnings or not.",
+    )
+
+    debug_level = property(
+        lambda s: _Setup_debug_level(),
+        lambda s, v: _Setup_set_debug_level(v),
+        "Access debug level.",
+    )
+
+
+Setup = _Setup()
 
 try:
     from .view import to_dot as _to_dot
