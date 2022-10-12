@@ -176,6 +176,8 @@ for name in list(results):
 
 # join set/get entries into properties
 for name in list(results):
+    if name.startswith("Setup"):
+        continue
     if ".set" not in name:
         continue
     i = name.find(".set")
@@ -198,7 +200,8 @@ for name in list(results):
     if getter not in results:
         continue
     results[prop] = results[getter] + results[setter]
-    del results[getter]
+    if prop != getter:
+        del results[getter]
     del results[setter]
 
 # merge trivially duplicated entries
