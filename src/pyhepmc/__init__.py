@@ -17,6 +17,8 @@ Differences between HepMC3 C++ and pyhepmc
   types to native Python types.
 - The ``Print`` class is missing, but :func:`listing` and :func:`content`
   are present as free functions.
+- The ``Setup`` class is missing, but all the static methods are available as
+  free functions.
 - The member functions ``delta_X`` of :class:`FourVector` are free functions
   with two arguments.
 - ``HEPEVT_Wrapper`` and friends are missing, use :meth:`GenEvent.from_hepevt`
@@ -30,8 +32,8 @@ Differences between HepMC3 C++ and pyhepmc
 Missing functionality
 ---------------------
 
-- Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``,
-  ``Setup``. These will be added in the future.
+- Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``.
+  These will be added in the future.
 
 """
 from sys import version_info
