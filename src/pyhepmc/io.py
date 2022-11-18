@@ -147,13 +147,15 @@ class _WrappedWriter:
     ):
         self._writer: _tp.Any = None
         self._init = (iostream, precision, Writer)
+        self._event = None
 
-    @staticmethod
-    def _maybe_convert(event: _tp.Any) -> GenEvent:
+    def _maybe_convert(self, event: _tp.Any) -> GenEvent:
         if isinstance(event, GenEvent):
             return event
         if hasattr(event, "to_hepmc3"):
-            return event.to_hepmc3()
+            # reuse GenEvent to not recreate GenRunInfo repeatedly
+            self._event = event.to_hepmc3(self._event)
+            return self._event
         raise TypeError(
             "event must be an instance of GenEvent or "
             "convertible to it by providing a to_hepmc3() method"

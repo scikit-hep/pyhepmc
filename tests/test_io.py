@@ -218,10 +218,17 @@ def test_open_3(evt):  # noqa
             f.write("foo")
 
     class Foo:
-        def to_hepmc3(self):
-            return evt
+        def __init__(self, evt):
+            self.event = evt
+            self.run_info = evt.run_info
 
-    foo = Foo()
+        def to_hepmc3(self, event=None):
+            if event is None:
+                event = self.event
+            assert event.run_info is self.run_info
+            return event
+
+    foo = Foo(evt)
 
     with hep.open(filename, "w") as f:
         f.write(foo)
