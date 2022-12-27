@@ -151,3 +151,12 @@ def to_dot(
         )
 
     return d
+
+def save_event(evt: pyhepmc.GenEvent, name: str ="event.png"):
+    g = to_dot(evt)
+    if 'png' in name:
+        with open("event.png", "wb") as f:
+            f.write(g._repr_image_png())  # as png
+    elif 'svg' in name:
+        with open("event.svg", "w") as f:
+            f.write(g._repr_image_svg_xml())  # as svg (recommended)
