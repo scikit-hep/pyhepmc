@@ -95,4 +95,4 @@ def test_savefig_3(evt, ext):  # noqa
     expected = REFERENCE_DIR / fname
     actual = RESULT_DIR / fname
     view.savefig(evt, actual)
-    compare_images(expected, actual, 1e-3)
+    assert compare_images(expected, actual, 1e-3) is None
