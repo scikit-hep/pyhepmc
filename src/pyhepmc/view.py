@@ -39,6 +39,9 @@ def _supported_formats() -> AbstractSet[str]:
         "gd",
         "gd2",
         "json0",
+        "x11",
+        "xlib",
+        "gtk",
     }
     formats = set(s[idx:].split()) - unsupported
     formats &= FORMATS  # graphviz python package supports less
