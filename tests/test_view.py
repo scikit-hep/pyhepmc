@@ -4,12 +4,14 @@ import pyhepmc
 from matplotlib.testing.compare import compare_images, comparable_formats
 from pathlib import Path
 import io
-
-CDIR = Path(__file__).parent
-FIGDIR = CDIR / "fig"
-FIGDIR.mkdir(exist_ok=True)
+import numpy as np
 
 view = pytest.importorskip("pyhepmc.view")  # depends on graphviz and particle
+
+CDIR = Path(__file__).parent
+RESULT_DIR = CDIR / "fig"
+REFERENCE_DIR = CDIR / "data"
+RESULT_DIR.mkdir(exist_ok=True)
 
 
 def test_dot(evt):  # noqa
@@ -54,14 +56,20 @@ def test_repr_html(evt):  # noqa
 
 @pytest.mark.parametrize("ext", view.SUPPORTED_FORMATS)
 def test_savefig_1(evt, ext):  # noqa
-    fname = FIGDIR / f"test_savefig_1.{ext}"
+    fname = RESULT_DIR / f"test_savefig_1.{ext}"
     view.savefig(evt, fname)
 
     with io.BytesIO() as f2:
-        view.savefig(evt, f2, format=ext)
+        g = view.to_dot(evt)
+        view.savefig(g, f2, format=ext)
         f2.seek(0)
         with open(fname, "rb") as f1:
-            assert f1.read() == f2.read()
+            # Both buffers should be almost equal.
+            # They may differ in the creation date,
+            # which should be less than 64 bytes
+            a1 = np.frombuffer(f1.read(), np.uint8)
+            a2 = np.frombuffer(f2.read(), np.uint8)
+            assert np.sum(a1 != a2) < 64
 
 
 def test_savefig_2(evt):  # noqa
@@ -72,14 +80,19 @@ def test_savefig_2(evt):  # noqa
         view.savefig(evt, "foo.foo")
 
     with pytest.raises(ValueError):
-        with io.StringIO() as f:
+        with io.BytesIO() as f:
             view.savefig(evt, f)
+
+    with io.BytesIO() as f:
+        g = view.to_dot(evt)
+        with pytest.warns(RuntimeWarning):
+            view.savefig(g, f, format="png", color_hadron="green")
 
 
 @pytest.mark.parametrize("ext", set(comparable_formats()) & set(view.SUPPORTED_FORMATS))
 def test_savefig_3(evt, ext):  # noqa
     fname = f"test_savefig_3.{ext}"
-    expected = CDIR / "data" / fname
-    actual = FIGDIR / fname
+    expected = REFERENCE_DIR / fname
+    actual = RESULT_DIR / fname
     view.savefig(evt, actual)
     compare_images(expected, actual, 1e-3)

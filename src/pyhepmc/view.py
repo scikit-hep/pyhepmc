@@ -195,23 +195,19 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
     if isinstance(fname, (str, os.PathLike)):
         p = PurePath(fname)
         if format is None:
-            if "".join(p.suffixes) == ".svg.gz":
-                format = "svgz"
-            else:
-                format = p.suffix[1:]
+            format = p.suffix[1:]
         if format in SUPPORTED_BINARY_FORMATS:
             with open(p, "wb") as fo:
                 savefig(event, fo, format=format, **kwargs)
-            return
         elif format in SUPPORTED_TEXT_FORMATS:
             with open(p, "wb") as fo:
                 savefig(event, fo, format=format, **kwargs)
-            return
-        raise ValueError(
-            f"Format {format!r} not supported (supported formats: {', '.join(SUPPORTED_FORMATS)})")
+        # unknown format raises exception in nested call
+        with open(os.devnull, "wb") as fo:
+            savefig(event, fo, format=format, **kwargs)
+        return
 
-    # if we arrive here, fname is a file-like object
-    assert hasattr(fname, "write")
+    # if we arrive here, fname is a file-like object or None
 
     if format is None:
         raise ValueError("When using file-like object, keyword 'format' must be set")
@@ -230,6 +226,7 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
                 RuntimeWarning
             )
         g = event
+
     encoding = 'utf-8' if isinstance(fname, TextIO) else None
     s = g.pipe(format=format, encoding=encoding)
 
