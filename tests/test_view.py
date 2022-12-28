@@ -51,7 +51,7 @@ def test_dot_3(evt):  # noqa
     assert d.graph_attr["size"] == "5,6"
 
 
-@pytest.skipif(not DOT_IS_AVAILABLE)
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 def test_repr_html(evt):  # noqa
     d = view.to_dot(evt)
     assert d._repr_image_svg_xml() == evt._repr_html_()
@@ -90,7 +90,7 @@ def test_savefig_2(evt):  # noqa
             view.savefig(evt, f)
 
 
-@pytest.skipif(not DOT_IS_AVAILABLE)
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 def test_savefig_3(evt):  # noqa
     with io.BytesIO() as f:
         g = view.to_dot(evt)
