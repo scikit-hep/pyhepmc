@@ -44,5 +44,5 @@ jobs:
       env:
         DEBUG: 1
     - if: ${{ matrix.os }} == macos-latest
-      run: python -m pip uninstall graphviz
+      run: python -m pip uninstall --yes graphviz
     - run: python -m pytest
