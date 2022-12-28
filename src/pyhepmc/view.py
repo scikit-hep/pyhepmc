@@ -3,10 +3,9 @@ Visualization for GenEvent.
 """
 from __future__ import annotations
 from graphviz import Digraph
-from ._prettify import db as _prettify
-from . import Units as _Units
+from ._prettify import db as prettify
+from . import Units, GenEvent
 import numpy as np
-from . import GenEvent
 import os
 from pathlib import PurePath
 from typing import BinaryIO, TextIO, Union
@@ -69,7 +68,7 @@ def to_dot(
         size_s = f"{size[0]},{size[1]}"
     d.graph_attr["size"] = size_s
 
-    GeV = 1 if evt.momentum_unit == _Units.GEV else 1e3
+    GeV = 1 if evt.momentum_unit == Units.GEV else 1e3
 
     for v in evt.vertices:
         d.node(f"{v.id}", tooltip=f"{v.position} mm\nstatus = {v.status}")
@@ -89,7 +88,7 @@ def to_dot(
 
         style = "solid"
 
-        pname = _prettify.get(p.pid, None)
+        pname = prettify.get(p.pid, None)
         if pname is None:
             if p.pid == 0:
                 pname = "Invalid(0)"
