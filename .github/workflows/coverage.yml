@@ -36,4 +36,4 @@ jobs:
     - run: python -m pip uninstall --yes particle graphviz
     - run: coverage run --append -m pytest
     - run: coveralls --service=github
-        
+      env: GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
