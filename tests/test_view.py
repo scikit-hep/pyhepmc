@@ -62,6 +62,7 @@ def test_savefig_1(evt, ext):  # noqa
     with io.BytesIO() as f2:
         g = view.to_dot(evt)
         view.savefig(g, f2, format=ext)
+        f2.flush()
         f2.seek(0)
         with open(fname, "rb") as f1:
             # Both buffers should be almost equal.
@@ -69,8 +70,9 @@ def test_savefig_1(evt, ext):  # noqa
             # which should be less than 64 bytes
             a1 = np.frombuffer(f1.read(), np.uint8)
             a2 = np.frombuffer(f2.read(), np.uint8)
-            assert len(a1) > 0
-            assert np.sum(a1 != a2) < 64
+            size = min(len(a1), len(a2))
+            assert size > 0
+            assert np.sum(a1[:size] != a2[:size]) < 64
 
 
 def test_savefig_2(evt):  # noqa

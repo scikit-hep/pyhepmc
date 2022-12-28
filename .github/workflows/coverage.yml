@@ -30,11 +30,12 @@ jobs:
       with:
         python-version: 3.11
     - run: python -m pip install --upgrade pip wheel
-    - run: python -m pip install --prefer-binary coveralls pytest
-    - run: python -m pip install --prefer-binary -e .
+    - run: python -m pip install --prefer-binary coveralls
+    - run: python -m pip install --prefer-binary -e .[test]
     - run: coverage run -m pytest
     - uses: ts-graphviz/setup-graphviz@v1
-    - run: python -m pip install --prefer-binary graphviz particle matplotlib
+    - run: coverage run --append -m pytest
+    - run: python -m pip uninstall --yes graphviz particle
     - run: coverage run --append -m pytest
     - run: coveralls --service=github
       env:
