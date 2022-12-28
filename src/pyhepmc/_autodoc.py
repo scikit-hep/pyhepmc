@@ -164,11 +164,11 @@ Access the GenRunInfo object by smart pointer.""",
     "GenEvent.vertices_size": """Vertices size, HepMC2 compatiility.""",
     "GenEvent.weight": """Access event weight accessed by index (or the canonical/first one if there is no argument) It's the user's responsibility to ensure that the given index exists!.
 
-Access event weight accessed by weight name Requires there to be an attached GenRunInfo, otherwise will throw an exception 
+Access event weight accessed by weight name Requires there to be an attached GenRunInfo, otherwise will throw an exception
 
 It's the user's responsibility to ensure that the given name exists!.
 
-Access event weight accessed by weight name Requires there to be an attached GenRunInfo, otherwise will throw an exception 
+Access event weight accessed by weight name Requires there to be an attached GenRunInfo, otherwise will throw an exception
 
 It's the user's responsibility to ensure that the given name exists!.""",
     "GenEvent.weight_names": """Get event weight names, if there are some Requires there to be an attached GenRunInfo with registered weight names, otherwise will throw an exception.""",

@@ -24,7 +24,9 @@ docs/xml
 docs/_build
 docs/index.rst
 docs/generated_reference.rst.in
-docs/examples/event.png
-docs/examples/event.svg
+docs/examples/event.*
 docs/examples/modified_event.dat
 .ipynb_checkpoints
+tests/fig/*
+tests/data/*_pdf.png
+tests/data/*_svg.png

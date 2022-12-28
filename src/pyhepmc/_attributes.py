@@ -1,4 +1,4 @@
-from ._core import AttributesView, RunInfoAttributesView
+from pyhepmc._core import AttributesView, RunInfoAttributesView
 import typing as _tp
 
 
