@@ -10,13 +10,26 @@ import os
 from pathlib import PurePath
 from typing import BinaryIO, TextIO, Union
 
-# eps cannot handle utf-8 characters
-SUPPORTED_BINARY_FORMATS = ("png", "gif", "svgz", "pdf")
-SUPPORTED_TEXT_FORMATS = ("dot", "fig", "svg")
-SUPPORTED_FORMATS = SUPPORTED_BINARY_FORMATS + SUPPORTED_TEXT_FORMATS
-
 
 __all__ = ("to_dot", "savefig", "SUPPORTED_FORMATS")
+
+
+def _supported_formats():
+    import subprocess as subp
+    from graphviz.parameters.formats import FORMATS
+
+    r = subp.run(["dot", "-T12345679"], stderr=subp.PIPE)
+    s = r.stderr.decode("ascii").strip()
+    idx = s.index("Use one of: ")
+    assert idx > 0
+    # eps cannot handle utf-8 characters
+    unsupported = {"eps", "cgimage", "pov"}
+    formats = set(s[idx:].split()) - unsupported
+    formats &= FORMATS  # graphviz python package supports less
+    return formats
+
+
+SUPPORTED_FORMATS = _supported_formats()
 
 
 def to_dot(
@@ -193,11 +206,8 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
     if isinstance(fname, (str, os.PathLike)):
         p = PurePath(fname)
         if format is None:
-            format = p.suffix[1:]
-        if format in SUPPORTED_BINARY_FORMATS:
-            with open(p, "wb") as fo:
-                savefig(event, fo, format=format, **kwargs)
-        elif format in SUPPORTED_TEXT_FORMATS:
+            format = "".join(p.suffixes)[1:]
+        if format in SUPPORTED_FORMATS:
             with open(p, "wb") as fo:
                 savefig(event, fo, format=format, **kwargs)
         # unknown format raises exception in nested call
