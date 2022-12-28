@@ -27,4 +27,4 @@ docs/generated_reference.rst.in
 docs/examples/event.*
 docs/examples/modified_event.dat
 .ipynb_checkpoints
-test_savefig_?.*
+tests/fig/*

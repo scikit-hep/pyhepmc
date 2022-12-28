@@ -11,8 +11,13 @@ import os
 from pathlib import PurePath
 from typing import BinaryIO, TextIO, Union
 
+# eps cannot handle utf-8 characters
+SUPPORTED_BINARY_FORMATS = ("png", "gif", "svgz", "pdf")
+SUPPORTED_TEXT_FORMATS = ("fig", "svg")
+SUPPORTED_FORMATS = SUPPORTED_BINARY_FORMATS + SUPPORTED_TEXT_FORMATS
 
-__all__ = ("to_dot", "savefig")
+
+__all__ = ("to_dot", "savefig", "SUPPORTED_FORMATS")
 
 
 def to_dot(
@@ -168,18 +173,13 @@ def to_dot(
     return d
 
 
-_savefig_supported_binary_formats = ("png", "gif", "svgz", "pdf", "eps")
-_savefig_supported_text_formats = ("fig", "svg")
-_savefig_supported_formats = _savefig_supported_binary_formats + _savefig_supported_text_formats
-
-
 def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO,BinaryIO], *, format: str = None, **kwargs):
-    f"""
+    """
     Save event as an image.
 
     The SVG format is recommended, because it contains tooltips with extra information.
     
-    Supported formats: {', '.join(_savefig_supported_formats)}
+    Supported formats: {SUPPORTED_FORMATS}.
 
     Parameters
     ----------
@@ -191,8 +191,6 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
         Output format.
     **kwargs :
         Other arguments are forwarded to pyhepmc.view.to_dot.
-
-    
     """
     if isinstance(fname, (str, os.PathLike)):
         p = PurePath(fname)
@@ -201,16 +199,16 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
                 format = "svgz"
             else:
                 format = p.suffix[1:]
-        if format in _savefig_supported_binary_formats:
+        if format in SUPPORTED_BINARY_FORMATS:
             with open(p, "wb") as fo:
                 savefig(event, fo, format=format, **kwargs)
             return
-        elif format in _savefig_supported_text_formats:
+        elif format in SUPPORTED_TEXT_FORMATS:
             with open(p, "wb") as fo:
                 savefig(event, fo, format=format, **kwargs)
             return
         raise ValueError(
-            f"Format {format!r} not supported (supported formats: {', '.join(_savefig_supported_formats)})")
+            f"Format {format!r} not supported (supported formats: {', '.join(SUPPORTED_FORMATS)})")
 
     # if we arrive here, fname is a file-like object
     assert hasattr(fname, "write")
@@ -218,9 +216,9 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
     if format is None:
         raise ValueError("When using file-like object, keyword 'format' must be set")
 
-    if format not in _savefig_supported_formats:
+    if format not in SUPPORTED_FORMATS:
         raise ValueError(
-            f"Format {format!r} not supported (supported formats: {', '.join(_savefig_supported_formats)})")
+            f"Format {format!r} not supported (supported formats: {', '.join(SUPPORTED_FORMATS)})")
 
     if isinstance(event, GenEvent):
         g = to_dot(event, **kwargs)
@@ -236,3 +234,5 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
     s = g.pipe(format=format, encoding=encoding)
 
     fname.write(s)
+
+savefig.__doc__ = savefig.__doc__.format(SUPPORTED_FORMATS=", ".join(SUPPORTED_FORMATS))
