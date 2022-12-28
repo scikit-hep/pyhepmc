@@ -7,6 +7,8 @@ from ._prettify import db as _prettify
 from . import Units as _Units
 import numpy as np
 from . import GenEvent
+import os
+import pathlib
 
 
 def to_dot(
@@ -152,11 +154,14 @@ def to_dot(
 
     return d
 
-def save_event(evt: pyhepmc.GenEvent, name: str ="event.png"):
+
+def savefig(evt: pyhepmc.GenEvent, filename: os.PathLike):
     g = to_dot(evt)
-    if 'png' in name:
-        with open("event.png", "wb") as f:
+    if pathlib.PurePosixPath(filename).suffix == ".png":
+        with open(filename, "wb") as f:
             f.write(g._repr_image_png())  # as png
-    elif 'svg' in name:
-        with open("event.svg", "w") as f:
+    elif pathlib.PurePosixPath(filename).suffix == ".svg":
+        with open(filename, "w") as f:
             f.write(g._repr_image_svg_xml())  # as svg (recommended)
+    else:
+        raise ValueError("Format not supported (supported formats: svg, png)")
