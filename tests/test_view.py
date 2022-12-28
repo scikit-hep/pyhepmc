@@ -7,14 +7,11 @@ import os
 import numpy as np
 
 view = pytest.importorskip("pyhepmc.view")  # depends on graphviz and particle
-mpl = pytest.importorskip("matplotlib.testing.compare")
 
 CDIR = Path(__file__).parent
 RESULT_DIR = CDIR / "fig"
 REFERENCE_DIR = CDIR / "data"
 RESULT_DIR.mkdir(exist_ok=True)
-
-TESTABLE_FORMATS = set(view.SUPPORTED_FORMATS) & set(mpl.comparable_formats())
 
 
 def test_dot(evt):  # noqa
@@ -94,8 +91,9 @@ def test_savefig_2(evt):  # noqa
 
 
 @pytest.mark.skipif("CI" in os.environ, reason="does not work on CI")
-@pytest.mark.parametrize("ext", TESTABLE_FORMATS)
+@pytest.mark.parametrize("ext", ("pdf", "png", "svg"))
 def test_savefig_3(evt, ext):  # noqa
+    mpl = pytest.importorskip("matplotlib.testing.compare")
     fname = f"test_savefig_3.{ext}"
     expected = REFERENCE_DIR / fname
     actual = RESULT_DIR / fname
