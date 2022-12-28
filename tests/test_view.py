@@ -43,3 +43,8 @@ def test_dot_3(evt):  # noqa
 def test_repr_html(evt):  # noqa
     d = view.to_dot(evt)
     assert d._repr_image_svg_xml() == evt._repr_html_()
+
+
+@pytest.mark.parametrize("ext", view._savefig_supported_formats + ("svg.gz",))
+def test_savefig_1(ext, evt):  # noqa
+    view.savefig(evt, f"test_savefig_1.{ext}")

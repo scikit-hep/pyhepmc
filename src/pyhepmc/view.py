@@ -20,8 +20,10 @@ def to_dot(
     size: tuple[int, int] = None,
     color_hadron: str = "black",
     color_lepton_or_boson: str = "goldenrod",
+    color_quark_or_gluon: str = "darkred",
     color_interal: str = "dodgerblue",
     color_invalid: str = "gainsboro",
+    **kwargs,
 ) -> Digraph:
     """
     Convert GenEvent to Digraph.
@@ -39,7 +41,9 @@ def to_dot(
     color_hadron : str, optional
         Color (HTML color specification) for hadrons.
     color_lepton_or_boson: str, optional
-        Color (HTML color specification) for leptons or bosons.
+        Color (HTML color specification) for leptons or bosons (gamma, W+/-, Z, H).
+    color_quark_or_gluon: str, optional
+        Color (HTML color specification) for quarks, diquarks, and gluons.
     color_internal: str, optional
         Color (HTML color specification) for generator-internal particles (e.g. Pomerons).
     color_invalid: str, optional
@@ -79,7 +83,6 @@ def to_dot(
             en *= 1e3
             unit = "MeV"
 
-        color = color_hadron
         style = "solid"
 
         pname = _prettify.get(p.pid, None)
@@ -99,15 +102,24 @@ def to_dot(
         tooltip += f"\nstatus = {p.status}"
 
         try:
-            from particle import Particle, ParticleNotFound, InvalidParticle
+            from particle import PDGID, Particle, ParticleNotFound, InvalidParticle
+
+            pdgid = PDGID(p.pid)
+
+            if pdgid.is_hadron or pdgid.is_nucleus:
+                if pdgid.is_nucleus:
+                    tooltip += f"\nA,Z = {pdgid.A},{pdgid.Z}"
+                color = color_hadron
+            elif pdgid == 21 or pdgid.is_quark or pdgid.is_diquark:
+                color = color_quark_or_gluon
+            elif pdgid.is_lepton or pdgid.is_gauge_boson_or_higgs:
+                color = color_lepton_or_boson
+            else:
+                color = color_interal
 
             try:
                 pdb = Particle.from_pdgid(p.pid)
-                quarks = pdb.quarks
-                if quarks:
-                    tooltip += f"\nquarks = {quarks}"
-                else:  # boson or lepton
-                    color = color_lepton_or_boson
+                tooltip += f"\nquarks = {pdb.quarks}"
                 tooltip += f"\nQ = {pdb.charge:.3g}"
                 if pdb.ctau and np.isfinite(pdb.ctau):
                     tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
@@ -116,12 +128,9 @@ def to_dot(
             except (ParticleNotFound, InvalidParticle):
                 pass
         except ModuleNotFoundError:  # pragma: no cover
-            pass  # pragma: no cover
+            color = "black"  # pragma: no cover
 
         label = f"{pname} {en:.2g} {unit}"
-
-        if 1000 <= p.pid < 10000:  # diquark
-            color = color_hadron
 
         # do not connect initial particles to root vertex
         if p.production_vertex and p.production_vertex.id != 0:
@@ -159,36 +168,71 @@ def to_dot(
     return d
 
 
-def savefig(evt: GenEvent, fname: Union[os.PathLike,TextIO,BinaryIO], *, format=None, **kwargs):
-    supported_binary_formats = ("png", "gif", "svgz", "pdf", "eps")
-    supported_text_formats = ("fig", "svg")
-    supported_formats = supported_binary_formats + supported_text_formats
+_savefig_supported_binary_formats = ("png", "gif", "svgz", "pdf", "eps")
+_savefig_supported_text_formats = ("fig", "svg")
+_savefig_supported_formats = _savefig_supported_binary_formats + _savefig_supported_text_formats
 
-    if isinstance(fname, os.PathLike):
+
+def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO,BinaryIO], *, format: str = None, **kwargs):
+    f"""
+    Save event as an image.
+
+    The SVG format is recommended, because it contains tooltips with extra information.
+    
+    Supported formats: {', '.join(_savefig_supported_formats)}
+
+    Parameters
+    ----------
+    event : GenEvent or Digraph
+        The event to be saved.
+    fname : path-like or file-like
+        Path or file-like handle to which the image is written.
+    format : str, optional
+        Output format.
+    **kwargs :
+        Other arguments are forwarded to pyhepmc.view.to_dot.
+
+    
+    """
+    if isinstance(fname, (str, os.PathLike)):
         p = PurePath(fname)
         if format is None:
-            if p.suffixes == (".svg", ".gz"):
+            if "".join(p.suffixes) == ".svg.gz":
                 format = "svgz"
             else:
                 format = p.suffix[1:]
-        if format in supported_binary_formats:
-            fo = p.open("wb")
-        elif format in supported_text_formats:
-            fo = p.open("w")
-        else:
-            fo = None
-    else:
-        # fname is a file-like object
-        fo = fname
-        if format is None:
-            raise ValueError("When using file-like object, keyword 'format' must be set")
-
-    assert format is not None
-    if format not in supported_formats:
+        if format in _savefig_supported_binary_formats:
+            with open(p, "wb") as fo:
+                savefig(event, fo, format=format, **kwargs)
+            return
+        elif format in _savefig_supported_text_formats:
+            with open(p, "wb") as fo:
+                savefig(event, fo, format=format, **kwargs)
+            return
         raise ValueError(
-            f"Format {format!r} not supported (supported formats: {', '.join(supported_formats)})")
+            f"Format {format!r} not supported (supported formats: {', '.join(_savefig_supported_formats)})")
 
-    encoding = 'utf-8' if format in supported_text_formats else None
-    s = to_dot(evt, **kwargs).pipe(format=format, encoding=encoding)
-    with fo:
-        fo.write(s)
+    # if we arrive here, fname is a file-like object
+    assert hasattr(fname, "write")
+
+    if format is None:
+        raise ValueError("When using file-like object, keyword 'format' must be set")
+
+    if format not in _savefig_supported_formats:
+        raise ValueError(
+            f"Format {format!r} not supported (supported formats: {', '.join(_savefig_supported_formats)})")
+
+    if isinstance(event, GenEvent):
+        g = to_dot(event, **kwargs)
+    else:
+        if kwargs:
+            import warnings
+
+            warnings.warn(f"Extra kwargs are ignored when passing DiGraph",
+                RuntimeWarning
+            )
+        g = event
+    encoding = 'utf-8' if isinstance(fname, TextIO) else None
+    s = g.pipe(format=format, encoding=encoding)
+
+    fname.write(s)
