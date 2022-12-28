@@ -13,6 +13,8 @@ RESULT_DIR = CDIR / "fig"
 REFERENCE_DIR = CDIR / "data"
 RESULT_DIR.mkdir(exist_ok=True)
 
+DOT_IS_AVAILABLE = bool(view.SUPPORTED_FORMATS)
+
 
 def test_dot(evt):  # noqa
     d = view.to_dot(evt)
@@ -49,6 +51,7 @@ def test_dot_3(evt):  # noqa
     assert d.graph_attr["size"] == "5,6"
 
 
+@pytest.skipif(not DOT_IS_AVAILABLE)
 def test_repr_html(evt):  # noqa
     d = view.to_dot(evt)
     assert d._repr_image_svg_xml() == evt._repr_html_()
@@ -86,6 +89,9 @@ def test_savefig_2(evt):  # noqa
         with io.BytesIO() as f:
             view.savefig(evt, f)
 
+
+@pytest.skipif(not DOT_IS_AVAILABLE)
+def test_savefig_3(evt):  # noqa
     with io.BytesIO() as f:
         g = view.to_dot(evt)
         with pytest.warns(RuntimeWarning):
