@@ -30,6 +30,10 @@ filterwarnings = [
 
 [tool.coverage.run]
 relative_files = true
+source = ["pyhepmc"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover"]
 
 [tool.cibuildwheel]
 # update skip when numpy wheels become available

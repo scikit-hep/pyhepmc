@@ -1,12 +1,33 @@
 cmake_minimum_required(VERSION 3.13...3.17)
 
-project(pyhepmc LANGUAGES CXX)
-
 if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
   message(
-    WARNING
+    STATUS
       "You should call this through setup.py so that all variables are set; python setup.py build_ext --inplace"
   )
+endif()
+
+find_program(ccache_executable ccache)
+if (ccache_executable)
+  message(STATUS "Using ccache: ${ccache_executable}")
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${ccache_executable})
+endif()
+
+find_program(mold_executable mold)
+find_program(gxx_executable NAMES
+  g++-20 g++-19 g++-18 g++-17 g++-16 g++-15 g++-14 g++-13
+  g++-12 g++-11 g++-10 g++-9 g++-8 g++-7 g++-6 g++-5)
+if (mold_executable AND gxx_executable)
+  message(STATUS "Using mold: ${mold_executable}")
+  add_compile_options(-fuse-ld=mold)
+  set(CMAKE_CXX_COMPILER ${gxx_executable})
+endif()
+
+project(pyhepmc LANGUAGES CXX)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+  # HepMC3 uses reinterpret_cast instead of const_cast
+  add_compile_options(-Wno-strict-aliasing)
 endif()
 
 set(CMAKE_CXX_STANDARD
