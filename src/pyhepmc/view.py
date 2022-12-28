@@ -28,7 +28,6 @@ def to_dot(
     color_quark_or_gluon: str = "darkred",
     color_interal: str = "dodgerblue",
     color_invalid: str = "gainsboro",
-    **kwargs,
 ) -> Digraph:
     """
     Convert GenEvent to Digraph.
@@ -207,7 +206,7 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
             savefig(event, fo, format=format, **kwargs)
         return
 
-    # if we arrive here, fname is a file-like object or None
+    # if we arrive here, fname is a file-like object
 
     if format is None:
         raise ValueError("When using file-like object, keyword 'format' must be set")
