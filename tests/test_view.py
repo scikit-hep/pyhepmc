@@ -57,6 +57,7 @@ def test_repr_html(evt):  # noqa
     assert d._repr_image_svg_xml() == evt._repr_html_()
 
 
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 @pytest.mark.parametrize("ext", view.SUPPORTED_FORMATS)
 def test_savefig_1(evt, ext):  # noqa
     fname = RESULT_DIR / f"test_savefig_1.{ext}"
@@ -91,6 +92,7 @@ def test_savefig_2(evt):  # noqa
 
 
 @pytest.mark.skipif("CI" in os.environ, reason="does not work on CI")
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 @pytest.mark.parametrize("ext", ("pdf", "png", "svg"))
 def test_savefig_3(evt, ext):  # noqa
     mpl = pytest.importorskip("matplotlib.testing.compare")
