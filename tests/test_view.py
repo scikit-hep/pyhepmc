@@ -90,14 +90,6 @@ def test_savefig_2(evt):  # noqa
             view.savefig(evt, f)
 
 
-@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
-def test_savefig_3(evt):  # noqa
-    with io.BytesIO() as f:
-        g = view.to_dot(evt)
-        with pytest.warns(RuntimeWarning):
-            view.savefig(g, f, format="png", color_hadron="green")
-
-
 @pytest.mark.skipif("CI" in os.environ, reason="does not work on CI")
 @pytest.mark.parametrize("ext", ("pdf", "png", "svg"))
 def test_savefig_3(evt, ext):  # noqa
@@ -107,3 +99,11 @@ def test_savefig_3(evt, ext):  # noqa
     actual = RESULT_DIR / fname
     view.savefig(evt, actual)
     assert mpl.compare_images(expected, actual, 1e-3) is None
+
+
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
+def test_savefig_4(evt):  # noqa
+    with io.BytesIO() as f:
+        g = view.to_dot(evt)
+        with pytest.warns(RuntimeWarning):
+            view.savefig(g, f, format="png", color_hadron="green")
