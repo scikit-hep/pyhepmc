@@ -1,20 +1,20 @@
 import pytest
 from test_basic import evt  # noqa
 import pyhepmc
-from matplotlib.testing.compare import compare_images, comparable_formats
 from pathlib import Path
 import io
 import os
 import numpy as np
 
 view = pytest.importorskip("pyhepmc.view")  # depends on graphviz and particle
+mpl = pytest.importorskip("matplotlib.testing.compare")
 
 CDIR = Path(__file__).parent
 RESULT_DIR = CDIR / "fig"
 REFERENCE_DIR = CDIR / "data"
 RESULT_DIR.mkdir(exist_ok=True)
 
-TESTABLE_FORMATS = set(view.SUPPORTED_FORMATS) & set(comparable_formats())
+TESTABLE_FORMATS = set(view.SUPPORTED_FORMATS) & set(mpl.comparable_formats())
 
 
 def test_dot(evt):  # noqa
@@ -100,4 +100,4 @@ def test_savefig_3(evt, ext):  # noqa
     expected = REFERENCE_DIR / fname
     actual = RESULT_DIR / fname
     view.savefig(evt, actual)
-    assert compare_images(expected, actual, 1e-3) is None
+    assert mpl.compare_images(expected, actual, 1e-3) is None
