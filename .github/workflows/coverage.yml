@@ -27,11 +27,11 @@ jobs:
         key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.python-version }}
     - uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: 3.11
     - uses: ts-graphviz/setup-graphviz@v1
     - run: python -m pip install --upgrade pip wheel
-    - run: python -m pip install --prefer-binary coverage
-    - run: python -m pip install --prefer-binary -e .[test] graphviz
+    - run: python -m pip install --prefer-binary coverage[toml] graphviz
+    - run: python -m pip install --prefer-binary -e .[test]
     - run: coverage run -m pytest
     - run: python -m pip uninstall --yes particle graphviz
     - run: coverage run --append -m pytest

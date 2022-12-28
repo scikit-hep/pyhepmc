@@ -1,7 +1,0 @@
-[run]
-source = src/pyhepmc
-relative_files = True
-
-[report]
-exclude_lines =
-    pragma: no cover
