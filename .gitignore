@@ -28,3 +28,5 @@ docs/examples/event.*
 docs/examples/modified_event.dat
 .ipynb_checkpoints
 tests/fig/*
+tests/data/*_pdf.png
+tests/data/*_svg.png
