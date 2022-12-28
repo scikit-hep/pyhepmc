@@ -18,7 +18,10 @@ def _supported_formats() -> AbstractSet[str]:
     import subprocess as subp
     from graphviz.parameters.formats import FORMATS
 
-    r = subp.run(["dot", "-T12345679"], stderr=subp.PIPE)
+    try:
+        r = subp.run(["dot", "-T12345679"], stderr=subp.PIPE)
+    except FileNotFoundError:
+        return set()
     s = r.stderr.decode("ascii").strip()
     idx = s.index("Use one of: ")
     assert idx > 0
