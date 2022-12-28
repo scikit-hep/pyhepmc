@@ -43,4 +43,5 @@ jobs:
     - run: python -m pip install --prefer-binary -v -e .[test]
       env:
         DEBUG: 1
+    - uses: ts-graphviz/setup-graphviz@v1
     - run: python -m pytest

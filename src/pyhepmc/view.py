@@ -12,7 +12,7 @@ from typing import BinaryIO, TextIO, Union
 
 # eps cannot handle utf-8 characters
 SUPPORTED_BINARY_FORMATS = ("png", "gif", "svgz", "pdf")
-SUPPORTED_TEXT_FORMATS = ("fig", "svg")
+SUPPORTED_TEXT_FORMATS = ("dot", "fig", "svg")
 SUPPORTED_FORMATS = SUPPORTED_BINARY_FORMATS + SUPPORTED_TEXT_FORMATS
 
 
