@@ -30,7 +30,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 relative_files = true
-source = ["src/pyhepmc/"]
+source = "pyhepmc"
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover"]
