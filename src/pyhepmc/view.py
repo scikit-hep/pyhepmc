@@ -8,7 +8,11 @@ from . import Units as _Units
 import numpy as np
 from . import GenEvent
 import os
-import pathlib
+from pathlib import PurePath
+from typing import BinaryIO, TextIO, Union
+
+
+__all__ = ("to_dot", "savefig")
 
 
 def to_dot(
@@ -155,13 +159,36 @@ def to_dot(
     return d
 
 
-def savefig(evt: pyhepmc.GenEvent, filename: os.PathLike):
-    g = to_dot(evt)
-    if pathlib.PurePosixPath(filename).suffix == ".png":
-        with open(filename, "wb") as f:
-            f.write(g._repr_image_png())  # as png
-    elif pathlib.PurePosixPath(filename).suffix == ".svg":
-        with open(filename, "w") as f:
-            f.write(g._repr_image_svg_xml())  # as svg (recommended)
+def savefig(evt: GenEvent, fname: Union[os.PathLike,TextIO,BinaryIO], *, format=None, **kwargs):
+    supported_binary_formats = ("png", "gif", "svgz", "pdf", "eps")
+    supported_text_formats = ("fig", "svg")
+    supported_formats = supported_binary_formats + supported_text_formats
+
+    if isinstance(fname, os.PathLike):
+        p = PurePath(fname)
+        if format is None:
+            if p.suffixes == (".svg", ".gz"):
+                format = "svgz"
+            else:
+                format = p.suffix[1:]
+        if format in supported_binary_formats:
+            fo = p.open("wb")
+        elif format in supported_text_formats:
+            fo = p.open("w")
+        else:
+            fo = None
     else:
-        raise ValueError("Format not supported (supported formats: svg, png)")
+        # fname is a file-like object
+        fo = fname
+        if format is None:
+            raise ValueError("When using file-like object, keyword 'format' must be set")
+
+    assert format is not None
+    if format not in supported_formats:
+        raise ValueError(
+            f"Format {format!r} not supported (supported formats: {', '.join(supported_formats)})")
+
+    encoding = 'utf-8' if format in supported_text_formats else None
+    s = to_dot(evt, **kwargs).pipe(format=format, encoding=encoding)
+    with fo:
+        fo.write(s)
