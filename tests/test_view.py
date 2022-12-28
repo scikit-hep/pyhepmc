@@ -4,6 +4,7 @@ import pyhepmc
 from matplotlib.testing.compare import compare_images, comparable_formats
 from pathlib import Path
 import io
+import os
 import numpy as np
 
 view = pytest.importorskip("pyhepmc.view")  # depends on graphviz and particle
@@ -12,6 +13,8 @@ CDIR = Path(__file__).parent
 RESULT_DIR = CDIR / "fig"
 REFERENCE_DIR = CDIR / "data"
 RESULT_DIR.mkdir(exist_ok=True)
+
+TESTABLE_FORMATS = set(view.SUPPORTED_FORMATS) & set(comparable_formats())
 
 
 def test_dot(evt):  # noqa
@@ -69,6 +72,7 @@ def test_savefig_1(evt, ext):  # noqa
             # which should be less than 64 bytes
             a1 = np.frombuffer(f1.read(), np.uint8)
             a2 = np.frombuffer(f2.read(), np.uint8)
+            assert len(a1) > 0
             assert np.sum(a1 != a2) < 64
 
 
@@ -89,7 +93,8 @@ def test_savefig_2(evt):  # noqa
             view.savefig(g, f, format="png", color_hadron="green")
 
 
-@pytest.mark.parametrize("ext", set(comparable_formats()) & set(view.SUPPORTED_FORMATS))
+@pytest.mark.skipif("CI" in os.environ, reason="does not work on CI")
+@pytest.mark.parametrize("ext", TESTABLE_FORMATS)
 def test_savefig_3(evt, ext):  # noqa
     fname = f"test_savefig_3.{ext}"
     expected = REFERENCE_DIR / fname

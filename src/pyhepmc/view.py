@@ -8,13 +8,13 @@ from . import Units, GenEvent
 import numpy as np
 import os
 from pathlib import PurePath
-from typing import BinaryIO, TextIO, Union
+from typing import BinaryIO, TextIO, Union, AbstractSet, Any, Optional
 
 
 __all__ = ("to_dot", "savefig", "SUPPORTED_FORMATS")
 
 
-def _supported_formats():
+def _supported_formats() -> AbstractSet[str]:
     import subprocess as subp
     from graphviz.parameters.formats import FORMATS
 
@@ -22,8 +22,24 @@ def _supported_formats():
     s = r.stderr.decode("ascii").strip()
     idx = s.index("Use one of: ")
     assert idx > 0
-    # eps cannot handle utf-8 characters
-    unsupported = {"eps", "cgimage", "pov"}
+    # Some formats (eps, pov, ...) cannot handle utf-8 characters
+    # GD Warning: GD image support has been disabled
+    unsupported = {
+        "eps",
+        "cgimage",
+        "pov",
+        "ico",
+        "sgi",
+        "ismap",
+        "imap",
+        "imap_np",
+        "pct",
+        "pict",
+        "ismap",
+        "gd",
+        "gd2",
+        "json0",
+    }
     formats = set(s[idx:].split()) - unsupported
     formats &= FORMATS  # graphviz python package supports less
     return formats
@@ -184,12 +200,18 @@ def to_dot(
     return d
 
 
-def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO,BinaryIO], *, format: str = None, **kwargs):
+def savefig(
+    event: Union[GenEvent, Digraph],
+    fname: Union[str, TextIO, BinaryIO],
+    *,
+    format: Optional[str] = None,
+    **kwargs: Any,
+) -> None:
     """
     Save event as an image.
 
     The SVG format is recommended, because it contains tooltips with extra information.
-    
+
     Supported formats: {SUPPORTED_FORMATS}.
 
     Parameters
@@ -222,7 +244,9 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
 
     if format not in SUPPORTED_FORMATS:
         raise ValueError(
-            f"Format {format!r} not supported (supported formats: {', '.join(SUPPORTED_FORMATS)})")
+            f"Format {format!r} not supported (supported formats: "
+            f"{', '.join(SUPPORTED_FORMATS)})"
+        )
 
     if isinstance(event, GenEvent):
         g = to_dot(event, **kwargs)
@@ -230,14 +254,17 @@ def savefig(event: Union[GenEvent, Digraph], fname: Union[str,os.PathLike,TextIO
         if kwargs:
             import warnings
 
-            warnings.warn(f"Extra kwargs are ignored when passing DiGraph",
-                RuntimeWarning
+            warnings.warn(
+                "Extra kwargs are ignored when passing DiGraph", RuntimeWarning
             )
         g = event
 
-    encoding = 'utf-8' if isinstance(fname, TextIO) else None
+    encoding = "utf-8" if isinstance(fname, TextIO) else None
     s = g.pipe(format=format, encoding=encoding)
 
     fname.write(s)
 
-savefig.__doc__ = savefig.__doc__.format(SUPPORTED_FORMATS=", ".join(SUPPORTED_FORMATS))
+
+savefig.__doc__ = savefig.__doc__.format(  # type:ignore
+    SUPPORTED_FORMATS=", ".join(SUPPORTED_FORMATS)
+)

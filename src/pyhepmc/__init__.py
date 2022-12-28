@@ -35,7 +35,7 @@ Missing functionality
 
 """
 from sys import version_info
-from ._core import (  # noqa: F401
+from pyhepmc._core import (
     Units,
     FourVector,
     GenEvent,
@@ -65,10 +65,11 @@ from ._core import (  # noqa: F401
     delta_r_rap,
     delta_rap,
 )
-from .io import open as open  # noqa: F401
-from ._version import __version__ as __version__  # noqa: F401
-import typing as _tp
-from . import _attributes  # noqa
+from pyhepmc.io import open as open  # noqa: F401
+from pyhepmc._version import __version__ as __version__  # noqa: F401
+import pyhepmc._attributes  # noqa, keep this, it has side effects
+from typing import Any
+from types import SimpleNamespace
 
 __all__ = (
     "Units",
@@ -98,32 +99,31 @@ __all__ = (
 )
 
 
-class _Setup:
-    print_errors = property(
+Setup = SimpleNamespace(
+    print_errors=property(
         lambda s: _Setup_print_errors(),
-        lambda s, v: _Setup_set_print_errors(v),
+        lambda s, v: _Setup_set_print_errors(v),  # type:ignore
+        None,
         "Whether to print errors or not.",
-    )
-
-    print_warnings = property(
+    ),
+    print_warnings=property(
         lambda s: _Setup_print_warnings(),
-        lambda s, v: _Setup_set_print_warnings(v),
+        lambda s, v: _Setup_set_print_warnings(v),  # type:ignore
+        None,
         "Whether to print warnings or not.",
-    )
-
-    debug_level = property(
+    ),
+    debug_level=property(
         lambda s: _Setup_debug_level(),
-        lambda s, v: _Setup_set_debug_level(v),
+        lambda s, v: _Setup_set_debug_level(v),  # type:ignore
+        None,
         "Access debug level.",
-    )
-
-
-Setup = _Setup()
+    ),
+)
 
 try:
     from .view import to_dot as _to_dot
 
-    def _genevent_repr_html(self: GenEvent) -> _tp.Any:
+    def _genevent_repr_html(self: GenEvent) -> Any:
         g = _to_dot(self)
         return g._repr_image_svg_xml()
 
@@ -145,7 +145,7 @@ else:
         return pytype.__args__  # pragma: no cover
 
 
-def __getattr__(name: str) -> _tp.Any:
+def __getattr__(name: str) -> Any:
     from . import io
     import warnings
     from numpy import VisibleDeprecationWarning

@@ -51,6 +51,7 @@ repos:
   rev: 4.0.1
   hooks:
   - id: flake8
+    exclude: ^(docs/.*|tests/.*)$
 
 # C++ formatting
 - repo: https://github.com/pre-commit/mirrors-clang-format
@@ -72,6 +73,6 @@ repos:
   rev: 'v0.971'
   hooks:
   - id: mypy
-    additional_dependencies: [numpy]
+    # additional_dependencies: [numpy]
     args: [src]
     pass_filenames: false
