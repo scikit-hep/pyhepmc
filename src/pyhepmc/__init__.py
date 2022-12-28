@@ -69,7 +69,6 @@ from pyhepmc.io import open as open  # noqa: F401
 from pyhepmc._version import __version__ as __version__  # noqa: F401
 import pyhepmc._attributes  # noqa, keep this, it has side effects
 from typing import Any
-from types import SimpleNamespace
 
 __all__ = (
     "Units",
@@ -99,32 +98,51 @@ __all__ = (
 )
 
 
-Setup = SimpleNamespace(
-    print_errors=property(
-        lambda s: _Setup_print_errors(),
-        lambda s, v: _Setup_set_print_errors(v),  # type:ignore
-        None,
-        "Whether to print errors or not.",
-    ),
-    print_warnings=property(
-        lambda s: _Setup_print_warnings(),
-        lambda s, v: _Setup_set_print_warnings(v),  # type:ignore
-        None,
-        "Whether to print warnings or not.",
-    ),
-    debug_level=property(
-        lambda s: _Setup_debug_level(),
-        lambda s, v: _Setup_set_debug_level(v),  # type:ignore
-        None,
-        "Access debug level.",
-    ),
-)
+class _SetupMeta(type):
+    @property
+    def print_errors(cls) -> bool:
+        "Whether to print errors or not."
+        return _Setup_print_errors()  # type:ignore
+
+    @property
+    def print_warnings(cls) -> bool:
+        "Whether to print warnings or not."
+        return _Setup_print_warnings()  # type:ignore
+
+    @property
+    def debug_level(cls) -> int:
+        "Access debug level."
+        return _Setup_debug_level()  # type:ignore
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        attr = {
+            "print_errors": _Setup_set_print_errors,
+            "print_warnings": _Setup_set_print_warnings,
+            "debug_level": _Setup_set_debug_level,
+        }
+        fn = attr.get(name, None)
+        if fn is None:
+            raise AttributeError
+        fn(value)
+
+
+class Setup(metaclass=_SetupMeta):
+    """
+    Imitates the Setup namespace.
+
+    You can directly read and write to the attributes of this class
+    without creating an instance. They manipulate the corresponding
+    global values in the HepMC3 C++ library.
+    """
+
+    __slots__ = ("print_errors", "print_warnings", "debug_level")
+
 
 try:
-    from .view import to_dot as _to_dot
+    from pyhepmc.view import to_dot
 
     def _genevent_repr_html(self: GenEvent) -> Any:
-        g = _to_dot(self)
+        g = to_dot(self)
         return g._repr_image_svg_xml()
 
     GenEvent._repr_html_ = _genevent_repr_html
@@ -133,15 +151,15 @@ except ModuleNotFoundError:  # pragma: no cover
 
 
 if version_info >= (3, 8):
-    from typing import get_origin as _get_origin, get_args as _get_args
+    from typing import get_origin, get_args
 else:
 
-    def _get_origin(pytype):  # type: ignore  # pragma: no cover
+    def get_origin(pytype):  # type: ignore  # pragma: no cover
         if hasattr(pytype, "__origin__"):  # pragma: no cover
             return pytype.__origin__  # pragma: no cover
         return None  # pragma: no cover
 
-    def _get_args(pytype):  # type: ignore # pragma: no cover
+    def get_args(pytype):  # type: ignore # pragma: no cover
         return pytype.__args__  # pragma: no cover
 
 
