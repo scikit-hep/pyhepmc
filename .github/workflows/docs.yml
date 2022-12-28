@@ -14,11 +14,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
         fetch-depth: 0  # needed for setuptools_scm
-    - uses: actions/setup-python@v2
+    # must come after checkout
+    - uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.python-version }}
+    - uses: actions/setup-python@v4
       with:
         python-version: "3.9"
     - run: sudo apt-get install pandoc
