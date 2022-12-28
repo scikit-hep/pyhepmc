@@ -1,5 +1,6 @@
 import pyhepmc
 from pyhepmc._core import _Setup_print_errors, _Setup_print_warnings, _Setup_debug_level
+import pytest
 
 
 def test_all():
@@ -15,3 +16,6 @@ def test_all():
 
     pyhepmc.Setup.debug_level = 10
     assert _Setup_debug_level() == 10
+
+    with pytest.raises(AttributeError):
+        pyhepmc.Setup.foo = 1
