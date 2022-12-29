@@ -110,11 +110,11 @@ class Digraph:
             msg = r.stderr.decode("utf-8")
             match = "Error: <stdin>: "
             idx = msg.index(match)
-            assert idx >= 0
-            idx += len(match)
-            msg = msg[idx:]
+            if idx >= 0:
+                idx += len(match)
+                msg = msg[idx:]
             msg += "\n" + input
-            raise ValueError(msg[idx:])
+            raise ValueError(msg)
         if encoding:
             return r.stdout.decode(encoding)
         return r.stdout

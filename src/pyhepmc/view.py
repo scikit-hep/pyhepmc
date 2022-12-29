@@ -49,6 +49,7 @@ def _supported_formats() -> AbstractSet[str]:
         "tk",
         "vdx",
         "icns",
+        "metafile",
     }
     formats = set(s[idx:].split()) - unsupported
     return formats
