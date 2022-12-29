@@ -102,9 +102,8 @@ py::object unparsed_attribute_to_python(AttributePtr& unparsed, py::object pytyp
   auto heprup_type = pyhepmc.attr("HEPRUPAttribute");
   auto hepeup_type = pyhepmc.attr("HEPEUPAttribute");
   py::module_ typing = py::module_::import("typing");
-  // typing.get_origin and typing.get_args are only available in Python-3.8+
-  auto get_origin = pyhepmc.attr("get_origin");
-  auto get_args = pyhepmc.attr("get_args");
+  auto get_origin = typing.attr("get_origin");
+  auto get_args = typing.attr("get_args");
   auto list2_type = typing.attr("List");
 
   // Convert the internal attribute as well as the Python return value;

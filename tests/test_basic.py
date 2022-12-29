@@ -2,8 +2,7 @@ import pytest
 import pyhepmc as hep
 
 
-@pytest.fixture()
-def evt():
+def make_evt():
     r"""
     In this example we will generate the following event by hand
 
@@ -96,6 +95,11 @@ def evt():
     evt.run_info = ri
 
     return evt
+
+
+@pytest.fixture()
+def evt():
+    return make_evt()
 
 
 def test_GenHeavyIon():
