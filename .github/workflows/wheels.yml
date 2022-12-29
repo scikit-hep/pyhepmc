@@ -68,7 +68,7 @@ jobs:
         with:
           python-version: '3.9'
 
-      - run: python -m setup.py sdist
+      - run: python setup.py sdist
       - run: python -m pip install dist/pyhepmc-*
       - run: python -m pytest
 

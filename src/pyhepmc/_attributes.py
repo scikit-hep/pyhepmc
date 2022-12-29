@@ -1,20 +1,19 @@
-from pyhepmc._core import AttributesView, RunInfoAttributesView
-import typing as _tp
+from typing import Any, Tuple, Generator, Dict
 
 
-def _clear(self: _tp.Any) -> None:
+def clear(self: Any) -> None:
     for key in list(self):
         del self[key]
 
 
-def _items(
-    self: _tp.Any,
-) -> _tp.Generator[_tp.Tuple[str, _tp.Any], None, None]:
+def items(
+    self: Any,
+) -> Generator[Tuple[str, Any], None, None]:
     for name in self:
         yield name, self[name]
 
 
-def _eq(self: _tp.Any, other: _tp.Dict[str, _tp.Any]) -> bool:
+def eq(self: Any, other: Dict[str, Any]) -> bool:
     if len(self) != len(other):
         return False
     for k, v in self.items():
@@ -25,7 +24,7 @@ def _eq(self: _tp.Any, other: _tp.Dict[str, _tp.Any]) -> bool:
     return True
 
 
-def _repr(self: _tp.Any) -> str:
+def repr(self: Any) -> str:
     s = f"<{self.__class__.__name__}>{{"
     first = True
     for k, v in self.items():
@@ -37,12 +36,15 @@ def _repr(self: _tp.Any) -> str:
     return s
 
 
-AttributesView.clear = _clear
-AttributesView.items = _items
-AttributesView.__eq__ = _eq
-AttributesView.__repr__ = _repr
+def install() -> None:
+    from pyhepmc._core import AttributesView, RunInfoAttributesView
 
-RunInfoAttributesView.clear = _clear
-RunInfoAttributesView.items = _items
-RunInfoAttributesView.__eq__ = _eq
-RunInfoAttributesView.__repr__ = _repr
+    AttributesView.clear = clear
+    AttributesView.items = items
+    AttributesView.__eq__ = eq
+    AttributesView.__repr__ = repr
+
+    RunInfoAttributesView.clear = clear
+    RunInfoAttributesView.items = items
+    RunInfoAttributesView.__eq__ = eq
+    RunInfoAttributesView.__repr__ = repr
