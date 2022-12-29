@@ -114,7 +114,7 @@ class Digraph:
         if r.returncode != 0:
             msg = r.stderr.decode("utf-8")
             match = "Error: <stdin>: "
-            idx = msg.index(match)
+            idx = msg.find(match)
             if idx >= 0:
                 idx += len(match)
                 msg = msg[idx:]
