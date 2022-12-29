@@ -53,7 +53,7 @@ def test_dot_3(evt):  # noqa
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 def test_repr_html(evt):  # noqa
     d = view.to_dot(evt)
-    assert d._repr_image_svg_xml() == evt._repr_html_()
+    assert d._repr_html_() == evt._repr_html_()
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")

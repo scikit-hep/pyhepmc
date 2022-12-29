@@ -2,9 +2,9 @@
 Visualization for GenEvent.
 """
 from __future__ import annotations
-from graphviz import Digraph
-from ._prettify import db as prettify
-from . import Units, GenEvent
+from pyhepmc._graphviz import Digraph
+from pyhepmc._prettify import db as prettify
+from pyhepmc import Units, GenEvent
 import numpy as np
 import os
 from pathlib import PurePath
@@ -16,15 +16,16 @@ __all__ = ("to_dot", "savefig", "SUPPORTED_FORMATS")
 
 def _supported_formats() -> AbstractSet[str]:
     import subprocess as subp
-    from graphviz.parameters.formats import FORMATS
 
     try:
         r = subp.run(["dot", "-T12345679"], stderr=subp.PIPE)
     except FileNotFoundError:
         return set()
     s = r.stderr.decode("ascii").strip()
-    idx = s.index("Use one of: ")
+    match = "Use one of: "
+    idx = s.index(match)
     assert idx > 0
+    idx += len(match)
     # Some formats (eps, pov, ...) cannot handle utf-8 characters
     # GD Warning: GD image support has been disabled
     unsupported = {
@@ -46,9 +47,10 @@ def _supported_formats() -> AbstractSet[str]:
         "xlib",
         "gtk",
         "tk",
+        "vdx",
+        "icns",
     }
     formats = set(s[idx:].split()) - unsupported
-    formats &= FORMATS  # graphviz python package supports less
     return formats
 
 
@@ -64,7 +66,7 @@ def to_dot(
     color_quark_or_gluon: str = "darkred",
     color_internal: str = "dodgerblue",
     color_invalid: str = "gainsboro",
-    color_bsm: str = "green",
+    color_special: str = "green",
 ) -> Digraph:
     """
     Convert GenEvent to Digraph.
@@ -87,12 +89,12 @@ def to_dot(
         Color (HTML color specification) for quarks, diquarks, and gluons.
     color_internal: str, optional
         Color (HTML color specification) for generator-internal particles
-        (e.g. Pomerons).
+        (e.g. strings, clusters, ...).
+    color_special: str, optional
+        Color (HTML color specification) for any valid particle which does not
+        fit into the other categories (e.g. BSM particles).
     color_invalid: str, optional
         Color (HTML color specification) for invalid particles (e.g. PID==0).
-    color_bsm: str, optional
-        Color (HTML color specification) for beyond standard-model particles
-        (e.g. SUSY, etc.).
     """
     if evt.run_info:
         name = "\n".join(f"{t.name}-{t.version}" for t in evt.run_info.tools)
@@ -132,14 +134,12 @@ def to_dot(
         color = "black"  # default color
 
         pname = prettify.get(p.pid, None)
-        if pname is None:
-            pname = f"Unknown({int(p.pid)})"
-            penwidth = "7"
-
-        tooltip = f"{pname} [PDGID: {int(p.pid)}]"
-        tooltip += f"\n{p.momentum} GeV"
-        tooltip += f"\nm = {p.generated_mass:.4g} GeV"
-        tooltip += f"\nstatus = {p.status}"
+        tooltip = [
+            f"PDGID = {p.pid}",
+            f"{p.momentum} GeV",
+            f"m = {p.generated_mass:.4g} GeV",
+            f"status = {p.status}",
+        ]
 
         try:
             from particle import PDGID, Particle, ParticleNotFound, InvalidParticle
@@ -148,7 +148,7 @@ def to_dot(
 
             if pdgid.is_hadron or pdgid.is_nucleus:
                 if pdgid.is_nucleus:
-                    tooltip += f"\nA,Z = {pdgid.A},{pdgid.Z}"
+                    tooltip.append(f"A,Z = {pdgid.A},{pdgid.Z}")
                 color = color_hadron
             elif pdgid == 21 or pdgid.is_quark or pdgid.is_diquark:
                 color = color_quark_or_gluon
@@ -156,17 +156,20 @@ def to_dot(
                 color = color_lepton_or_boson
             elif not pdgid.is_valid:
                 color = color_invalid
+                pname = f"Invalid({p.pid})"
             elif pdgid.is_generator_specific:
                 color = color_internal
+                pname = f"Internal({p.pid})"
             else:
-                color = color_bsm
+                color = color_special
 
             try:
                 pdb = Particle.from_pdgid(p.pid)
-                tooltip += f"\nquarks = {pdb.quarks}"
-                tooltip += f"\nQ = {pdb.charge:.3g}"
+                if pdb.quarks:
+                    tooltip.append(f"quarks = {pdb.quarks}")
+                tooltip.append(f"Q = {pdb.charge:.3g}")
                 if pdb.ctau and np.isfinite(pdb.ctau):
-                    tooltip += f"\ncτ = {pdb.ctau:.3g} mm"
+                    tooltip.append(f"cτ = {pdb.ctau:.3g} mm")
                 if pdb.charge == 0:
                     style = "dashed"
             except (ParticleNotFound, InvalidParticle):
@@ -174,7 +177,11 @@ def to_dot(
         except ModuleNotFoundError:
             pass
 
+        if pname is None:
+            pname = f"PDGID({p.pid})"
+
         label = f"{pname} {en:.2g} {unit}"
+        tooltip = "\n".join(tooltip)
 
         # do not connect initial particles to root vertex
         if p.production_vertex and p.production_vertex.id != 0:
@@ -204,9 +211,9 @@ def to_dot(
             label=label,
             color=color,
             style=style,
+            penwidth=penwidth,
             tooltip=tooltip,
             labeltooltip=tooltip,
-            penwidth=penwidth,
         )
 
     return d
@@ -271,10 +278,14 @@ def savefig(
             )
         g = event
 
-    encoding = "utf-8" if isinstance(fname, TextIO) else None
-    s = g.pipe(format=format, encoding=encoding)
-
-    fname.write(s)
+    if isinstance(fname, TextIO):
+        s = g.pipe(format=format, encoding="utf-8")
+        assert isinstance(s, str)
+        fname.write(s)
+    else:
+        s = g.pipe(format=format)
+        assert isinstance(s, bytes)
+        fname.write(s)
 
 
 savefig.__doc__ = savefig.__doc__.format(  # type:ignore

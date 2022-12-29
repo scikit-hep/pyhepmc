@@ -37,8 +37,6 @@ jobs:
     - run: coverage run --append -m pytest
     - run: python -m pip uninstall --yes particle
     - run: coverage run --append -m pytest
-    - run: python -m pip uninstall --yes graphviz
-    - run: coverage run --append -m pytest
     - run: coveralls --service=github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

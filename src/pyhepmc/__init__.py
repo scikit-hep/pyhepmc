@@ -98,11 +98,7 @@ _attributes.install()
 try:
     from pyhepmc.view import to_dot
 
-    def _genevent_repr_html(self: GenEvent) -> Any:
-        g = to_dot(self)
-        return g._repr_image_svg_xml()
-
-    GenEvent._repr_html_ = _genevent_repr_html
+    GenEvent._repr_html_ = lambda self: to_dot(self)._repr_html_()
 except ModuleNotFoundError:  # pragma: no cover
     pass  # pragma: no cover
 

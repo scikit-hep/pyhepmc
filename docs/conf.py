@@ -40,4 +40,4 @@ if not on_rtd:
 
 # Autodoc options
 autodoc_member_order = "groupwise"
-autodoc_mock_imports = ["numpy", "particle", "graphviz"]
+autodoc_mock_imports = ["numpy", "particle"]

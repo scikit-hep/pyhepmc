@@ -38,7 +38,6 @@ documentation = "https://scikit-hep.org/pyhepmc"
 test = [
     "pytest",
     "particle",
-    "graphviz",
     "matplotlib"
 ]
 doc = [
