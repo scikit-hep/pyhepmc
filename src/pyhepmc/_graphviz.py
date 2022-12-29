@@ -103,9 +103,14 @@ class Digraph:
 
     def pipe(self, *, format: str, encoding: str = None) -> Union[str, bytes]:
         input = str(self)
-        r = subp.run(
-            ["dot", f"-T{format}"], capture_output=True, input=input.encode("utf-8")
-        )
+        try:
+            r = subp.run(
+                ["dot", f"-T{format}"], capture_output=True, input=input.encode("utf-8")
+            )
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                "command `dot` cannot be found, please install graphviz"
+            )
         if r.returncode != 0:
             msg = r.stderr.decode("utf-8")
             match = "Error: <stdin>: "

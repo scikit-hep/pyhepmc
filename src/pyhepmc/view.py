@@ -8,7 +8,7 @@ from pyhepmc import Units, GenEvent
 import numpy as np
 import os
 from pathlib import PurePath
-from typing import BinaryIO, TextIO, Union, AbstractSet, Any, Optional, Tuple
+from typing import BinaryIO, Union, AbstractSet, Any, Optional, Tuple
 
 
 __all__ = ("to_dot", "savefig", "SUPPORTED_FORMATS")
@@ -222,7 +222,7 @@ def to_dot(
 
 def savefig(
     event: Union[GenEvent, Digraph],
-    fname: Union[str, TextIO, BinaryIO],
+    fname: Union[str, BinaryIO],
     *,
     format: str = None,
     **kwargs: Any,
@@ -279,14 +279,9 @@ def savefig(
             )
         g = event
 
-    if isinstance(fname, TextIO):
-        s = g.pipe(format=format, encoding="utf-8")
-        assert isinstance(s, str)
-        fname.write(s)
-    else:
-        s = g.pipe(format=format)
-        assert isinstance(s, bytes)
-        fname.write(s)
+    s = g.pipe(format=format)
+    assert isinstance(s, bytes)
+    fname.write(s)
 
 
 savefig.__doc__ = savefig.__doc__.format(  # type:ignore

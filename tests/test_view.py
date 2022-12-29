@@ -67,9 +67,15 @@ def test_to_dot_3(evt):
     assert d.graph_attr["size"] == "5,6"
 
 
-@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 def test_Digraph_pipe(graph):
-    assert graph._repr_png_() == graph.pipe(format="png")
+    if DOT_IS_AVAILABLE:
+        assert graph._repr_png_() == graph.pipe(format="png")
+    else:
+        with pytest.raises(FileNotFoundError):
+            graph.pipe(format="png")
+
+    with pytest.raises(ValueError):
+        graph.pipe(format="12345678")
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
