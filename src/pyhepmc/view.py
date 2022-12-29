@@ -8,13 +8,13 @@ from pyhepmc import Units, GenEvent
 import numpy as np
 import os
 from pathlib import PurePath
-from typing import BinaryIO, Union, AbstractSet, Any, Optional, Tuple
+from typing import BinaryIO, Union, Set, Any, Optional, Tuple
 
 
 __all__ = ("to_dot", "savefig", "SUPPORTED_FORMATS")
 
 
-def _supported_formats() -> AbstractSet[str]:
+def _supported_formats() -> Set[str]:
     import subprocess as subp
 
     try:

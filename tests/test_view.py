@@ -69,13 +69,13 @@ def test_to_dot_3(evt):
 
 def test_Digraph_pipe(graph):
     if DOT_IS_AVAILABLE:
+        with pytest.raises(ValueError):
+            graph.pipe(format="12345678")
+
         assert graph._repr_png_() == graph.pipe(format="png")
     else:
         with pytest.raises(FileNotFoundError):
             graph.pipe(format="png")
-
-    with pytest.raises(ValueError):
-        graph.pipe(format="12345678")
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
