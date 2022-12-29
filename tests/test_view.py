@@ -1,12 +1,11 @@
 import pytest
-from test_basic import evt  # noqa
+from test_basic import make_evt
 import pyhepmc
+from pyhepmc import view
 from pathlib import Path
 import io
 import os
 import numpy as np
-
-view = pytest.importorskip("pyhepmc.view")  # depends on graphviz and particle
 
 CDIR = Path(__file__).parent
 RESULT_DIR = CDIR / "fig"
@@ -21,9 +20,18 @@ except ModuleNotFoundError:
     PARTICLE_IS_AVAILABLE = False
 
 
-def test_dot(evt):  # noqa
-    d = view.to_dot(evt)
-    s = str(d)
+@pytest.fixture
+def evt():
+    return make_evt()
+
+
+@pytest.fixture
+def graph():
+    return view.to_dot(make_evt())
+
+
+def test_to_dot_1(graph):
+    s = str(graph)
     assert s.startswith('digraph "dummy-1.0\nevent number = 1')
     assert "in_1" in s
     assert "in_2" in s
@@ -33,7 +41,7 @@ def test_dot(evt):  # noqa
     assert "out_8" in s
 
 
-def test_dot_2():
+def test_to_dot_2():
     ev = pyhepmc.GenEvent()
     # unknown particle
     p = pyhepmc.GenParticle((0, 0, 0, 1e-3), pid=91, status=1)
@@ -54,20 +62,29 @@ def test_dot_2():
         assert "PDGID(0)" in s
 
 
-def test_dot_3(evt):  # noqa
+def test_to_dot_3(evt):
     d = view.to_dot(evt, size=(5, 6))
     assert d.graph_attr["size"] == "5,6"
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
-def test_repr_html(evt):  # noqa
-    d = view.to_dot(evt)
-    assert d._repr_html_() == evt._repr_html_()
+def test_pipe(graph):
+    assert graph._repr_png_() == graph.pipe(format="png")
+
+
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
+def test_repr_html(graph, evt):
+    assert evt._repr_html_() == graph._repr_html_()
+
+
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
+def test_repr_png(graph):
+    assert graph._repr_png_() == graph.pipe(format="png")
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 @pytest.mark.parametrize("ext", view.SUPPORTED_FORMATS)
-def test_savefig_1(evt, ext):  # noqa
+def test_savefig_1(evt, ext):
     fname = RESULT_DIR / f"test_savefig_1.{ext}"
     view.savefig(evt, fname)
 
@@ -87,7 +104,7 @@ def test_savefig_1(evt, ext):  # noqa
             assert np.sum(a1[:size] != a2[:size]) < 80
 
 
-def test_savefig_2(evt):  # noqa
+def test_savefig_2(evt):
     with pytest.raises(ValueError):
         view.savefig(evt, "foo")
 
@@ -102,7 +119,7 @@ def test_savefig_2(evt):  # noqa
 @pytest.mark.skipif("CI" in os.environ, reason="does not work on CI")
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 @pytest.mark.parametrize("ext", ("pdf", "png", "svg"))
-def test_savefig_3(evt, ext):  # noqa
+def test_savefig_3(evt, ext):
     pytest.importorskip("particle")
     mpl = pytest.importorskip("matplotlib.testing.compare")
     fname = f"test_savefig_3.{ext}"
@@ -113,7 +130,7 @@ def test_savefig_3(evt, ext):  # noqa
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
-def test_savefig_4(evt):  # noqa
+def test_savefig_4(evt):
     with io.BytesIO() as f:
         g = view.to_dot(evt)
         with pytest.warns(RuntimeWarning):

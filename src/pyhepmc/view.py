@@ -8,7 +8,7 @@ from pyhepmc import Units, GenEvent
 import numpy as np
 import os
 from pathlib import PurePath
-from typing import BinaryIO, TextIO, Union, AbstractSet, Any, Optional
+from typing import BinaryIO, TextIO, Union, AbstractSet, Any, Optional, Tuple
 
 
 __all__ = ("to_dot", "savefig", "SUPPORTED_FORMATS")
@@ -61,7 +61,7 @@ SUPPORTED_FORMATS = _supported_formats()
 def to_dot(
     evt: GenEvent,
     *,
-    size: tuple[int, int] = None,
+    size: Optional[Tuple[int, int]] = None,
     color_hadron: str = "black",
     color_lepton_or_boson: str = "goldenrod",
     color_quark_or_gluon: str = "darkred",
@@ -224,7 +224,7 @@ def savefig(
     event: Union[GenEvent, Digraph],
     fname: Union[str, TextIO, BinaryIO],
     *,
-    format: Optional[str] = None,
+    format: str = None,
     **kwargs: Any,
 ) -> None:
     """
