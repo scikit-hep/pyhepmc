@@ -68,18 +68,29 @@ def test_to_dot_3(evt):
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
-def test_pipe(graph):
+def test_Digraph_pipe(graph):
     assert graph._repr_png_() == graph.pipe(format="png")
+
+
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
+def test_Digraph_repr_png(graph):
+    assert graph._repr_png_() == graph.pipe(format="png")
+
+
+@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
+def test_Digraph_repr(graph):
+    from pyhepmc._graphviz import Digraph, Block
+
+    s = repr(graph)
+    graph2 = eval(s, {"Digraph": Digraph, "Block": Block})
+    assert graph == graph2
+    graph2.graph_attr["foo"] = "bar"
+    assert graph != graph2
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 def test_repr_html(graph, evt):
     assert evt._repr_html_() == graph._repr_html_()
-
-
-@pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
-def test_repr_png(graph):
-    assert graph._repr_png_() == graph.pipe(format="png")
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
