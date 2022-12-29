@@ -94,6 +94,7 @@ def test_savefig_2(evt):  # noqa
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 @pytest.mark.parametrize("ext", ("pdf", "png", "svg"))
 def test_savefig_3(evt, ext):  # noqa
+    pytest.importorskip("particle")
     mpl = pytest.importorskip("matplotlib.testing.compare")
     fname = f"test_savefig_3.{ext}"
     expected = REFERENCE_DIR / fname
