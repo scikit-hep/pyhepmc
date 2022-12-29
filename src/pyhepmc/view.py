@@ -45,6 +45,7 @@ def _supported_formats() -> AbstractSet[str]:
         "x11",
         "xlib",
         "gtk",
+        "tk",
     }
     formats = set(s[idx:].split()) - unsupported
     formats &= FORMATS  # graphviz python package supports less
