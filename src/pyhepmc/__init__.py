@@ -66,9 +66,15 @@ from pyhepmc._core import (
     delta_rap,
 )
 from pyhepmc.io import open as open  # noqa: F401
-from pyhepmc._version import __version__ as __version__  # noqa: F401
-import pyhepmc._attributes  # noqa, keep this, it has side effects
+import pyhepmc._attributes  # noqa, keep this for its side effects
 from typing import Any
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("pyhepmc")
+except PackageNotFoundError:
+    # package is not installed
+    pass
 
 __all__ = (
     "Units",

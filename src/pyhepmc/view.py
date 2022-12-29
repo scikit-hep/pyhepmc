@@ -56,12 +56,14 @@ SUPPORTED_FORMATS = _supported_formats()
 
 def to_dot(
     evt: GenEvent,
+    *,
     size: tuple[int, int] = None,
     color_hadron: str = "black",
     color_lepton_or_boson: str = "goldenrod",
     color_quark_or_gluon: str = "darkred",
-    color_interal: str = "dodgerblue",
+    color_internal: str = "dodgerblue",
     color_invalid: str = "gainsboro",
+    color_bsm: str = "green",
 ) -> Digraph:
     """
     Convert GenEvent to Digraph.
@@ -83,9 +85,13 @@ def to_dot(
     color_quark_or_gluon: str, optional
         Color (HTML color specification) for quarks, diquarks, and gluons.
     color_internal: str, optional
-        Color (HTML color specification) for generator-internal particles (e.g. Pomerons).
+        Color (HTML color specification) for generator-internal particles
+        (e.g. Pomerons).
     color_invalid: str, optional
         Color (HTML color specification) for invalid particles (e.g. PID==0).
+    color_bsm: str, optional
+        Color (HTML color specification) for beyond standard-model particles
+        (e.g. SUSY, etc.).
     """
     if evt.run_info:
         name = "\n".join(f"{t.name}-{t.version}" for t in evt.run_info.tools)
@@ -122,17 +128,12 @@ def to_dot(
             unit = "MeV"
 
         style = "solid"
+        color = "black"  # default color
 
         pname = prettify.get(p.pid, None)
         if pname is None:
-            if p.pid == 0:
-                pname = "Invalid(0)"
-                color = color_invalid
-                penwidth = "7"
-            else:
-                pname = f"Internal({p.pid})"
-                color = color_interal
-                penwidth = "7"
+            pname = f"Unknown({int(p.pid)})"
+            penwidth = "7"
 
         tooltip = f"{pname} [PDGID: {int(p.pid)}]"
         tooltip += f"\n{p.momentum} GeV"
@@ -152,8 +153,12 @@ def to_dot(
                 color = color_quark_or_gluon
             elif pdgid.is_lepton or pdgid.is_gauge_boson_or_higgs:
                 color = color_lepton_or_boson
+            elif not pdgid.is_valid:
+                color = color_invalid
+            elif pdgid.is_generator_specific:
+                color = color_internal
             else:
-                color = color_interal
+                color = color_bsm
 
             try:
                 pdb = Particle.from_pdgid(p.pid)
@@ -165,8 +170,8 @@ def to_dot(
                     style = "dashed"
             except (ParticleNotFound, InvalidParticle):
                 pass
-        except ModuleNotFoundError:  # pragma: no cover
-            color = "black"  # pragma: no cover
+        except ModuleNotFoundError:
+            pass
 
         label = f"{pname} {en:.2g} {unit}"
 

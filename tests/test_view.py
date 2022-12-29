@@ -42,8 +42,7 @@ def test_dot_2():
     ev.add_vertex(v)
     d = view.to_dot(ev)
     s = str(d)
-    assert "Internal" in s
-    assert "Invalid" in s
+    assert "Unknown" in s or "Internal" in s
 
 
 def test_dot_3(evt):  # noqa
