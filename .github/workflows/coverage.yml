@@ -36,9 +36,9 @@ jobs:
     - uses: ts-graphviz/setup-graphviz@v1
     - run: coverage run --append -m pytest
     - run: python -m pip uninstall --yes particle
-    - run: coverage run --append -m pytest tests/test_view.py
+    - run: coverage run --append -m pytest
     - run: python -m pip uninstall --yes graphviz
-    - run: coverage run --append -m pytest tests/test_view.py
+    - run: coverage run --append -m pytest
     - run: coveralls --service=github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
