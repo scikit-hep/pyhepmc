@@ -14,6 +14,11 @@ REFERENCE_DIR = CDIR / "data"
 RESULT_DIR.mkdir(exist_ok=True)
 
 DOT_IS_AVAILABLE = bool(view.SUPPORTED_FORMATS)
+PARTICLE_IS_AVAILABLE = True
+try:
+    import particle  # noqa
+except ModuleNotFoundError:
+    PARTICLE_IS_AVAILABLE = False
 
 
 def test_dot(evt):  # noqa
@@ -42,7 +47,11 @@ def test_dot_2():
     ev.add_vertex(v)
     d = view.to_dot(ev)
     s = str(d)
-    assert "Unknown" in s or "Internal" in s
+    if PARTICLE_IS_AVAILABLE:
+        assert "Invalid(0)" in s
+        assert "Internal(91)" in s
+    else:
+        assert "PDGID(0)" in s
 
 
 def test_dot_3(evt):  # noqa
