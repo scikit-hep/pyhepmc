@@ -70,7 +70,7 @@ jobs:
 
       - run: python -m pip install --upgrade pip setuptools wheel
       - run: python setup.py sdist
-      - run: python -m pip install -v dist/pyhepmc-*
+      - run: python -m pip install -v $(echo dist/*)'[test]'
       - run: python -m pytest
 
       - uses: actions/upload-artifact@v2
