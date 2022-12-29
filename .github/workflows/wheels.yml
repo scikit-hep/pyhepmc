@@ -62,18 +62,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
-          fetch-depth: 0
+          fetch-depth: 0  # needed by setuptools_scm
 
       - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - run: python -m pip install --upgrade pip wheel
-      # to get pyhepmc/src/_version.py
-      - run: python -m pip install --prefer-binary -e .[test]
-      - run: python setup.py sdist
-      - run: python -m pip uninstall --yes pyhepmc
-
+      - run: python -m setup.py sdist
       - run: python -m pip install dist/pyhepmc-*
       - run: python -m pytest
 

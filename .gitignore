@@ -12,6 +12,7 @@ tests/__pycache__
 .compiler_support_cache
 .flag_filter_cache
 .pytest_cache
+.mypy_cache
 py??
 py???
 .ci_bak
