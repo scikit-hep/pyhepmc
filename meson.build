@@ -8,7 +8,7 @@ cmake = import('cmake')
 accessor = dependency('cpp-member-accessor')
 mp11 = cmake.subproject('mp11').dependency('boost_mp11')
 pybind11 = dependency('pybind11')
-hepmc3 = dependency('hepmc3')
+hepmc3 = dependency('hepmc3', static: true)
 
 cpp = meson.get_compiler('cpp')
 
