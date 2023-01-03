@@ -38,7 +38,8 @@ src = files([
 
 lib = library('hepmc3', src,
     include_directories: inc,
-    cpp_args: '-DHepMC3_EXPORTS=1'
+    cpp_args: '-DHepMC3_EXPORTS=1',
+    install: true
 )
 
 hepmc3_dep = declare_dependency(

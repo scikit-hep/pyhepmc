@@ -30,9 +30,9 @@ src = files([
     'src/runinfo_attributes_view.cpp',
 ])
 
-py = import('python').find_installation('python3')
+py = import('python').find_installation()
 
-py.extension_module(
+core = py.extension_module(
     '_core', src,
     dependencies: [
         pybind11,
@@ -40,4 +40,20 @@ py.extension_module(
         hepmc3,
         accessor,
     ],
+    subdir: 'pyhepmc',
+    install: true
+)
+
+py.install_sources(
+    'src/pyhepmc/__init__.py',
+    'src/pyhepmc/_attributes.py',
+    'src/pyhepmc/_autodoc.py',
+    'src/pyhepmc/_deprecated.py',
+    'src/pyhepmc/_doc.py',
+    'src/pyhepmc/_graphviz.py',
+    'src/pyhepmc/_prettify.py',
+    'src/pyhepmc/_setup.py',
+    'src/pyhepmc/io.py',
+    'src/pyhepmc/view.py',
+    subdir: 'pyhepmc'
 )

@@ -1,14 +1,10 @@
 [build-system]
-requires = [
-    "setuptools>=46.4",
-    "setuptools_scm[toml]>=6.2",
-    "cmake>=3.13",
-    "wheel"
-]
-build-backend = "setuptools.build_meta"
+requires = ["meson-python", "ninja", "cmake"]
+build-backend = "mesonpy"
 
 [project]
 name = "pyhepmc"
+version = "2.10.0.dev"
 description = "Pythonic interface to the HepMC3 C++ library licensed under LGPL-v3."
 maintainers = [
     { name = "Hans Dembinski" },
@@ -28,7 +24,6 @@ classifiers = [
     "Intended Audience :: Developers"
 ]
 dependencies = ["numpy"]
-dynamic = ["version"]
 
 [project.urls]
 repository = "https://github.com/scikit-hep/pyhepmc"
