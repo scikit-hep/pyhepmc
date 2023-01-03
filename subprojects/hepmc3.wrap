@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://gitlab.cern.ch/hepmc/HepMC3.git
+revision = 591bccc2fdb65bfed9ab97a85eda57c0c1073355
+depth = 1
+patch_directory = HepMC3
+
+[provide]
+hepmc3 = hepmc3_dep

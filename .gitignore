@@ -31,5 +31,4 @@ docs/examples/modified_event.dat
 tests/fig/*
 tests/data/*_pdf.png
 tests/data/*_svg.png
-subprojects/packagecache
-subprojects/pybind11-*
+subprojects/*

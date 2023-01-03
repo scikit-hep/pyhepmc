@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/hliberacki/cpp-member-accessor.git
+revision = e72109f1400a9b70cdaaae1bf0e9192900dcc332
+depth = 1
+patch_directory = cpp-member-accessor
+
+[provide]
+cpp-member-accessor = cpp_member_accessor_dep
