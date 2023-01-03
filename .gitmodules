@@ -1,12 +1,9 @@
-[submodule "extern/pybind11"]
-	path = extern/pybind11
-	url = https://github.com/pybind/pybind11.git
 [submodule "extern/HepMC3"]
-	path = extern/HepMC3
+	path = subprojects/HepMC3
 	url = https://gitlab.cern.ch/hepmc/HepMC3.git
 [submodule "extern/mp11"]
-	path = extern/mp11
+	path = subprojects/mp11
 	url = https://github.com/boostorg/mp11.git
 [submodule "extern/cpp-member-accessor"]
-	path = extern/cpp-member-accessor
+	path = subprojects/cpp-member-accessor
 	url = https://github.com/hliberacki/cpp-member-accessor.git
