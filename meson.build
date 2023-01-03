@@ -1,20 +1,21 @@
 project('pyhepmc', 'cpp',
+        license: 'BSD-3',
         version: '2.9.x',
         default_options: ['cpp_std=c++14'])
 
 cmake = import('cmake')
-python = import('python')
 
 accessor = dependency('cpp-member-accessor')
 mp11 = cmake.subproject('mp11').dependency('boost_mp11')
 pybind11 = dependency('pybind11')
 hepmc3 = dependency('hepmc3')
 
-compiler = meson.get_compiler('cpp')
+cpp = meson.get_compiler('cpp')
 
-if compiler.get_argument_syntax() == 'gcc'
-    add_project_arguments('-Wno-self-assign-overloaded', language: 'cpp')
-endif
+add_project_arguments(
+    cpp.get_supported_arguments('-Wno-self-assign-overloaded'),
+    language: 'cpp'
+)
 
 src = files([
     'src/attribute_conversion.cpp',
@@ -29,10 +30,10 @@ src = files([
     'src/runinfo_attributes_view.cpp',
 ])
 
-py = python.find_installation('python3')
+py = import('python').find_installation('python3')
 
 py.extension_module(
-    'pyhepmc', src,
+    '_core', src,
     dependencies: [
         pybind11,
         mp11,
