@@ -10,6 +10,12 @@ mp11 = cmake.subproject('mp11').dependency('boost_mp11')
 pybind11 = dependency('pybind11')
 hepmc3 = dependency('hepmc3')
 
+compiler = meson.get_compiler('cpp')
+
+if compiler.get_argument_syntax() == 'gcc'
+    add_project_arguments('-Wno-self-assign-overloaded', language: 'cpp')
+endif
+
 src = files([
     'src/attribute_conversion.cpp',
     'src/attributes_view.cpp',

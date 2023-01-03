@@ -1,7 +1,15 @@
 project(
     'HepMC3', 'cpp',
     version: '3.2.5-38-g591bccc',
-    license: 'LGPLv3')
+    license: 'LGPLv3',
+    default_options: ['cpp_std=c++14']
+)
+
+compiler = meson.get_compiler('cpp')
+
+if compiler.get_argument_syntax() == 'gcc'
+    add_project_arguments('-Wno-deprecated-declarations', language: 'cpp')
+endif
 
 inc = include_directories('include')
 
@@ -28,11 +36,13 @@ src = files([
     'src/WriterPlugin.cc',
 ])
 
-library('hepmc3', src,
-    include_directories: inc
+lib = library('hepmc3', src,
+    include_directories: inc,
+    cpp_args: '-DHepMC3_EXPORTS=1'
 )
 
 hepmc3_dep = declare_dependency(
     include_directories: inc,
+    link_with: lib,
     compile_args: '-DHepMC3_EXPORTS=1'
 )
