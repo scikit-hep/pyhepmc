@@ -2,7 +2,9 @@ project(
     'HepMC3', 'cpp',
     version: '3.2.5-38-g591bccc',
     license: 'LGPL-v3',
-    default_options: ['cpp_std=c++11']
+    default_options: [
+        'cpp_std=c++11'
+    ]
 )
 
 cpp = meson.get_compiler('cpp')

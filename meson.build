@@ -1,7 +1,14 @@
-project('pyhepmc', 'cpp',
-        license: 'BSD-3',
-        version: '2.9.x',
-        default_options: ['cpp_std=c++14'])
+project(
+    'pyhepmc', 'cpp',
+    license: 'BSD-3',
+    version: '2.9.x',
+    default_options: [
+        'cpp_std=c++14',
+        'b_lto=true',
+        'b_lto_mode=thin',
+        'b_thinlto_cache=true',
+    ]
+)
 
 cmake = import('cmake')
 
