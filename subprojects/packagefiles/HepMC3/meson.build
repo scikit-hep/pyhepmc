@@ -1,15 +1,16 @@
 project(
     'HepMC3', 'cpp',
     version: '3.2.5-38-g591bccc',
-    license: 'LGPLv3',
-    default_options: ['cpp_std=c++14']
+    license: 'LGPL-v3',
+    default_options: ['cpp_std=c++11']
 )
 
-compiler = meson.get_compiler('cpp')
+cpp = meson.get_compiler('cpp')
 
-if compiler.get_argument_syntax() == 'gcc'
-    add_project_arguments('-Wno-deprecated-declarations', language: 'cpp')
-endif
+add_project_arguments(
+    cpp.get_supported_arguments('-Wno-deprecated-declarations'),
+    language: 'cpp'
+)
 
 inc = include_directories('include')
 
