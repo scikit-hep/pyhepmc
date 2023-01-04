@@ -4,9 +4,10 @@ project(
     version: '2.9.x',
     default_options: [
         'cpp_std=c++14',
-        'b_lto=true',
-        'b_lto_mode=thin',
-        'b_thinlto_cache=true',
+        # for release mode
+        # 'b_lto=true',
+        # 'b_lto_mode=thin',
+        # 'b_thinlto_cache=true',
     ]
 )
 
