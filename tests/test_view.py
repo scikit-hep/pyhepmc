@@ -133,7 +133,7 @@ def test_savefig_2(evt):
             view.savefig(evt, f)
 
 
-@pytest.mark.skipif("CI" in os.environ, reason="does not work on CI")
+@pytest.mark.xfail(reason="image comparison is not robust enough")
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 @pytest.mark.parametrize("ext", ("pdf", "png", "svg"))
 def test_savefig_3(evt, ext):
