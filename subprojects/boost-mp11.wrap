@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/boostorg/mp11.git
+revision = boost-1.81.0
+depth = 1
+patch_directory = boost-mp11
+
+[provide]
+boost-mp11 = boost_mp11_dep

@@ -32,4 +32,6 @@ tests/fig/*
 tests/data/*_pdf.png
 tests/data/*_svg.png
 subprojects/*
+!subprojects/*.wrap
+!subprojects/packagefiles
 .mesonpy-native-file.ini

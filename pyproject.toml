@@ -1,5 +1,5 @@
 [build-system]
-requires = ["meson-python", "ninja", "cmake"]
+requires = ["meson-python", "ninja"]
 build-backend = "mesonpy"
 
 [project]
@@ -32,6 +32,7 @@ documentation = "https://scikit-hep.org/pyhepmc"
 [project.optional-dependencies]
 test = [
     "pytest",
+    "pytest-cov",
     "particle",
     "matplotlib"
 ]

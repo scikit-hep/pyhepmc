@@ -1,7 +1,6 @@
 project(
     'pyhepmc', 'cpp',
     license: 'BSD-3',
-    version: '2.9.x',
     default_options: [
         'cpp_std=c++14',
         # for release mode
@@ -11,10 +10,8 @@ project(
     ]
 )
 
-cmake = import('cmake')
-
 accessor = dependency('cpp-member-accessor')
-mp11 = cmake.subproject('mp11').dependency('boost_mp11')
+mp11 = dependency('boost-mp11')
 pybind11 = dependency('pybind11')
 hepmc3 = dependency('hepmc3', static: true).as_link_whole()
 
