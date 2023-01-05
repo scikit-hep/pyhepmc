@@ -10,10 +10,10 @@ project(
 cpp = meson.get_compiler('cpp')
 
 add_project_arguments(
-    cpp.get_supported_arguments([
-        '-Wno-deprecated-declarations'
+    cpp.get_supported_arguments(
+        '-Wno-deprecated-declarations',
         '-Wno-strict-aliasing',
-    ]),
+    ),
     language: 'cpp'
 )
 

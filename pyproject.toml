@@ -1,5 +1,8 @@
 [build-system]
-requires = ["meson-python", "ninja"]
+requires = [
+    "meson-python",
+    "ninja",
+]
 build-backend = "mesonpy"
 
 [project]
