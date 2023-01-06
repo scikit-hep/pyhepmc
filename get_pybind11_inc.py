@@ -1,7 +1,6 @@
 import pybind11
 import os
+from pathlib import Path
 
-p = pybind11.get_include()
-if p.find(os.getcwd()) == 0:
-    p = p[len(os.getcwd()) + 1 :]
-print(p)
+p = Path(pybind11.get_include())
+print(p.relative_to(os.getcwd()))
