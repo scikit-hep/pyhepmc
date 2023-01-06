@@ -30,13 +30,15 @@ jobs:
       with:
         python-version: 3.11
     - run: python -m pip install --upgrade pip
-    - run: python -m pip install --prefer-binary coveralls
-    - run: python -m pip install --prefer-binary -e .[test]
+    # we need the unreleased meson-python version for editable build support
+    - run: python -m pip install --upgrade git+https://github.com/mesonbuild/meson-python.git
+    - run: python -m pip install --prefer-binary --no-build-isolation -e .[test]
     - run: coverage run -m pytest
     - uses: ts-graphviz/setup-graphviz@v1
     - run: coverage run --append -m pytest
     - run: python -m pip uninstall --yes particle
     - run: coverage run --append -m pytest
+    - run: python -m pip install --prefer-binary coveralls
     - run: coveralls --service=github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
