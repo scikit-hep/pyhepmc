@@ -17,7 +17,7 @@ hepmc3 = dependency('hepmc3', static: true)
 py = import('python').find_installation('python')
 
 # pybind11 include directory - needed in several submodules
-incdir_pybind11 = run_command(py, ['get_pybind11_inc.py'],).stdout().strip()
+incdir_pybind11 = run_command(py, ['get_pybind11_inc.py']).stdout().strip()
 
 inc_pybind11 = include_directories(incdir_pybind11)
 
