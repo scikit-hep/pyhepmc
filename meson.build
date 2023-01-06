@@ -12,8 +12,16 @@ project(
 
 accessor = dependency('cpp-member-accessor')
 mp11 = dependency('boost-mp11')
-pybind11 = dependency('pybind11')
-hepmc3 = dependency('hepmc3', static: true).as_link_whole()
+hepmc3 = dependency('hepmc3', static: true)
+
+py = import('python').find_installation('python')
+
+# pybind11 include directory - needed in several submodules
+incdir_pybind11 = run_command(py, ['get_pybind11_inc.py'],
+  check: true
+).stdout().strip()
+
+inc_pybind11 = include_directories(incdir_pybind11)
 
 cpp = meson.get_compiler('cpp')
 
@@ -35,12 +43,11 @@ src = files([
     'src/runinfo_attributes_view.cpp',
 ])
 
-py = import('python').find_installation()
 
 core = py.extension_module(
     '_core', src,
+    include_directories: inc_pybind11,
     dependencies: [
-        pybind11,
         mp11,
         hepmc3,
         accessor,
