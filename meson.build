@@ -14,10 +14,20 @@ accessor = dependency('cpp-member-accessor')
 mp11 = dependency('boost-mp11')
 hepmc3 = dependency('hepmc3', static: true)
 
-py = import('python').find_installation('python')
+py = import('python').find_installation('python',
+    pure: false,
+    modules: ['numpy', 'pybind11']
+)
 
 # pybind11 include directory - needed in several submodules
-incdir_pybind11 = run_command(py, ['get_pybind11_inc.py']).stdout().strip()
+incdir_pybind11 = run_command(py,
+  [
+    '-c',
+    'import os, pybind11, pathlib; '+
+    'print(pathlib.Path(pybind11.get_include()).relative_to(os.environ["MESON_SOURCE_ROOT"]))'
+  ],
+  check: true
+).stdout().strip()
 
 inc_pybind11 = include_directories(incdir_pybind11)
 
