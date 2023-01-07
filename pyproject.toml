@@ -2,7 +2,7 @@
 requires = [
     "meson-python",
     "ninja",
-    "pybind11>=2.10.0",
+    "pybind11",
 ]
 build-backend = "mesonpy"
 
