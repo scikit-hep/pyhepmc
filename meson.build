@@ -6,7 +6,6 @@ project(
         # for release mode
         # 'b_lto=true',
         # 'b_lto_mode=thin',
-        # 'b_thinlto_cache=true',
     ]
 )
 
@@ -14,7 +13,7 @@ accessor = dependency('cpp-member-accessor')
 mp11 = dependency('boost-mp11')
 hepmc3 = dependency('hepmc3', static: true)
 
-py = import('python').find_installation('python',
+py = import('python').find_installation(
     pure: false,
     modules: ['numpy', 'pybind11']
 )
