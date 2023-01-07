@@ -11,7 +11,7 @@ project(
 
 accessor = dependency('cpp-member-accessor')
 mp11 = dependency('boost-mp11')
-hepmc3 = dependency('hepmc3', static: true)
+hepmc3 = dependency('hepmc3', static:true).as_link_whole()
 
 py = import('python').find_installation(pure: false)
 
@@ -42,14 +42,13 @@ src = files([
     'src/runinfo_attributes_view.cpp',
 ])
 
-
 core = py.extension_module(
     '_core', src,
     include_directories: [inc_pybind11],
     dependencies: [
         mp11,
-        hepmc3,
         accessor,
+        hepmc3,
     ],
     subdir: 'pyhepmc',
     install: true
