@@ -18,9 +18,9 @@ py = import('python').find_installation(pure: false)
 # pybind11 include directory - needed in several submodules
 incdir_pybind11 = run_command(py,
   [
-    '-c',
-    'import os, pybind11, pathlib; '+
-    'print(pathlib.Path(pybind11.get_include()).relative_to(os.environ["MESON_SOURCE_ROOT"]))'
+    '-c', 'import pybind11, pathlib, os; ' +
+    'p = pathlib.Path(pybind11.get_include()); ' +
+    'print(p.relative_to(os.environ["MESON_SOURCE_ROOT"]) if p.is_absolute() else p)'
   ],
   check: true
 ).stdout().strip()
