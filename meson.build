@@ -13,10 +13,7 @@ accessor = dependency('cpp-member-accessor')
 mp11 = dependency('boost-mp11')
 hepmc3 = dependency('hepmc3', static: true)
 
-py = import('python').find_installation(
-    pure: false,
-    modules: ['numpy', 'pybind11']
-)
+py = import('python').find_installation(pure: false)
 
 # pybind11 include directory - needed in several submodules
 incdir_pybind11 = run_command(py,
