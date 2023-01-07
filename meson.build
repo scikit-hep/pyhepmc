@@ -16,12 +16,7 @@ hepmc3 = dependency('hepmc3', static: true)
 py = import('python').find_installation(pure: false)
 
 # pybind11 include directory - needed in several submodules
-incdir_pybind11 = run_command(py,
-  [
-    '-c', 'import pybind11, pathlib, os; ' +
-    'p = pathlib.Path(pybind11.get_include()); ' +
-    'print(p.relative_to(os.environ["MESON_SOURCE_ROOT"]) if p.is_absolute() else p)'
-  ],
+incdir_pybind11 = run_command(py, ['get_pybind11_include.py'],
   check: true
 ).stdout().strip()
 
@@ -50,7 +45,7 @@ src = files([
 
 core = py.extension_module(
     '_core', src,
-    include_directories: inc_pybind11,
+    include_directories: [inc_pybind11],
     dependencies: [
         mp11,
         hepmc3,
