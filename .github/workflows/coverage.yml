@@ -30,7 +30,9 @@ jobs:
     - run: python -m pip install --upgrade pip
     # we need the unreleased meson-python version for editable build support
     - run: python -m pip install --upgrade ninja git+https://github.com/mesonbuild/meson-python.git
-    - run: python -m pip install --prefer-binary --no-build-isolation -e .[test]
+    - run: python -m pip install --prefer-binary --no-build-isolation -v -e .[test]
+    - if: failure()
+      run: cat .mesonpy/editable/build/meson-logs/meson-log.txt
     - run: coverage run -m pytest
     - uses: ts-graphviz/setup-graphviz@v1
     - run: coverage run --append -m pytest
