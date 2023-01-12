@@ -53,13 +53,16 @@ src_hepmc3 = files([
     'extern/HepMC3/src/WriterPlugin.cc',
 ])
 
-hepmc3 = static_library('hepmc3', src_hepmc3,
-    include_directories: inc_hepmc3,
-    cpp_args: ['-DHepMC3_EXPORTS=1'] + cpp.get_supported_arguments(
-        '-Wno-deprecated-declarations',
-        '-Wno-strict-aliasing',
-    ),
-)
+# Installing shared library along with Python extension is currently not
+# supported by meson-python for all platforms (currently only Linux)
+# hepmc3 = library('hepmc3', src_hepmc3,
+#     include_directories: inc_hepmc3,
+#     cpp_args: ['-DHepMC3_EXPORTS=1'] + cpp.get_supported_arguments(
+#         '-Wno-deprecated-declarations',
+#         '-Wno-strict-aliasing',
+#     ),
+#     install=true
+# )
 
 src_core = files([
     'src/attribute_conversion.cpp',
@@ -75,14 +78,16 @@ src_core = files([
 ])
 
 py.extension_module(
-    '_core', src_core,
+    '_core', src_core + src_hepmc3,
     include_directories: [inc_pybind11, inc_hepmc3],
     dependencies: [
         mp11,
         accessor,
     ],
-    link_whole: hepmc3,
-    cpp_args: cpp.get_supported_arguments('-Wno-self-assign-overloaded'),
+    cpp_args: ['-DHepMC3_EXPORTS=1'] + cpp.get_supported_arguments(
+        '-Wno-self-assign-overloaded',
+        '-Wno-deprecated-declarations',
+        '-Wno-strict-aliasing'),
     subdir: 'pyhepmc',
     install: true
 )
