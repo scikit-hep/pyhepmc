@@ -27,6 +27,7 @@ docs/index.rst
 docs/generated_reference.rst.in
 docs/examples/event.*
 docs/examples/modified_event.dat
+docs/examples/modified_event.hepmc2
 .ipynb_checkpoints
 tests/fig/*
 tests/data/*_pdf.png
