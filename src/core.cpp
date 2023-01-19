@@ -5,6 +5,9 @@
 #include "pybind.hpp"
 #include "repr.hpp"
 #include <HepMC3/Attribute.h>
+#include <HepMC3/Data/GenEventData.h>
+#include <HepMC3/Data/GenParticleData.h>
+#include <HepMC3/Data/GenVertexData.h>
 #include <HepMC3/FourVector.h>
 #include <HepMC3/GenCrossSection.h>
 #include <HepMC3/GenEvent.h>
@@ -35,6 +38,9 @@ void register_io(py::module& m);
 
 namespace HepMC3 {
 
+bool operator==(const GenParticleData& a, const GenParticleData& b);
+bool operator==(const GenVertexData& a, const GenVertexData& b);
+bool operator==(const GenEventData& a, const GenEventData& b);
 bool operator==(const GenParticle& a, const GenParticle& b);
 bool operator==(const GenVertex& a, const GenVertex& b);
 bool operator==(const GenRunInfo& a, const GenRunInfo& b);
@@ -59,6 +65,9 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
                  py::object parents, py::object children, py::object vx, py::object vy,
                  py::object vz, py::object vt);
+
+py::object particledata_asarray(std::vector<GenParticleData>&);
+py::object vertexdata_asarray(std::vector<GenVertexData>&);
 
 } // namespace HepMC3
 
@@ -203,6 +212,52 @@ PYBIND11_MODULE(_core, m) {
       // clang-format off
       METH(momentum, HEPEUPAttribute)
       ATTR(hepeup, HEPEUPAttribute)
+      // clang-format on
+      ;
+
+  py::class_<GenParticleData>(m, "GenParticleData", DOC(GenParticleData))
+      .def(py::init<>())
+      // clang-format off
+      ATTR(pid, GenParticleData)
+      ATTR(status, GenParticleData)
+      ATTR(is_mass_set, GenParticleData)
+      ATTR(mass, GenParticleData)
+      ATTR(momentum, GenParticleData)
+      EQ(GenParticleData)
+      // clang-format on
+      ;
+
+  py::class_<GenVertexData>(m, "GenVertexData", DOC(GenVertexData))
+      .def(py::init<>())
+      // clang-format off
+      ATTR(status, GenVertexData)
+      ATTR(position, GenVertexData)
+      PROP_RO(is_zero, GenVertexData)
+      EQ(GenVertexData)
+      // clang-format on
+      ;
+
+  py::bind_vector<std::vector<GenParticleData>>(m, "VectorGenParticleData")
+      .def("asarray", particledata_asarray);
+  py::bind_vector<std::vector<GenVertexData>>(m, "VectorGenVertexData")
+      .def("asarray", vertexdata_asarray);
+
+  py::class_<GenEventData>(m, "GenEventData", DOC(GenEventData))
+      .def(py::init<>())
+      // clang-format off
+      ATTR(event_number, GenEventData)
+      ATTR(momentum_unit, GenEventData)
+      ATTR(length_unit, GenEventData)
+      ATTR(particles, GenEventData)
+      ATTR(vertices, GenEventData)
+      ATTR(weights, GenEventData)
+      ATTR(event_pos, GenEventData)
+      ATTR(links1, GenEventData)
+      ATTR(links2, GenEventData)
+      ATTR(attribute_id, GenEventData)
+      ATTR(attribute_name, GenEventData)
+      ATTR(attribute_string, GenEventData)
+      EQ(GenEventData)
       // clang-format on
       ;
 
@@ -497,6 +552,8 @@ PYBIND11_MODULE(_core, m) {
            "m"_a, "pid"_a, "status"_a, "parents"_a = py::none(),
            "children"_a = py::none(), "vx"_a = py::none(), "vy"_a = py::none(),
            "vz"_a = py::none(), "vt"_a = py::none(), DOC(GenEvent.from_hepevt))
+      .def("write_data", &GenEvent::write_data, "data"_a, DOC(GenEvent.write_data))
+      .def("read_data", &GenEvent::read_data, "data"_a, DOC(GenEvent.read_data))
       // clang-format off
       EQ(GenEvent)
       REPR(GenEvent)

@@ -5,6 +5,15 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
+
+namespace HepMC3 {
+struct GenParticleData;
+struct GenVertexData;
+} // namespace HepMC3
+
+PYBIND11_MAKE_OPAQUE(std::vector<HepMC3::GenParticleData>);
+PYBIND11_MAKE_OPAQUE(std::vector<HepMC3::GenVertexData>);
 
 namespace py = pybind11;
 using namespace py::literals;

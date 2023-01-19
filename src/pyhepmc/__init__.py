@@ -30,13 +30,18 @@ Differences between HepMC3 C++ and pyhepmc
 Missing functionality
 ---------------------
 
-- Not yet implemented: ``GenParticleData``, ``GenVertexData``, ``ReaderMT``.
-  These will be added in the future.
+- ``ReaderMT`` will not be implemented. If you want to use multi-threaded IO,
+  it is better to use the high-level threading API of Python to achieve this.
+  You can read the next GenEvent in a child thread from a file while you are
+  processing the current event in the main thread.
 
 """
 from pyhepmc._core import (
     Units,
     FourVector,
+    GenEventData,
+    GenParticleData,
+    GenVertexData,
     GenEvent,
     GenParticle,
     GenVertex,
@@ -69,6 +74,9 @@ __version__ = version("pyhepmc")
 __all__ = (
     "Units",
     "FourVector",
+    "GenEventData",
+    "GenParticleData",
+    "GenVertexData",
     "GenEvent",
     "GenParticle",
     "GenVertex",

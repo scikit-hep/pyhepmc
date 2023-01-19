@@ -1,6 +1,9 @@
 #include "HepMC3/GenPdfInfo.h"
 #include "HepMC3/LHEFAttributes.h"
 #include "pointer.hpp"
+#include <HepMC3/Data/GenEventData.h>
+#include <HepMC3/Data/GenParticleData.h>
+#include <HepMC3/Data/GenVertexData.h>
 #include <HepMC3/GenEvent.h>
 #include <HepMC3/GenHeavyIon.h>
 #include <HepMC3/GenParticle.h>
@@ -12,6 +15,11 @@ namespace HepMC3 {
 template <class T>
 bool operator!=(const T& a, const T& b) {
   return !operator==(a, b);
+}
+
+template <class T>
+bool operator==(const std::vector<T>& a, const std::vector<T>& b) {
+  return std::equal(a.begin(), a.end(), b.begin(), b.end());
 }
 
 // equality comparions used by unit tests
@@ -73,10 +81,8 @@ bool operator==(const GenRunInfo& a, const GenRunInfo& b) {
   const auto b_attr = b.attributes();
   return a.tools().size() == b.tools().size() &&
          a.weight_names().size() == b.weight_names().size() &&
-         a_attr.size() == b_attr.size() &&
-         std::equal(a.tools().begin(), a.tools().end(), b.tools().begin()) &&
-         std::equal(a.weight_names().begin(), a.weight_names().end(),
-                    b.weight_names().begin()) &&
+         a_attr.size() == b_attr.size() && a.tools() == b.tools() &&
+         a.weight_names() == b.weight_names() &&
          std::equal(a_attr.begin(), a_attr.end(), b_attr.begin(),
                     [](const std::pair<std::string, AttributePtr>& a,
                        const std::pair<std::string, AttributePtr>& b) {
@@ -144,6 +150,24 @@ bool operator==(const GenEvent& a, const GenEvent& b) {
 
   // if all vertices compare equal, then also all particles are equal
   return equal_vertex_sets(a.vertices(), b.vertices());
+}
+
+bool operator==(const GenParticleData& a, const GenParticleData& b) {
+  return a.pid == b.pid && a.status == b.status && a.is_mass_set == b.is_mass_set &&
+         a.mass == b.mass && a.momentum == b.momentum;
+}
+
+bool operator==(const GenVertexData& a, const GenVertexData& b) {
+  return a.status == b.status && a.position == b.position;
+}
+
+bool operator==(const GenEventData& a, const GenEventData& b) {
+  return a.event_number == b.event_number && a.momentum_unit == b.momentum_unit &&
+         a.length_unit == b.length_unit && a.particles == b.particles &&
+         a.vertices == b.vertices && a.weights == b.weights &&
+         a.event_pos == b.event_pos && a.links1 == b.links1 && a.links2 == b.links2 &&
+         a.attribute_id == b.attribute_id && a.attribute_name == b.attribute_name &&
+         a.attribute_string == b.attribute_string;
 }
 
 } // namespace HepMC3

@@ -28,10 +28,7 @@ find_program(
         g++-11
         g++-10
         g++-9
-        g++-8
-        g++-7
-        g++-6
-        g++-5)
+        g++-8)
 if(mold_executable AND gxx_executable)
   message(STATUS "Using mold: ${mold_executable}")
   add_compile_options(-fuse-ld=mold)
@@ -40,7 +37,7 @@ endif()
 
 project(pyhepmc LANGUAGES CXX)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+if(GCC)
   # HepMC3 uses reinterpret_cast instead of const_cast
   add_compile_options(-Wno-strict-aliasing)
 endif()
