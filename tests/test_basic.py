@@ -456,7 +456,7 @@ def test_GenEventData(evt):
     assert_equal(a["z"], [v.position.z for v in evt.vertices])
 
     assert len(ed.particles) == 8
-    b = ed.particles.asarray()
+    b = ed.particles
     assert_equal(b["status"], [p.status for p in evt.particles])
     assert_equal(b["pid"], [p.pid for p in evt.particles])
     assert_equal(b["px"], [p.momentum.px for p in evt.particles])
@@ -464,10 +464,10 @@ def test_GenEventData(evt):
 
     a["status"] = 2
     assert ed.vertices[0]["status"] == 2
-    ed.particles[:, "mass"] = 123
+    ed.particles["mass"] = 123
     assert ed.particles[0]["mass"] == 123
 
     evt2 = hep.GenEvent()
     evt2.read_data(ed)
-    assert_equal([v.status for v in evt2.vertices], 2)
-    assert_equal([p.mass for p in evt2.particles], 123)
+    assert_equal([v.status for v in evt2.vertices], [2] * 4)
+    assert_equal([p.generated_mass for p in evt2.particles], [123] * 8)
