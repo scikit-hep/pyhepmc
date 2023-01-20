@@ -14,7 +14,7 @@ py::object particledata_asarray(std::vector<GenParticleData>& self) {
 
 py::object vertexdata_asarray(std::vector<GenVertexData>& self) {
   auto dt = py::dtype::of<VertexData>();
-  ssize_t shape[1] = {self.size()};
+  ssize_t shape[1] = {static_cast<ssize_t>(self.size())};
   return py::array(dt, shape, static_cast<void*>(self.data()));
 }
 
