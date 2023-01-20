@@ -12,17 +12,9 @@ struct GenParticleData;
 struct GenVertexData;
 } // namespace HepMC3
 
-struct FourPos {
-  double x, y, z, t;
-};
-
 struct VertexData {
   int status;
-  FourPos position;
-};
-
-struct FourMom {
-  double px, py, pz, e;
+  double x, y, z, t;
 };
 
 struct ParticleData {
@@ -30,7 +22,7 @@ struct ParticleData {
   int status;
   bool is_mass_set;
   double mass;
-  FourMom momentum;
+  double px, py, pz, e;
 };
 
 PYBIND11_MAKE_OPAQUE(std::vector<HepMC3::GenParticleData>);
@@ -70,5 +62,6 @@ _T overload_cast(_T x) {
 #define REPR(name) .def("__repr__", repr<name>)
 #define EQ(name) \
   .def("__eq__", py::overload_cast<const name&, const name&>(HepMC3::operator==))
+#define DEF(name) .def(#name, name)
 
 #endif
