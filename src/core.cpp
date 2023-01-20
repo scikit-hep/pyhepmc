@@ -74,6 +74,11 @@ py::object vertexdata_asarray(std::vector<GenVertexData>&);
 PYBIND11_MODULE(_core, m) {
   using namespace HepMC3;
 
+  PYBIND11_NUMPY_DTYPE(FourMom, px, py, pz, e);
+  PYBIND11_NUMPY_DTYPE(FourPos, x, y, z, t);
+  PYBIND11_NUMPY_DTYPE(ParticleData, pid, status, is_mass_set, mass, momentum);
+  PYBIND11_NUMPY_DTYPE(VertexData, status, position);
+
   py::module_ m_doc = py::module_::import("pyhepmc._doc");
   auto doc = py::cast<std::map<std::string, std::string>>(m_doc.attr("doc"));
 

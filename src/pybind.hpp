@@ -12,6 +12,27 @@ struct GenParticleData;
 struct GenVertexData;
 } // namespace HepMC3
 
+struct FourPos {
+  double x, y, z, t;
+};
+
+struct VertexData {
+  int status;
+  FourPos position;
+};
+
+struct FourMom {
+  double px, py, pz, e;
+};
+
+struct ParticleData {
+  int pid;
+  int status;
+  bool is_mass_set;
+  double mass;
+  FourMom momentum;
+};
+
 PYBIND11_MAKE_OPAQUE(std::vector<HepMC3::GenParticleData>);
 PYBIND11_MAKE_OPAQUE(std::vector<HepMC3::GenVertexData>);
 
