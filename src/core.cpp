@@ -1,13 +1,12 @@
 #include "HepMC3/AssociatedParticle.h"
 #include "HepMC3/GenPdfInfo_fwd.h"
 #include "attributes_view.hpp"
+#include "geneventdata.hpp"
 #include "pointer.hpp"
 #include "pybind.hpp"
 #include "repr.hpp"
 #include <HepMC3/Attribute.h>
 #include <HepMC3/Data/GenEventData.h>
-#include <HepMC3/Data/GenParticleData.h>
-#include <HepMC3/Data/GenVertexData.h>
 #include <HepMC3/FourVector.h>
 #include <HepMC3/GenCrossSection.h>
 #include <HepMC3/GenEvent.h>
@@ -38,8 +37,6 @@ void register_io(py::module& m);
 
 namespace HepMC3 {
 
-bool operator==(const GenParticleData& a, const GenParticleData& b);
-bool operator==(const GenVertexData& a, const GenVertexData& b);
 bool operator==(const GenEventData& a, const GenEventData& b);
 bool operator==(const GenParticle& a, const GenParticle& b);
 bool operator==(const GenVertex& a, const GenVertex& b);
@@ -65,9 +62,6 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
                  py::object parents, py::object children, py::object vx, py::object vy,
                  py::object vz, py::object vt);
-
-py::object particledata_asarray(std::vector<GenParticleData>& self);
-py::object vertexdata_asarray(std::vector<GenVertexData>& self);
 
 #define NP_ARRAY(kind, type, method)                              \
   py::array_t<type> np_##kind##_##method(GenEvent& self) {        \
@@ -112,8 +106,7 @@ NP_ARRAY2(vertices, double, position, t)
 PYBIND11_MODULE(_core, m) {
   using namespace HepMC3;
 
-  PYBIND11_NUMPY_DTYPE(ParticleData, pid, status, is_mass_set, mass, px, py, pz, e);
-  PYBIND11_NUMPY_DTYPE(VertexData, status, x, y, z, t);
+  register_geneventdata_dtypes();
 
   py::module_ m_doc = py::module_::import("pyhepmc._doc");
   auto doc = py::cast<std::map<std::string, std::string>>(m_doc.attr("doc"));
@@ -256,48 +249,21 @@ PYBIND11_MODULE(_core, m) {
       // clang-format on
       ;
 
-  py::class_<GenParticleData>(m, "GenParticleData", DOC(GenParticleData))
-      .def(py::init<>())
-      // clang-format off
-      ATTR(pid, GenParticleData)
-      ATTR(status, GenParticleData)
-      ATTR(is_mass_set, GenParticleData)
-      ATTR(mass, GenParticleData)
-      ATTR(momentum, GenParticleData)
-      EQ(GenParticleData)
-      // clang-format on
-      ;
-
-  py::class_<GenVertexData>(m, "GenVertexData", DOC(GenVertexData))
-      .def(py::init<>())
-      // clang-format off
-      ATTR(status, GenVertexData)
-      ATTR(position, GenVertexData)
-      PROP_RO(is_zero, GenVertexData)
-      EQ(GenVertexData)
-      // clang-format on
-      ;
-
-  py::bind_vector<std::vector<GenParticleData>>(m, "VectorGenParticleData")
-      .def("asarray", particledata_asarray);
-  py::bind_vector<std::vector<GenVertexData>>(m, "VectorGenVertexData")
-      .def("asarray", vertexdata_asarray);
-
   py::class_<GenEventData>(m, "GenEventData", DOC(GenEventData))
       .def(py::init<>())
       // clang-format off
+      PROP_RO2(weights, GenEventData)
+      PROP_RO2(vertices, GenEventData)
+      PROP_RO2(particles, GenEventData)
+      PROP_RO2(links1, GenEventData)
+      PROP_RO2(links2, GenEventData)
+      PROP_RO2(attribute_id, GenEventData)
+      PROP_RO2(attribute_name, GenEventData)
+      PROP_RO2(attribute_string, GenEventData)
       ATTR(event_number, GenEventData)
       ATTR(momentum_unit, GenEventData)
       ATTR(length_unit, GenEventData)
-      ATTR(particles, GenEventData)
-      ATTR(vertices, GenEventData)
-      ATTR(weights, GenEventData)
       ATTR(event_pos, GenEventData)
-      ATTR(links1, GenEventData)
-      ATTR(links2, GenEventData)
-      ATTR(attribute_id, GenEventData)
-      ATTR(attribute_name, GenEventData)
-      ATTR(attribute_string, GenEventData)
       EQ(GenEventData)
       // clang-format on
       ;
@@ -705,9 +671,6 @@ PYBIND11_MODULE(_core, m) {
       METH(has_set_position, GenVertex)
       // clang-format on
       ;
-
-  // py::class_<GenParticleData>(m, "GenParticleData");
-  // py::class_<GenVertexData>(m, "GenVertexData");
 
   m.def(
       "content",

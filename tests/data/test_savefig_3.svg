@@ -5,17 +5,17 @@
  -->
 <!-- Title: dummy&#45;1.0
 event number = 1 Pages: 1 -->
-<svg width="404pt" height="80pt"
- viewBox="0.00 0.00 404.00 79.88" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="405pt" height="80pt"
+ viewBox="0.00 0.00 405.00 79.88" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 75.88)">
 <title>dummy&#45;1.0
 event number = 1</title>
-<polygon fill="white" stroke="none" points="-4,4 -4,-75.88 400,-75.88 400,4 -4,4"/>
+<polygon fill="white" stroke="none" points="-4,4 -4,-75.88 401,-75.88 401,4 -4,4"/>
 <!-- &#45;1 -->
 <g id="node1" class="node">
 <title>&#45;1</title>
 <g id="a_node1"><a xlink:title="FourVector(1, 1, 1, 1) mm&#10;status = 0">
-<ellipse fill="black" stroke="black" cx="100.4" cy="-4.88" rx="1.8" ry="1.8"/>
+<ellipse fill="black" stroke="black" cx="101.4" cy="-4.88" rx="1.8" ry="1.8"/>
 </a>
 </g>
 </g>
@@ -23,19 +23,19 @@ event number = 1</title>
 <g id="node3" class="node">
 <title>&#45;3</title>
 <g id="a_node3"><a xlink:title="FourVector(3, 3, 3, 3) mm&#10;status = 0">
-<ellipse fill="black" stroke="black" cx="194" cy="-23.88" rx="1.8" ry="1.8"/>
+<ellipse fill="black" stroke="black" cx="195" cy="-23.88" rx="1.8" ry="1.8"/>
 </a>
 </g>
 </g>
 <!-- &#45;1&#45;&gt;&#45;3 -->
 <g id="edge3" class="edge">
 <title>&#45;1&#45;&gt;&#45;3</title>
-<g id="a_edge3"><a xlink:title="d [PDGID: 1]&#10;FourVector(0.75, &#45;1.57, 32.2, 32.2) GeV&#10;m = 0 GeV&#10;status = 3&#10;quarks = d&#10;Q = &#45;0.333">
-<path fill="none" stroke="darkred" stroke-width="0.5" d="M102.48,-4.62C109.32,-2.98 147.06,5.23 174.2,-5.88 182.9,-9.45 189.87,-19.1 192.18,-22.6"/>
+<g id="a_edge3"><a xlink:title="PDGID = 1&#10;FourVector(0.75, &#45;1.57, 32.2, 32.2) GeV&#10;m = 0 GeV&#10;status = 3&#10;quarks = d&#10;Q = &#45;0.333">
+<path fill="none" stroke="darkred" stroke-width="0.5" d="M103.48,-4.62C110.32,-2.98 148.06,5.23 175.2,-5.88 183.9,-9.45 190.87,-19.1 193.18,-22.6"/>
 </a>
 </g>
-<g id="a_edge3&#45;label"><a xlink:title="d [PDGID: 1]&#10;FourVector(0.75, &#45;1.57, 32.2, 32.2) GeV&#10;m = 0 GeV&#10;status = 3&#10;quarks = d&#10;Q = &#45;0.333">
-<text text-anchor="middle" x="147.2" y="-9.68" font-family="Times,serif" font-size="14.00">d 32 GeV</text>
+<g id="a_edge3&#45;label"><a xlink:title="PDGID = 1&#10;FourVector(0.75, &#45;1.57, 32.2, 32.2) GeV&#10;m = 0 GeV&#10;status = 3&#10;quarks = d&#10;Q = &#45;0.333">
+<text text-anchor="middle" x="148.2" y="-9.68" font-family="Times,serif" font-size="14.00">d 32 GeV</text>
 </a>
 </g>
 </g>
@@ -43,19 +43,19 @@ event number = 1</title>
 <g id="node2" class="node">
 <title>&#45;2</title>
 <g id="a_node2"><a xlink:title="FourVector(2, 2, 2, 2) mm&#10;status = 0">
-<ellipse fill="black" stroke="black" cx="100.4" cy="-42.88" rx="1.8" ry="1.8"/>
+<ellipse fill="black" stroke="black" cx="101.4" cy="-42.88" rx="1.8" ry="1.8"/>
 </a>
 </g>
 </g>
 <!-- &#45;2&#45;&gt;&#45;3 -->
 <g id="edge4" class="edge">
 <title>&#45;2&#45;&gt;&#45;3</title>
-<g id="a_edge4"><a xlink:title="u̅ [PDGID: &#45;2]&#10;FourVector(&#45;3.05, &#45;19, &#45;54.6, 57.9) GeV&#10;m = 0 GeV&#10;status = 4&#10;quarks = U&#10;Q = &#45;0.667">
-<path fill="none" stroke="darkred" stroke-width="0.5" d="M102.43,-42.67C111.78,-40.73 182.03,-26.16 191.86,-24.12"/>
+<g id="a_edge4"><a xlink:title="PDGID = &#45;2&#10;FourVector(&#45;3.05, &#45;19, &#45;54.6, 57.9) GeV&#10;m = 0 GeV&#10;status = 4&#10;quarks = U&#10;Q = &#45;0.667">
+<path fill="none" stroke="darkred" stroke-width="0.5" d="M103.43,-42.67C112.78,-40.73 183.03,-26.16 192.86,-24.12"/>
 </a>
 </g>
-<g id="a_edge4&#45;label"><a xlink:title="u̅ [PDGID: &#45;2]&#10;FourVector(&#45;3.05, &#45;19, &#45;54.6, 57.9) GeV&#10;m = 0 GeV&#10;status = 4&#10;quarks = U&#10;Q = &#45;0.667">
-<text text-anchor="middle" x="147.2" y="-41.68" font-family="Times,serif" font-size="14.00">u̅ 58 GeV</text>
+<g id="a_edge4&#45;label"><a xlink:title="PDGID = &#45;2&#10;FourVector(&#45;3.05, &#45;19, &#45;54.6, 57.9) GeV&#10;m = 0 GeV&#10;status = 4&#10;quarks = U&#10;Q = &#45;0.667">
+<text text-anchor="middle" x="148.2" y="-41.68" font-family="Times,serif" font-size="14.00">u̅ 58 GeV</text>
 </a>
 </g>
 </g>
@@ -63,19 +63,19 @@ event number = 1</title>
 <g id="node4" class="node">
 <title>&#45;4</title>
 <g id="a_node4"><a xlink:title="FourVector(4, 4, 4, 4) mm&#10;status = 0">
-<ellipse fill="black" stroke="black" cx="300.6" cy="-42.88" rx="1.8" ry="1.8"/>
+<ellipse fill="black" stroke="black" cx="301.6" cy="-42.88" rx="1.8" ry="1.8"/>
 </a>
 </g>
 </g>
 <!-- &#45;3&#45;&gt;&#45;4 -->
 <g id="edge5" class="edge">
 <title>&#45;3&#45;&gt;&#45;4</title>
-<g id="a_edge5"><a xlink:title="W⁻ [PDGID: &#45;24]&#10;FourVector(1.52, &#45;20.7, &#45;20.6, 85.9) GeV&#10;m = 80.8 GeV&#10;status = 5&#10;quarks = &#10;Q = &#45;1&#10;cτ = 9.49e&#45;14 mm">
-<path fill="none" stroke="goldenrod" stroke-width="0.5" d="M196.17,-24.1C206.95,-26.06 288.42,-40.85 298.56,-42.7"/>
+<g id="a_edge5"><a xlink:title="PDGID = &#45;24&#10;FourVector(1.52, &#45;20.7, &#45;20.6, 85.9) GeV&#10;m = 80.8 GeV&#10;status = 5&#10;Q = &#45;1&#10;cτ = 9.49e&#45;14 mm">
+<path fill="none" stroke="goldenrod" stroke-width="0.5" d="M197.17,-24.1C207.95,-26.06 289.42,-40.85 299.56,-42.7"/>
 </a>
 </g>
-<g id="a_edge5&#45;label"><a xlink:title="W⁻ [PDGID: &#45;24]&#10;FourVector(1.52, &#45;20.7, &#45;20.6, 85.9) GeV&#10;m = 80.8 GeV&#10;status = 5&#10;quarks = &#10;Q = &#45;1&#10;cτ = 9.49e&#45;14 mm">
-<text text-anchor="middle" x="247.3" y="-42.68" font-family="Times,serif" font-size="14.00">W⁻ 86 GeV</text>
+<g id="a_edge5&#45;label"><a xlink:title="PDGID = &#45;24&#10;FourVector(1.52, &#45;20.7, &#45;20.6, 85.9) GeV&#10;m = 80.8 GeV&#10;status = 5&#10;Q = &#45;1&#10;cτ = 9.49e&#45;14 mm">
+<text text-anchor="middle" x="248.3" y="-42.68" font-family="Times,serif" font-size="14.00">W⁻ 86 GeV</text>
 </a>
 </g>
 </g>
@@ -83,12 +83,12 @@ event number = 1</title>
 <!-- &#45;3&#45;&gt;out_6 -->
 <g id="edge6" class="edge">
 <title>&#45;3&#45;&gt;out_6</title>
-<g id="a_edge6"><a xlink:title="γ [PDGID: 22]&#10;FourVector(&#45;3.81, 0.113, &#45;1.83, 4.23) GeV&#10;m = 0 GeV&#10;status = 6&#10;quarks = &#10;Q = 0">
-<path fill="none" stroke="goldenrod" stroke-width="0.5" stroke-dasharray="5,2" d="M195.86,-22.75C198.27,-19.66 205.49,-11.11 213.8,-7.88 246.04,4.62 290.31,-3.08 298.33,-4.63"/>
+<g id="a_edge6"><a xlink:title="PDGID = 22&#10;FourVector(&#45;3.81, 0.113, &#45;1.83, 4.23) GeV&#10;m = 0 GeV&#10;status = 6&#10;Q = 0">
+<path fill="none" stroke="goldenrod" stroke-width="0.5" stroke-dasharray="5,2" d="M196.86,-22.75C199.27,-19.66 206.49,-11.11 214.8,-7.88 247.04,4.62 291.31,-3.08 299.33,-4.63"/>
 </a>
 </g>
-<g id="a_edge6&#45;label"><a xlink:title="γ [PDGID: 22]&#10;FourVector(&#45;3.81, 0.113, &#45;1.83, 4.23) GeV&#10;m = 0 GeV&#10;status = 6&#10;quarks = &#10;Q = 0">
-<text text-anchor="middle" x="247.3" y="-11.68" font-family="Times,serif" font-size="14.00">γ 4.2 GeV</text>
+<g id="a_edge6&#45;label"><a xlink:title="PDGID = 22&#10;FourVector(&#45;3.81, 0.113, &#45;1.83, 4.23) GeV&#10;m = 0 GeV&#10;status = 6&#10;Q = 0">
+<text text-anchor="middle" x="248.3" y="-11.68" font-family="Times,serif" font-size="14.00">γ 4.2 GeV</text>
 </a>
 </g>
 </g>
@@ -96,12 +96,12 @@ event number = 1</title>
 <!-- &#45;4&#45;&gt;out_7 -->
 <g id="edge7" class="edge">
 <title>&#45;4&#45;&gt;out_7</title>
-<g id="a_edge7"><a xlink:title="d [PDGID: 1]&#10;FourVector(&#45;2.44, 28.8, 6.08, 29.6) GeV&#10;m = 0.01 GeV&#10;status = 7&#10;quarks = d&#10;Q = &#45;0.333">
-<path fill="none" stroke="darkred" stroke-width="0.5" d="M302.63,-43.1C311.98,-45.04 382.23,-59.61 392.06,-61.65"/>
+<g id="a_edge7"><a xlink:title="PDGID = 1&#10;FourVector(&#45;2.44, 28.8, 6.08, 29.6) GeV&#10;m = 0.01 GeV&#10;status = 7&#10;quarks = d&#10;Q = &#45;0.333">
+<path fill="none" stroke="darkred" stroke-width="0.5" d="M303.63,-43.1C312.98,-45.04 383.23,-59.61 393.06,-61.65"/>
 </a>
 </g>
-<g id="a_edge7&#45;label"><a xlink:title="d [PDGID: 1]&#10;FourVector(&#45;2.44, 28.8, 6.08, 29.6) GeV&#10;m = 0.01 GeV&#10;status = 7&#10;quarks = d&#10;Q = &#45;0.333">
-<text text-anchor="middle" x="347.4" y="-60.68" font-family="Times,serif" font-size="14.00">d 30 GeV</text>
+<g id="a_edge7&#45;label"><a xlink:title="PDGID = 1&#10;FourVector(&#45;2.44, 28.8, 6.08, 29.6) GeV&#10;m = 0.01 GeV&#10;status = 7&#10;quarks = d&#10;Q = &#45;0.333">
+<text text-anchor="middle" x="348.4" y="-60.68" font-family="Times,serif" font-size="14.00">d 30 GeV</text>
 </a>
 </g>
 </g>
@@ -109,12 +109,12 @@ event number = 1</title>
 <!-- &#45;4&#45;&gt;out_8 -->
 <g id="edge8" class="edge">
 <title>&#45;4&#45;&gt;out_8</title>
-<g id="a_edge8"><a xlink:title="u̅ [PDGID: &#45;2]&#10;FourVector(3.96, &#45;49.5, &#45;26.7, 56.4) GeV&#10;m = 0.006 GeV&#10;status = 8&#10;quarks = U&#10;Q = &#45;0.667">
-<path fill="none" stroke="darkred" stroke-width="0.5" d="M302.48,-41.83C304.95,-38.95 312.28,-30.98 320.4,-27.88 347.84,-17.43 385.33,-22.64 392.12,-23.71"/>
+<g id="a_edge8"><a xlink:title="PDGID = &#45;2&#10;FourVector(3.96, &#45;49.5, &#45;26.7, 56.4) GeV&#10;m = 0.006 GeV&#10;status = 8&#10;quarks = U&#10;Q = &#45;0.667">
+<path fill="none" stroke="darkred" stroke-width="0.5" d="M303.48,-41.83C305.95,-38.95 313.28,-30.98 321.4,-27.88 348.84,-17.43 386.33,-22.64 393.12,-23.71"/>
 </a>
 </g>
-<g id="a_edge8&#45;label"><a xlink:title="u̅ [PDGID: &#45;2]&#10;FourVector(3.96, &#45;49.5, &#45;26.7, 56.4) GeV&#10;m = 0.006 GeV&#10;status = 8&#10;quarks = U&#10;Q = &#45;0.667">
-<text text-anchor="middle" x="347.4" y="-31.68" font-family="Times,serif" font-size="14.00">u̅ 56 GeV</text>
+<g id="a_edge8&#45;label"><a xlink:title="PDGID = &#45;2&#10;FourVector(3.96, &#45;49.5, &#45;26.7, 56.4) GeV&#10;m = 0.006 GeV&#10;status = 8&#10;quarks = U&#10;Q = &#45;0.667">
+<text text-anchor="middle" x="348.4" y="-31.68" font-family="Times,serif" font-size="14.00">u̅ 56 GeV</text>
 </a>
 </g>
 </g>
@@ -122,13 +122,13 @@ event number = 1</title>
 <!-- in_1&#45;&gt;&#45;1 -->
 <g id="edge1" class="edge">
 <title>in_1&#45;&gt;&#45;1</title>
-<g id="a_edge1"><a xlink:title="p [PDGID: 2212]&#10;FourVector(0, 0, 7e+03, 7e+03) GeV&#10;m = 0.938 GeV&#10;status = 1&#10;A,Z = 1,1&#10;quarks = uud&#10;Q = 1">
-<path fill="none" stroke="black" stroke-width="4" d="M3.88,-4.88C11.48,-4.88 57.09,-4.88 82.44,-4.88"/>
-<polygon fill="black" stroke="black" stroke-width="4" points="82.14,-8.38 92.14,-4.88 82.14,-1.38 82.14,-8.38"/>
+<g id="a_edge1"><a xlink:title="PDGID = 2212&#10;FourVector(0, 0, 7e+03, 7e+03) GeV&#10;m = 0.938 GeV&#10;status = 1&#10;A,Z = 1,1&#10;quarks = uud&#10;Q = 1">
+<path fill="none" stroke="black" stroke-width="4" d="M3.9,-4.88C11.57,-4.88 57.66,-4.88 83.27,-4.88"/>
+<polygon fill="black" stroke="black" stroke-width="4" points="83.13,-8.38 93.13,-4.88 83.13,-1.38 83.13,-8.38"/>
 </a>
 </g>
-<g id="a_edge1&#45;label"><a xlink:title="p [PDGID: 2212]&#10;FourVector(0, 0, 7e+03, 7e+03) GeV&#10;m = 0.938 GeV&#10;status = 1&#10;A,Z = 1,1&#10;quarks = uud&#10;Q = 1">
-<text text-anchor="middle" x="51.1" y="-8.68" font-family="Times,serif" font-size="14.00">p 7 TeV</text>
+<g id="a_edge1&#45;label"><a xlink:title="PDGID = 2212&#10;FourVector(0, 0, 7e+03, 7e+03) GeV&#10;m = 0.938 GeV&#10;status = 1&#10;A,Z = 1,1&#10;quarks = uud&#10;Q = 1">
+<text text-anchor="middle" x="51.6" y="-8.68" font-family="Times,serif" font-size="14.00">p 7 TeV</text>
 </a>
 </g>
 </g>
@@ -136,13 +136,13 @@ event number = 1</title>
 <!-- in_2&#45;&gt;&#45;2 -->
 <g id="edge2" class="edge">
 <title>in_2&#45;&gt;&#45;2</title>
-<g id="a_edge2"><a xlink:title="⁴He [PDGID: 1000020040]&#10;FourVector(0, 0, &#45;7e+03, 7e+03) GeV&#10;m = 3.756 GeV&#10;status = 2&#10;A,Z = 4,2&#10;quarks = &#10;Q = 2">
-<path fill="none" stroke="black" stroke-width="4" d="M3.88,-42.88C11.48,-42.88 57.09,-42.88 82.44,-42.88"/>
-<polygon fill="black" stroke="black" stroke-width="4" points="82.14,-46.38 92.14,-42.88 82.14,-39.38 82.14,-46.38"/>
+<g id="a_edge2"><a xlink:title="PDGID = 1000020040&#10;FourVector(0, 0, &#45;7e+03, 7e+03) GeV&#10;m = 3.756 GeV&#10;status = 2&#10;A,Z = 4,2&#10;Q = 2">
+<path fill="none" stroke="black" stroke-width="4" d="M3.9,-42.88C11.57,-42.88 57.66,-42.88 83.27,-42.88"/>
+<polygon fill="black" stroke="black" stroke-width="4" points="83.13,-46.38 93.13,-42.88 83.13,-39.38 83.13,-46.38"/>
 </a>
 </g>
-<g id="a_edge2&#45;label"><a xlink:title="⁴He [PDGID: 1000020040]&#10;FourVector(0, 0, &#45;7e+03, 7e+03) GeV&#10;m = 3.756 GeV&#10;status = 2&#10;A,Z = 4,2&#10;quarks = &#10;Q = 2">
-<text text-anchor="middle" x="51.1" y="-46.68" font-family="Times,serif" font-size="14.00">⁴He 7 TeV</text>
+<g id="a_edge2&#45;label"><a xlink:title="PDGID = 1000020040&#10;FourVector(0, 0, &#45;7e+03, 7e+03) GeV&#10;m = 3.756 GeV&#10;status = 2&#10;A,Z = 4,2&#10;Q = 2">
+<text text-anchor="middle" x="51.6" y="-46.68" font-family="Times,serif" font-size="14.00">⁴He 7 TeV</text>
 </a>
 </g>
 </g>

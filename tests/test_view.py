@@ -138,12 +138,15 @@ def test_savefig_2(evt):
 @pytest.mark.parametrize("ext", ("pdf", "png", "svg"))
 def test_savefig_3(evt, ext):
     pytest.importorskip("particle")
-    mpl = pytest.importorskip("matplotlib.testing.compare")
+    testing = pytest.importorskip("matplotlib.testing")
+    compare = pytest.importorskip("matplotlib.testing.compare")
+    testing.set_font_settings_for_testing()
+    testing.set_reproducibility_for_testing()
     fname = f"test_savefig_3.{ext}"
     expected = REFERENCE_DIR / fname
     actual = RESULT_DIR / fname
     view.savefig(evt, actual)
-    assert mpl.compare_images(expected, actual, 1e-3) is None
+    assert compare.compare_images(expected, actual, 1e-3) is None
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")

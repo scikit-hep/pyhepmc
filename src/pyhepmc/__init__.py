@@ -40,8 +40,6 @@ from pyhepmc._core import (
     Units,
     FourVector,
     GenEventData,
-    GenParticleData,
-    GenVertexData,
     GenEvent,
     GenParticle,
     GenVertex,

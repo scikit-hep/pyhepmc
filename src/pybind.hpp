@@ -7,27 +7,6 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
-namespace HepMC3 {
-struct GenParticleData;
-struct GenVertexData;
-} // namespace HepMC3
-
-struct VertexData {
-  int status;
-  double x, y, z, t;
-};
-
-struct ParticleData {
-  int pid;
-  int status;
-  bool is_mass_set;
-  double mass;
-  double px, py, pz, e;
-};
-
-PYBIND11_MAKE_OPAQUE(std::vector<HepMC3::GenParticleData>);
-PYBIND11_MAKE_OPAQUE(std::vector<HepMC3::GenVertexData>);
-
 namespace py = pybind11;
 using namespace py::literals;
 
@@ -43,6 +22,7 @@ _T overload_cast(_T x) {
 
 #define FUNC(name) m.def(#name, name, DOC(name))
 #define PROP_RO(name, cls) .def_property_readonly(#name, &cls::name, DOC(cls.name))
+#define PROP_RO2(name, cls) .def_property_readonly(#name, cls##_##name, DOC(cls.name))
 #define PROP_ROS(name, cls) \
   .def_property_readonly_static(#name, &cls::name, DOC(cls.name))
 #define PROP_RO_OL(name, cls, rval)                                         \
