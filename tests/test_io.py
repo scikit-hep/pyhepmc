@@ -355,6 +355,30 @@ def test_open_with_writer(evt, writer):  # noqa
     os.unlink(filename)
 
 
+def test_open_standalone(evt):
+    filename = f"test_open_standalone.dat"
+
+    f = hep.open(filename, "w")
+    f.write(evt)
+    f.flush()
+    f.close()
+
+    f2 = hep.open(filename)
+    evt2 = f2.read()
+    f2.close()
+
+    assert evt2 == evt
+
+    f3 = hep.io.HepMCFile(filename)
+    for evt3 in f3:
+        pass
+    f3.close()
+
+    assert evt3 == evt
+
+    os.unlink(filename)
+
+
 def test_deprecated_import():
     with pytest.warns(np.VisibleDeprecationWarning):
         from pyhepmc import ReaderAscii  # noqa F401
