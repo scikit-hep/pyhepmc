@@ -9,6 +9,7 @@ The :func:`open` function is even easier to use. It can read any
 supported file and will auto-detect the format. It can be used for
 reading and writing.
 """
+from __future__ import annotations
 from ._core import (
     GenEvent,
     ReaderAscii,
@@ -21,7 +22,6 @@ from ._core import (
     UnparsedAttribute,
     pyiostream,
 )
-import contextlib
 from pathlib import PurePath
 import typing as _tp
 
@@ -186,15 +186,9 @@ class _WrappedWriter:
     __exit__ = _exit_close
 
 
-@contextlib.contextmanager
-def open(
-    filename: _Filename,
-    mode: str = "r",
-    precision: int = None,
-    format: str = None,
-) -> _tp.Any:
+class HepMCFile:
     """
-    Open HepMC files for reading or writing.
+    HepMC file for reading or writing.
 
     Parameters
     ----------
@@ -218,68 +212,124 @@ def open(
     ------
     IOError if reading or writing fails.
     """
-    fn = str(filename)
 
-    if fn.endswith(".gz"):
-        import gzip
+    def __init__(
+        self,
+        filename: _Filename,
+        mode: str = "r",
+        precision: int = None,
+        format: str = None,
+    ):
+        fn = str(filename)
+        if fn.endswith(".gz"):
+            import gzip
 
-        op = gzip.open
-    elif fn.endswith(".bz2"):
-        import bz2
+            op = gzip.open
+        elif fn.endswith(".bz2"):
+            import bz2
 
-        op = bz2.open  # type:ignore
+            op = bz2.open  # type:ignore
 
-    elif fn.endswith(".xz"):
-        import lzma
+        elif fn.endswith(".xz"):
+            import lzma
 
-        op = lzma.open  # type:ignore
-    else:
-        op = _open  # type:ignore
-        mode += "b"
+            op = lzma.open  # type:ignore
+        else:
+            op = _open  # type:ignore
+            mode += "b"
 
-    if mode.startswith("r"):
-        if format is None:
-            # auto-detect
-            with op(fn, mode) as f:
-                chunk = f.read(256)
-            assert isinstance(chunk, bytes)
-            header = chunk.decode()
-            if "HepMC::Asciiv3" in header:
-                Reader = ReaderAscii
-            elif "HepMC::IO_GenEvent" in header:
-                Reader = ReaderAsciiHepMC2
-            elif "<LesHouchesEvents" in header:
-                Reader = ReaderLHEF
+        if mode.startswith("r"):
+            if format is None:
+                # auto-detect
+                with op(fn, mode) as f:
+                    chunk = f.read(256)
+                assert isinstance(chunk, bytes)
+                header = chunk.decode()
+                if "HepMC::Asciiv3" in header:
+                    Reader = ReaderAscii
+                elif "HepMC::IO_GenEvent" in header:
+                    Reader = ReaderAsciiHepMC2
+                elif "<LesHouchesEvents" in header:
+                    Reader = ReaderLHEF
+                else:
+                    # this one has no header
+                    Reader = ReaderHEPEVT
             else:
-                # this one has no header
-                Reader = ReaderHEPEVT
+                Reader = {
+                    "hepmc3": ReaderAscii,
+                    "hepmc2": ReaderAsciiHepMC2,
+                    "lhef": ReaderLHEF,
+                    "hepevt": ReaderHEPEVT,
+                }.get(format.lower(), None)
+                if Reader is None:
+                    raise ValueError(f"format {format} not recognized for reading")
+
+            self._file = op(fn, mode)
+            self._ios = pyiostream(self._file)
+            self._reader = Reader(self._ios)
+            self._writer = None
+
+        elif mode.startswith("w"):
+            if format is None:
+                Writer = WriterAscii
+            else:
+                Writer = {
+                    "hepmc3": WriterAscii,
+                    "hepmc2": WriterAsciiHepMC2,
+                    "hepevt": WriterHEPEVT,
+                }.get(format.lower(), None)
+                if Writer is None:
+                    raise ValueError(f"format {format} not recognized for writing")
+
+            self._file = op(fn, mode)
+            self._ios = pyiostream(self._file)
+            self._reader = None
+            self._writer = _WrappedWriter(self._ios, precision, Writer)
         else:
-            Reader = {
-                "hepmc3": ReaderAscii,
-                "hepmc2": ReaderAsciiHepMC2,
-                "lhef": ReaderLHEF,
-                "hepevt": ReaderHEPEVT,
-            }.get(format.lower(), None)
-            if Reader is None:
-                raise ValueError(f"format {format} not recognized for reading")
-        with op(fn, mode) as f:
-            with pyiostream(f) as io:
-                with Reader(io) as r:
-                    yield r
-    elif mode.startswith("w"):
-        if format is None:
-            Writer = WriterAscii
-        else:
-            Writer = {
-                "hepmc3": WriterAscii,
-                "hepmc2": WriterAsciiHepMC2,
-                "hepevt": WriterHEPEVT,
-            }.get(format.lower(), None)
-            if Writer is None:
-                raise ValueError(f"format {format} not recognized for writing")
-        with op(fn, mode) as f:
-            with pyiostream(f) as io:
-                with _WrappedWriter(io, precision, Writer) as w:
-                    yield w
-    else:
-        raise ValueError(f"mode must be r or w, got {mode}")
+            raise ValueError(f"mode must be r or w, got {mode}")
+
+    def __enter__(self) -> HepMCFile:
+        return self
+
+    __exit__ = _exit_close
+
+    def __iter__(self) -> _tp.Any:
+        return self._reader.__iter__()
+
+    def flush(self) -> None:
+        if not self._writer:
+            raise IOError("File opened for reading")
+        self._ios.flush()
+        self._file.flush()
+
+    def read(self) -> GenEvent:
+        if not self._reader:
+            raise IOError("File openened for writing")
+        return self._reader.read()
+
+    def write(self, event: GenEvent) -> None:
+        if not self._writer:
+            raise IOError("File openened for reading")
+        self._writer.write(event)
+
+    def close(self) -> None:
+        if self._reader:
+            self._reader.close()
+        if self._writer:
+            self._writer.close()
+        self._ios.flush()
+        self._file.close()
+
+
+def open(
+    filename: _Filename,
+    mode: str = "r",
+    precision: int = None,
+    format: str = None,
+) -> _tp.Any:
+    """
+    Open HepMC files for reading or writing.
+
+    See HepMCFile.
+    """
+    return HepMCFile(filename, mode, precision, format)
