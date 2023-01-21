@@ -372,6 +372,7 @@ def test_open_standalone(evt):
     f3 = hep.io.HepMCFile(filename)
     for evt3 in f3:
         pass
+    f3.close()
 
     assert evt3 == evt
 
