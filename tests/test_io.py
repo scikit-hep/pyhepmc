@@ -369,7 +369,7 @@ def test_open_standalone(evt):
 
     assert evt2 == evt
 
-    f3 = hep.HepMCFile(filename)
+    f3 = hep.io.HepMCFile(filename)
     for evt3 in f3:
         pass
 
