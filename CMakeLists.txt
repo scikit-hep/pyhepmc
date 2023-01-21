@@ -1,12 +1,5 @@
 cmake_minimum_required(VERSION 3.13...3.17)
 
-if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-  message(
-    STATUS
-      "You should call this through setup.py so that all variables are set; python setup.py build_ext --inplace"
-  )
-endif()
-
 find_program(ccache_executable ccache)
 if(ccache_executable)
   message(STATUS "Using ccache: ${ccache_executable}")

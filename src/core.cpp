@@ -34,6 +34,7 @@
 // #include "GzReaderAscii.h"
 
 void register_io(py::module& m);
+void register_bench(py::module& m);
 
 namespace HepMC3 {
 
@@ -708,4 +709,5 @@ PYBIND11_MODULE(_core, m) {
   FUNC(equal_vertex_sets);
 
   register_io(m);
+  register_bench(m);
 }
