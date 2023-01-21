@@ -471,3 +471,10 @@ def test_GenEventData(evt):
     evt2.read_data(ed)
     assert_equal([v.status for v in evt2.vertices], [2] * 4)
     assert_equal([p.generated_mass for p in evt2.particles], [123] * 8)
+
+
+def test_numpy_api(evt):
+    pids = evt.numpy.particles.pid
+    assert_equal(pids, [p.pid for p in evt.particles])
+    x = evt.numpy.vertices.x
+    assert_equal(x, [v.position.x for v in evt.vertices])

@@ -2,6 +2,7 @@
 #include "HepMC3/GenPdfInfo_fwd.h"
 #include "attributes_view.hpp"
 #include "geneventdata.hpp"
+#include "numpy_api.hpp"
 #include "pointer.hpp"
 #include "pybind.hpp"
 #include "repr.hpp"
@@ -63,44 +64,6 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
                  py::object parents, py::object children, py::object vx, py::object vy,
                  py::object vz, py::object vt);
-
-#define NP_ARRAY(kind, type, method)                              \
-  py::array_t<type> np_##kind##_##method(GenEvent& self) {        \
-    const auto& p = self.kind();                                  \
-    py::array_t<type> a(p.size());                                \
-    auto a2 = a.mutable_unchecked<1>();                           \
-    for (size_t i = 0; i < p.size(); ++i) a2[i] = p[i]->method(); \
-    return a;                                                     \
-  }
-
-#define NP_ARRAY2(kind, type, method1, method2)                              \
-  py::array_t<type> np_##kind##_##method1##_##method2(GenEvent& self) {      \
-    const auto& p = self.kind();                                             \
-    py::array_t<type> a(p.size());                                           \
-    auto a2 = a.mutable_unchecked<1>();                                      \
-    for (size_t i = 0; i < p.size(); ++i) a2[i] = p[i]->method1().method2(); \
-    return a;                                                                \
-  }
-
-NP_ARRAY(particles, int, id)
-NP_ARRAY(particles, int, pdg_id)
-NP_ARRAY(particles, int, status)
-NP_ARRAY(particles, bool, is_generated_mass_set)
-NP_ARRAY(particles, double, generated_mass)
-
-NP_ARRAY2(particles, double, momentum, px)
-NP_ARRAY2(particles, double, momentum, py)
-NP_ARRAY2(particles, double, momentum, pz)
-NP_ARRAY2(particles, double, momentum, e)
-
-NP_ARRAY(vertices, int, id)
-NP_ARRAY(vertices, int, status)
-NP_ARRAY(vertices, bool, has_set_position)
-
-NP_ARRAY2(vertices, double, position, x)
-NP_ARRAY2(vertices, double, position, y)
-NP_ARRAY2(vertices, double, position, z)
-NP_ARRAY2(vertices, double, position, t)
 
 } // namespace HepMC3
 
@@ -562,23 +525,8 @@ PYBIND11_MODULE(_core, m) {
            "vz"_a = py::none(), "vt"_a = py::none(), DOC(GenEvent.from_hepevt))
       .def("write_data", &GenEvent::write_data, "data"_a, DOC(GenEvent.write_data))
       .def("read_data", &GenEvent::read_data, "data"_a, DOC(GenEvent.read_data))
+      .def_property_readonly("numpy", [](py::object self) { return NumpyAPI(self); })
       // clang-format off
-      DEF(np_particles_generated_mass)
-      DEF(np_particles_id)
-      DEF(np_particles_is_generated_mass_set)
-      DEF(np_particles_momentum_e)
-      DEF(np_particles_momentum_px)
-      DEF(np_particles_momentum_py)
-      DEF(np_particles_momentum_pz)
-      DEF(np_particles_pdg_id)
-      DEF(np_particles_status)
-      DEF(np_vertices_has_set_position)
-      DEF(np_vertices_id)
-      DEF(np_vertices_position_t)
-      DEF(np_vertices_position_x)
-      DEF(np_vertices_position_y)
-      DEF(np_vertices_position_z)
-      DEF(np_vertices_status)
       EQ(GenEvent)
       REPR(GenEvent)
       METH(clear, GenEvent)
@@ -710,4 +658,5 @@ PYBIND11_MODULE(_core, m) {
 
   register_io(m);
   register_bench(m);
+  register_numpy_api(m);
 }

@@ -64,6 +64,7 @@ from pyhepmc._core import (
 from pyhepmc.io import open as open  # noqa: F401
 from pyhepmc import _attributes
 from pyhepmc._setup import Setup
+from pyhepmc.view import to_dot
 from typing import Any
 from importlib.metadata import version
 
@@ -101,12 +102,7 @@ __all__ = (
 
 _attributes.install()
 
-try:
-    from pyhepmc.view import to_dot
-
-    GenEvent._repr_html_ = lambda self: to_dot(self)._repr_html_()
-except ModuleNotFoundError:  # pragma: no cover
-    pass  # pragma: no cover
+GenEvent._repr_html_ = lambda self: to_dot(self)._repr_html_()
 
 
 def __getattr__(name: str) -> Any:
