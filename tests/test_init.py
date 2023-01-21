@@ -19,6 +19,9 @@ def test_init():
     core_names.remove("Reader")
     core_names.remove("Writer")
     core_names.remove("RunInfoAttributesView")
+    core_names.remove("NumpyAPI")
+    core_names.remove("ParticlesAPI")
+    core_names.remove("VerticesAPI")
 
     names = set()
     for name in dir(pyhepmc):
