@@ -1,5 +1,6 @@
 import pytest
 import pyhepmc as hep
+from numpy.testing import assert_equal
 
 
 def make_evt():
@@ -442,3 +443,38 @@ def test_GenParticle_repr():
 def test_GenVertex_repr():
     p = hep.GenVertex([1, 2, 3, 4])
     assert repr(p) == "GenVertex(FourVector(1, 2, 3, 4))"
+
+
+def test_GenEventData(evt):
+    ed = hep.GenEventData()
+    evt.write_data(ed)
+
+    assert len(ed.vertices) == 4
+    a = ed.vertices
+    assert_equal(a["status"], [v.status for v in evt.vertices])
+    assert_equal(a["x"], [v.position.x for v in evt.vertices])
+    assert_equal(a["z"], [v.position.z for v in evt.vertices])
+
+    assert len(ed.particles) == 8
+    b = ed.particles
+    assert_equal(b["status"], [p.status for p in evt.particles])
+    assert_equal(b["pid"], [p.pid for p in evt.particles])
+    assert_equal(b["px"], [p.momentum.px for p in evt.particles])
+    assert_equal(b["e"], [p.momentum.e for p in evt.particles])
+
+    a["status"] = 2
+    assert ed.vertices[0]["status"] == 2
+    ed.particles["mass"] = 123
+    assert ed.particles[0]["mass"] == 123
+
+    evt2 = hep.GenEvent()
+    evt2.read_data(ed)
+    assert_equal([v.status for v in evt2.vertices], [2] * 4)
+    assert_equal([p.generated_mass for p in evt2.particles], [123] * 8)
+
+
+def test_numpy_api(evt):
+    pids = evt.numpy.particles.pid
+    assert_equal(pids, [p.pid for p in evt.particles])
+    x = evt.numpy.vertices.x
+    assert_equal(x, [v.position.x for v in evt.vertices])

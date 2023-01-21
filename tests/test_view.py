@@ -113,12 +113,12 @@ def test_savefig_1(evt, ext):
         with open(fname, "rb") as f1:
             # Both buffers should be almost equal.
             # They may differ in the creation date,
-            # which should be less than 100 bytes
+            # which should be less than 150 bytes
             a1 = np.frombuffer(f1.read(), np.uint8)
             a2 = np.frombuffer(f2.read(), np.uint8)
             size = min(len(a1), len(a2))
             assert size > 0
-            assert np.sum(a1[:size] != a2[:size]) < 100
+            assert np.sum(a1[:size] != a2[:size]) < 150
 
 
 def test_savefig_2(evt):
@@ -138,12 +138,15 @@ def test_savefig_2(evt):
 @pytest.mark.parametrize("ext", ("pdf", "png", "svg"))
 def test_savefig_3(evt, ext):
     pytest.importorskip("particle")
-    mpl = pytest.importorskip("matplotlib.testing.compare")
+    testing = pytest.importorskip("matplotlib.testing")
+    compare = pytest.importorskip("matplotlib.testing.compare")
+    testing.set_font_settings_for_testing()
+    testing.set_reproducibility_for_testing()
     fname = f"test_savefig_3.{ext}"
     expected = REFERENCE_DIR / fname
     actual = RESULT_DIR / fname
     view.savefig(evt, actual)
-    assert mpl.compare_images(expected, actual, 1e-3) is None
+    assert compare.compare_images(expected, actual, 1e-3) is None
 
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")

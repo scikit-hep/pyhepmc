@@ -5,6 +5,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 
 namespace py = pybind11;
 using namespace py::literals;
@@ -21,6 +22,7 @@ _T overload_cast(_T x) {
 
 #define FUNC(name) m.def(#name, name, DOC(name))
 #define PROP_RO(name, cls) .def_property_readonly(#name, &cls::name, DOC(cls.name))
+#define PROP_RO2(name, cls) .def_property_readonly(#name, cls##_##name, DOC(cls.name))
 #define PROP_ROS(name, cls) \
   .def_property_readonly_static(#name, &cls::name, DOC(cls.name))
 #define PROP_RO_OL(name, cls, rval)                                         \
@@ -40,5 +42,6 @@ _T overload_cast(_T x) {
 #define REPR(name) .def("__repr__", repr<name>)
 #define EQ(name) \
   .def("__eq__", py::overload_cast<const name&, const name&>(HepMC3::operator==))
+#define DEF(name) .def(#name, name)
 
 #endif
