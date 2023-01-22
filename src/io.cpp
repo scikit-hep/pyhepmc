@@ -36,6 +36,12 @@ void register_io(py::module& m) {
   auto doc = py::cast<std::map<std::string, std::string>>(m_doc.attr("doc"));
 
   py::class_<std::iostream>(m, "iostream")
+      .def("getline",
+           [](std::iostream& self) {
+             char buffer[1024];
+             self.getline(buffer, 1024);
+             return py::bytes(buffer);
+           })
       // clang-format off
       METH(flush, pyiostream)
       // clang-format on

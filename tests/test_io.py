@@ -4,6 +4,7 @@ import pyhepmc.io as io
 import pytest
 from test_basic import evt  # noqa
 from pyhepmc._core import stringstream, pyiostream
+from io import BytesIO
 from pathlib import Path
 import numpy as np
 import typing
@@ -67,6 +68,20 @@ def test_pystream_3(evt):  # noqa
     assert evt == evt2
 
     os.unlink(fn)
+
+
+@pytest.mark.parametrize("size", (100, 1))
+def test_pystream_4(size):
+    s = b"\r\n1\r\n\r\n22\r\n333\r\n"
+    io = BytesIO(s)
+    pio = pyiostream(io, size)
+    assert pio.getline() == b""
+    assert pio.getline() == b"1"
+    assert pio.getline() == b""
+    assert pio.getline() == b"22"
+    assert pio.getline() == b"333"
+    assert pio.getline() == b""
+    assert pio.getline() == b""
 
 
 def test_read_event_write_event(evt):  # noqa

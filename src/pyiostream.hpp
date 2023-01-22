@@ -5,20 +5,18 @@
 #include <iostream>
 #include <streambuf>
 
-struct eol_normalizer {
-  bool skip_ = false;
-  void operator()(char* s, int& size) noexcept;
-};
-
 class pystreambuf : public std::streambuf {
   py::array_t<char_type> buffer_;
   py::object iohandle_;
   py::object readinto_;
   py::object write_;
-  eol_normalizer eol_normalizer_;
+  char search_for_cr_ = 0; // three-way 0 undecided, 1 yes, -1 no
+  bool skip_next_ = false;
+  char_type* end_ = nullptr;
 
 public:
-  bool initialization_error() const { return !readinto_ || !write_; }
+  bool has_readinto() const { return !readinto_.is_none(); }
+  bool has_write() const { return !write_.is_none(); }
 
   pystreambuf(py::object iohandle, int size);
   pystreambuf(const pystreambuf&);

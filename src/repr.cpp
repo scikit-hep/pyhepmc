@@ -20,7 +20,7 @@ std::ostream& repr_ostream(std::ostream& os, const HepMC3::Attribute& a) {
 }
 
 std::ostream& repr_ostream(std::ostream& os, const HepMC3::UnparsedAttribute& a) {
-  os << "<UnparsedAttribute>('" << a.parent_->unparsed_string() << "')";
+  os << "<UnparsedAttribute '" << a.parent_->unparsed_string() << "'>";
   return os;
 }
 
@@ -77,13 +77,13 @@ std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenEvent& x) {
   // incomplete:
   // missing comparison of GenHeavyIon, GenPdfInfo, GenCrossSection
 
-  os << "GenEvent("
+  os << "<GenEvent "
      << "momentum_unit=" << x.momentum_unit() << ", "
      << "length_unit=" << x.length_unit() << ", "
      << "event_number=" << x.event_number() << ", "
-     << "particles=";
-  repr_ostream(os, x.particles()) << ", vertices=";
-  repr_ostream(os, x.vertices()) << ", run_info=";
-  repr_ostream(os, x.run_info()) << ")";
+     << "particles=" << x.particles().size() << ", "
+     << "vertices=" << x.vertices().size() << ", "
+     << "run_info=";
+  repr_ostream(os, x.run_info()) << ">";
   return os;
 }

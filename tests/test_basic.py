@@ -411,9 +411,8 @@ def test_sequence_access():
     assert evt.vertices[0].id == -1
     assert evt.vertices[0].position == (1, 2, 3, 4)
     assert repr(evt) == (
-        "GenEvent(momentum_unit=1, length_unit=0, event_number=0, "
-        "particles=[GenParticle(FourVector(1, 2, 3, 4), pid=5, status=0)], "
-        "vertices=[GenVertex(FourVector(1, 2, 3, 4))], run_info=None)"
+        "<GenEvent momentum_unit=1, length_unit=0, event_number=0, "
+        "particles=1, vertices=1, run_info=None>"
     )
 
 
