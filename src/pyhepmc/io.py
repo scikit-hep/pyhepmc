@@ -246,7 +246,7 @@ class HepMCFile:
                 if not self._file.seekable():
                     raise ValueError("cannot detect format is file is not seekable")
                 header = self._file.read(256)
-                assert isinstance(header, bytes)
+                assert isinstance(header, bytes)  # for mypy
                 self._file.seek(0)
                 if b"HepMC::Asciiv3" in header:
                     Reader = ReaderAscii

@@ -22,15 +22,7 @@ pystreambuf::pystreambuf(py::object iohandle, int size)
 pystreambuf::pystreambuf(const pystreambuf& other) { operator=(other); }
 
 pystreambuf& pystreambuf::operator=(const pystreambuf& other) {
-  if (this != &other) {
-    buffer_ = py::array_t<char_type>(py::len(other.buffer_));
-    iohandle_ = other.iohandle_;
-    readinto_ = other.readinto_;
-    write_ = other.write_;
-    char* b = buffer_.mutable_data();
-    const int size = py::len(buffer_);
-    setp(b, b + size);
-  }
+  throw std::runtime_error("copy not implemented");
   return *this;
 }
 
@@ -50,13 +42,22 @@ pystreambuf::~pystreambuf() {
 // reading from python
 pystreambuf::int_type pystreambuf::underflow() {
   // if buffer is exhausted (pos == end) ...
-  if (gptr() == egptr()) {
-    // ... refill buffer from Python source
-    int size = pyreadinto_buffer();
-    // return EOF if source is empty ...
-    if (size == 0) return traits_type::eof();
-    // .. or update view pointers to buffer area
-    setg(pbase(), pbase(), pbase() + size);
+  while (gptr() == egptr()) {
+    auto start = egptr();
+    if (start != true_end_) {
+      if (skip_one_ || *start == '\r') ++start;
+      auto end = std::find(start, true_end_, '\r');
+      if (*(end - 1) == '\r') {
+        *(end - 1) = '\n';
+        skip_one_ = true;
+      }
+      setg(pbase(), start, end);
+    } else {
+      auto size = pyreadinto_buffer();
+      if (size == 0) return traits_type::eof();
+      true_end_ = pbase() + size;
+      setg(pbase(), pbase(), pbase());
+    }
   }
   // return current char from refilled buffer
   return traits_type::to_int_type(*gptr());
