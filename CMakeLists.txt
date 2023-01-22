@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13...3.17)
 
+include(CMakePrintHelpers)
+
 find_program(ccache_executable ccache)
 if(ccache_executable)
   message(STATUS "Using ccache: ${ccache_executable}")
@@ -48,6 +50,8 @@ if(EXTERNAL_PYBIND11)
 else()
   add_subdirectory(extern/pybind11)
 endif()
+
+cmake_print_variables(CMAKE_BUILD_TYPE)
 
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB HEPMC3_SOURCES "extern/HepMC3/src/*.cc")

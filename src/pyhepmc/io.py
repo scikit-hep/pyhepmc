@@ -23,7 +23,7 @@ from ._core import (
     pyiostream,
 )
 from pathlib import PurePath
-import typing as _tp
+from typing import Union, Any, Optional
 
 __all__ = [
     "open",
@@ -37,11 +37,9 @@ __all__ = [
     "UnparsedAttribute",
 ]
 
-_open = open
-
 
 class _Iter:
-    def __init__(self, parent: _tp.Any):
+    def __init__(self, parent: Any):
         self.parent = parent
 
     def __next__(self) -> GenEvent:
@@ -59,25 +57,25 @@ class _Iter:
     next = __next__
 
 
-def _enter(self: _tp.Any) -> _tp.Any:
+def _enter(self: Any) -> Any:
     return self
 
 
-def _exit_close(self: _tp.Any, type: Exception, value: str, tb: _tp.Any) -> bool:
+def _exit_close(self: Any, type: Exception, value: str, tb: Any) -> bool:
     self.close()
     return False
 
 
-def _exit_flush(self: _tp.Any, type: Exception, value: str, tb: _tp.Any) -> bool:
+def _exit_flush(self: Any, type: Exception, value: str, tb: Any) -> bool:
     self.flush()
     return False
 
 
-def _iter(self: _tp.Any) -> _Iter:
+def _iter(self: Any) -> _Iter:
     return _Iter(self)
 
 
-def _read(self: _tp.Any) -> _tp.Optional[GenEvent]:
+def _read(self: Any) -> Optional[GenEvent]:
     evt = GenEvent()
     success = self.read_event(evt)
     if self.failed():
@@ -87,8 +85,8 @@ def _read(self: _tp.Any) -> _tp.Optional[GenEvent]:
     return evt if success else None
 
 
-def _read_event_lhef_patch(self: _tp.Any, evt: GenEvent) -> bool:
-    failed = ReaderLHEF_read_event(self, evt)
+def _read_event_lhef_patch(self: Any, evt: GenEvent) -> bool:
+    failed = self._read_event_unpatched(evt)
     if failed and self.failed():  # probably EOF
         return True
     return not failed
@@ -108,7 +106,7 @@ ReaderAsciiHepMC2.read = _read
 ReaderLHEF.__enter__ = _enter
 ReaderLHEF.__exit__ = _exit_close
 ReaderLHEF.__iter__ = _iter
-ReaderLHEF_read_event = ReaderLHEF.read_event
+ReaderLHEF._read_event_unpatched = ReaderLHEF.read_event
 ReaderLHEF.read_event = _read_event_lhef_patch
 ReaderLHEF.read = _read
 
@@ -133,7 +131,7 @@ pyiostream.__enter__ = _enter
 pyiostream.__exit__ = _exit_flush
 
 
-_Filename = _tp.Union[str, PurePath]
+_Filename = Union[str, PurePath]
 
 
 class _WrappedWriter:
@@ -141,15 +139,15 @@ class _WrappedWriter:
 
     def __init__(
         self,
-        iostream: _tp.Any,
-        precision: _tp.Optional[int],
-        Writer: _tp.Any,
+        iostream: Any,
+        precision: Optional[int],
+        Writer: Any,
     ):
-        self._writer: _tp.Any = None
+        self._writer: Any = None
         self._init = (iostream, precision, Writer)
         self._event = None
 
-    def _maybe_convert(self, event: _tp.Any) -> GenEvent:
+    def _maybe_convert(self, event: Any) -> GenEvent:
         if isinstance(event, GenEvent):
             return event
         if hasattr(event, "to_hepmc3"):
@@ -161,7 +159,7 @@ class _WrappedWriter:
             "convertible to it by providing a to_hepmc3() method"
         )
 
-    def write(self, event: _tp.Any) -> None:
+    def write(self, event: Any) -> None:
         evt = self._maybe_convert(event)
 
         if self._writer is None:
@@ -221,35 +219,40 @@ class HepMCFile:
         format: str = None,
     ):
         fn = str(filename)
+
         if fn.endswith(".gz"):
             import gzip
 
-            op = gzip.open
+            open = gzip.open
         elif fn.endswith(".bz2"):
             import bz2
 
-            op = bz2.open  # type:ignore
-
+            open = bz2.open  # type:ignore
         elif fn.endswith(".xz"):
             import lzma
 
-            op = lzma.open  # type:ignore
+            open = lzma.open  # type:ignore
         else:
-            op = _open  # type:ignore
+            from builtins import open  # type:ignore
+
             mode += "b"
 
         if mode.startswith("r"):
+            self._file = open(fn, mode)
+            self._ios = pyiostream(self._file)
+
             if format is None:
                 # auto-detect
-                with op(fn, mode) as f:
-                    chunk = f.read(256)
-                assert isinstance(chunk, bytes)
-                header = chunk.decode()
-                if "HepMC::Asciiv3" in header:
+                if not self._file.seekable():
+                    raise ValueError("cannot detect format is file is not seekable")
+                header = self._file.read(256)
+                assert isinstance(header, bytes)
+                self._file.seek(0)
+                if b"HepMC::Asciiv3" in header:
                     Reader = ReaderAscii
-                elif "HepMC::IO_GenEvent" in header:
+                elif b"HepMC::IO_GenEvent" in header:
                     Reader = ReaderAsciiHepMC2
-                elif "<LesHouchesEvents" in header:
+                elif b"<LesHouchesEvents" in header:
                     Reader = ReaderLHEF
                 else:
                     # this one has no header
@@ -264,8 +267,6 @@ class HepMCFile:
                 if Reader is None:
                     raise ValueError(f"format {format} not recognized for reading")
 
-            self._file = op(fn, mode)
-            self._ios = pyiostream(self._file)
             self._reader = Reader(self._ios)
             self._writer = None
 
@@ -281,19 +282,19 @@ class HepMCFile:
                 if Writer is None:
                     raise ValueError(f"format {format} not recognized for writing")
 
-            self._file = op(fn, mode)
+            self._file = open(fn, mode)
             self._ios = pyiostream(self._file)
             self._reader = None
             self._writer = _WrappedWriter(self._ios, precision, Writer)
         else:
-            raise ValueError(f"mode must be r or w, got {mode}")
+            raise ValueError(f"mode must be 'r' or 'w', got {mode}")
 
     def __enter__(self) -> HepMCFile:
         return self
 
     __exit__ = _exit_close
 
-    def __iter__(self) -> _tp.Any:
+    def __iter__(self) -> Any:
         return self._reader.__iter__()
 
     def flush(self) -> None:
@@ -326,7 +327,7 @@ def open(
     mode: str = "r",
     precision: int = None,
     format: str = None,
-) -> _tp.Any:
+) -> Any:
     """
     Open HepMC files for reading or writing.
 

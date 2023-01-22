@@ -8,31 +8,13 @@
 #include <stdexcept>
 #include <streambuf>
 
-void eol_normalizer::operator()(char* s, int& size) noexcept {
-  if (size < 2 || skip_) return;
-
-  ++s;
-  for (char* end = s + size; s != end; ++s) {
-    if (*s == '\n') {
-      if (*(s - 1) == '\r') {
-        --end;
-        --size;
-        for (char* t = s - 1; t != end; ++t) *t = *(t + 1);
-      } else {
-        skip_ = true;
-        return;
-      }
-    }
-  }
-}
-
 pystreambuf::pystreambuf(py::object iohandle, int size)
     : buffer_(size), iohandle_(iohandle) {
   // this ctor must not throw
-  const bool has_readinto1 = hasattr(iohandle, "readinto1");
-  if (has_readinto1 || hasattr(iohandle, "readinto"))
+  const bool has_readinto1 = py::hasattr(iohandle, "readinto1");
+  if (has_readinto1 || py::hasattr(iohandle, "readinto"))
     readinto_ = iohandle.attr(has_readinto1 ? "readinto1" : "readinto");
-  if (hasattr(iohandle, "write")) write_ = iohandle.attr("write");
+  if (py::hasattr(iohandle, "write")) write_ = iohandle.attr("write");
   char* b = buffer_.mutable_data();
   setp(b, b + size);
 }
@@ -71,7 +53,6 @@ pystreambuf::int_type pystreambuf::underflow() {
   if (gptr() == egptr()) {
     // ... refill buffer from Python source
     int size = pyreadinto_buffer();
-    eol_normalizer_(pbase(), size);
     // return EOF if source is empty ...
     if (size == 0) return traits_type::eof();
     // .. or update view pointers to buffer area
@@ -83,14 +64,13 @@ pystreambuf::int_type pystreambuf::underflow() {
 
 // writing to python
 pystreambuf::int_type pystreambuf::overflow(pystreambuf::int_type c) {
-  const bool eof = traits_type::eq_int_type(c, traits_type::eof());
-  // if buffer is full (pos == end) or c is EOF ...
-  if (pptr() == epptr() || eof) {
-    // ... write buffer to sink
+  // if c is EOF write buffer to sink and return
+  if (traits_type::eq_int_type(c, traits_type::eof())) {
     sync_();
-    // pass-through EOF ...
-    if (eof) return c;
+    return c;
   }
+  // if buffer is full (pos == end) write buffer to sink
+  if (pptr() == epptr()) sync_();
   // put current character into buffer
   *pptr() = traits_type::to_char_type(c);
   pbump(1);
@@ -115,16 +95,20 @@ void pystreambuf::pywrite_buffer() {
 }
 
 int pystreambuf::pyreadinto_buffer() {
-  py::gil_scoped_acquire g;
-  assert(readinto_);
-  return py::cast<int>(readinto_(buffer_));
+  if (readinto_) {
+    py::gil_scoped_acquire g;
+    return py::cast<int>(readinto_(buffer_));
+  }
+  return 0;
 }
 
 // pystreambuf must be initialized before std::iostream
 pyiostream::pyiostream(py::object iohandle, int size)
     : std::iostream(new pystreambuf(iohandle, size)) {
-  if (static_cast<pystreambuf*>(rdbuf())->initialization_error())
-    throw std::runtime_error("file object lacks readinto or write methods");
+  if (!static_cast<pystreambuf*>(rdbuf())->has_readinto())
+    throw std::runtime_error("file object lacks readinto");
+  if (!static_cast<pystreambuf*>(rdbuf())->has_write())
+    throw std::runtime_error("file object lacks write");
 }
 
 pyiostream::~pyiostream() { delete rdbuf(nullptr); }
