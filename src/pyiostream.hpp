@@ -10,6 +10,7 @@ class pystreambuf : public std::streambuf {
   py::object iohandle_;
   py::object readinto_;
   py::object write_;
+  char search_for_cr_ = 0; // three-way 0 undecided, 1 yes, -1 no
   bool skip_next_ = false;
   char_type* end_ = nullptr;
 

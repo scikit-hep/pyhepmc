@@ -42,12 +42,14 @@ pystreambuf::~pystreambuf() {
 // reading from python
 pystreambuf::int_type pystreambuf::underflow() {
   // HepMC3 code expects \n as linefeed character, even on Windows.
-  // To improve performance, we already read the raw bytestream and
-  // correct \r\n to \n here, by manipulating the buffer.
+  // To improve performance, we let Python read the raw bytestream and
+  // correct \r\n to \n here, by manipulating the view on the internal buffer.
   // - Read raw bytes from Python.
   // - If buffer contains \r at pos i, turn \r at i to \n and set buffer view
   //   from start to i + 1. Skip one character in buffer on next call to
   //   underflow.
+  // - Skip this scan in the future if \r is not found, but \n is found in
+  //   buffer, but only perform this check until the first \r is found.
   while (gptr() == egptr()) {
     // view is exhausted
     auto start = egptr();
@@ -61,12 +63,25 @@ pystreambuf::int_type pystreambuf::underflow() {
     // buffer contains at least one character
     auto end = end_;
     assert(start < end);
-    if (skip_next_ || *start == '\r') ++start;
-    if (start < end) {
-      end = std::find(start, end, '\r');
-      if (start < end && *(end - 1) == '\r') {
-        *(end - 1) = '\n';
-        skip_next_ = true;
+    if (search_for_cr_ >= 0) {
+      if (skip_next_ || *start == '\r') {
+        search_for_cr_ = 1;
+        ++start;
+      }
+      if (start < end) {
+        end = std::find(start, end, '\r');
+        if (end < end_)
+          search_for_cr_ = 1;
+        else if (search_for_cr_ == 0) {
+          assert(end == end_);
+          if (std::find(start, end, '\n') != end) search_for_cr_ = -1;
+        }
+        if (start < end) {
+          if (*(end - 1) == '\r') {
+            *(end - 1) = '\n';
+            skip_next_ = true;
+          }
+        }
       }
     }
     // if start == end, do another loop

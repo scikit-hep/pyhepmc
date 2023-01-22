@@ -244,7 +244,7 @@ class HepMCFile:
             if format is None:
                 # auto-detect
                 if not self._file.seekable():
-                    raise ValueError("cannot detect format is file is not seekable")
+                    raise ValueError("cannot detect format, file is not seekable")
                 header = self._file.read(256)
                 assert isinstance(header, bytes)  # for mypy
                 self._file.seek(0)
@@ -265,7 +265,7 @@ class HepMCFile:
                     "hepevt": ReaderHEPEVT,
                 }.get(format.lower(), None)
                 if Reader is None:
-                    raise ValueError(f"format {format} not recognized for reading")
+                    raise ValueError(f"format {format!r} not recognized for reading")
 
             self._reader = Reader(self._ios)
             self._writer = None
@@ -280,14 +280,14 @@ class HepMCFile:
                     "hepevt": WriterHEPEVT,
                 }.get(format.lower(), None)
                 if Writer is None:
-                    raise ValueError(f"format {format} not recognized for writing")
+                    raise ValueError(f"format {format!r} not recognized for writing")
 
             self._file = open(fn, mode)
             self._ios = pyiostream(self._file)
             self._reader = None
             self._writer = _WrappedWriter(self._ios, precision, Writer)
         else:
-            raise ValueError(f"mode must be 'r' or 'w', got {mode}")
+            raise ValueError(f"mode must be 'r' or 'w', got {mode!r}")
 
     def __enter__(self) -> HepMCFile:
         return self
