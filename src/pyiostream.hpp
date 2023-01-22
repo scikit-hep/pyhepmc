@@ -10,8 +10,8 @@ class pystreambuf : public std::streambuf {
   py::object iohandle_;
   py::object readinto_;
   py::object write_;
-  bool skip_one_ = false;
-  char_type* true_end_ = nullptr;
+  bool skip_next_ = false;
+  char_type* end_ = nullptr;
 
 public:
   bool has_readinto() const { return !readinto_.is_none(); }

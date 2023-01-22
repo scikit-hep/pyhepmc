@@ -41,23 +41,36 @@ pystreambuf::~pystreambuf() {
 
 // reading from python
 pystreambuf::int_type pystreambuf::underflow() {
-  // if buffer is exhausted (pos == end) ...
+  // HepMC3 code expects \n as linefeed character, even on Windows.
+  // To improve performance, we already read the raw bytestream and
+  // correct \r\n to \n here, by manipulating the buffer.
+  // - Read raw bytes from Python.
+  // - If buffer contains \r at pos i, turn \r at i to \n and set buffer view
+  //   from start to i + 1. Skip one character in buffer on next call to
+  //   underflow.
   while (gptr() == egptr()) {
+    // view is exhausted
     auto start = egptr();
-    if (start != true_end_) {
-      if (skip_one_ || *start == '\r') ++start;
-      auto end = std::find(start, true_end_, '\r');
-      if (*(end - 1) == '\r') {
-        *(end - 1) = '\n';
-        skip_one_ = true;
-      }
-      setg(pbase(), start, end);
-    } else {
+    if (start == end_) {
+      // buffer is exhausted, fill from Python
       auto size = pyreadinto_buffer();
       if (size == 0) return traits_type::eof();
-      true_end_ = pbase() + size;
-      setg(pbase(), pbase(), pbase());
+      start = pbase();
+      end_ = pbase() + size;
     }
+    // buffer contains at least one character
+    auto end = end_;
+    assert(start < end);
+    if (skip_next_ || *start == '\r') ++start;
+    if (start < end) {
+      end = std::find(start, end, '\r');
+      if (start < end && *(end - 1) == '\r') {
+        *(end - 1) = '\n';
+        skip_next_ = true;
+      }
+    }
+    // if start == end, do another loop
+    setg(pbase(), start, end);
   }
   // return current char from refilled buffer
   return traits_type::to_int_type(*gptr());
