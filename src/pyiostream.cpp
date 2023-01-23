@@ -113,10 +113,13 @@ void pystreambuf::pywrite_buffer() {
   assert(write_);
   const int s = std::distance(pbase(), pptr());
   py::gil_scoped_acquire g;
-  reinterpret_cast<PyVarObject*>(buffer_.ptr())->ob_size = s;
-  // Py_SET_SIZE(buffer_.ptr(), s); // use instead in CPython-3.9+
+#if (PY_MAJOR_VERSION >= 3) && (PY_MINOR_VERSION >= 9)
+  Py_SET_SIZE(buffer_.ptr(), s);
   PyByteArray_AS_STRING(buffer_.ptr())[s] = '\0'; /* Trailing null */
   write_(buffer_);
+#else
+  write_(buffer_[py::slice(0, s, 1)]);
+#endif
 }
 
 int pystreambuf::pyreadinto_buffer() {
