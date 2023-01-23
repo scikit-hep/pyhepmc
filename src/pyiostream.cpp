@@ -98,9 +98,6 @@ pystreambuf::int_type pystreambuf::overflow(pystreambuf::int_type c) {
 }
 
 int pystreambuf::sync_() {
-  // std::cout << "sync \n" << pbase() << " pptr-pbase " << pptr()-pbase() << "
-  // epptr-pbase " << epptr()-pbase() << std::endl; if buffer is not empty, write buffer
-  // to sink
   if (pbase() != pptr()) {
     pywrite_buffer();
     setp(pbase(), epptr());
