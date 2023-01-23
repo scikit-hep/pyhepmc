@@ -6,7 +6,7 @@
 #include <streambuf>
 
 class pystreambuf : public std::streambuf {
-  py::array_t<char_type> buffer_;
+  py::bytearray buffer_;
   py::object iohandle_;
   py::object readinto_;
   py::object write_;

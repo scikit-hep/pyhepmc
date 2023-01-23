@@ -84,6 +84,14 @@ def test_pystream_4(size):
     assert pio.getline() == b""
 
 
+def test_pystream_5():
+    import sys
+
+    io = sys.stdout.buffer
+    with pyiostream(io, 100) as pio:
+        pio.write(b"foo")
+
+
 def test_read_event_write_event(evt):  # noqa
     oss = stringstream()
     with io.WriterAscii(oss) as f:
@@ -293,6 +301,39 @@ def test_open_5():
         for ev in f:
             n += 1
     assert n == 1
+
+
+def test_open_6(evt, capsys):
+    import sys
+
+    fn = "test_open_6.dat"
+
+    with hep.open(fn, "w") as f:
+        f.write(evt)
+
+    with open(fn, "rb") as f:
+        content = f.read().decode()
+
+    with hep.open(sys.stdout, "w") as f:
+        f.write(evt)
+
+    c = capsys.readouterr().out
+    assert c == content
+
+    os.unlink(fn)
+
+
+def test_open_7():
+    import sys
+
+    fn = str(Path(__file__).parent / "sibyll21.dat")
+
+    with open(fn, "r") as f:
+        with hep.open(f, "r") as f2:
+            evt = f2.read()
+
+    assert len(evt.particles) == 23
+    assert len(evt.vertices) == 7
 
 
 def test_open_failures():

@@ -42,6 +42,21 @@ void register_io(py::module& m) {
              self.getline(buffer, 1024);
              return py::bytes(buffer);
            })
+      .def("read",
+           [](std::iostream& self, int size) {
+             if (size > 1024) throw std::runtime_error("size must be <= 1024");
+             char buffer[1024];
+             self.read(buffer, size);
+             return py::bytes(buffer);
+           })
+      .def("write",
+           [](std::iostream& self, py::bytes s) {
+             char* buffer = nullptr;
+             py::ssize_t length = 0;
+             if (PYBIND11_BYTES_AS_STRING_AND_SIZE(s.ptr(), &buffer, &length))
+               py::pybind11_fail("Unable to extract bytes contents!");
+             self.write(buffer, length);
+           })
       // clang-format off
       METH(flush, pyiostream)
       // clang-format on

@@ -6,6 +6,13 @@ on:
       - 'docs/**'
       - '*.rst'
       - '*.md'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.rst'
+      - '*.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
