@@ -323,6 +323,19 @@ def test_open_6(evt, capsys):
     os.unlink(fn)
 
 
+def test_open_7():
+    import sys
+
+    fn = str(Path(__file__).parent / "sibyll21.dat")
+
+    with open(fn, "r") as f:
+        with hep.open(f, "r") as f2:
+            evt = f2.read()
+
+    assert len(evt.particles) == 23
+    assert len(evt.vertices) == 7
+
+
 def test_open_failures():
     fn = Path(__file__).parent / "pp.lhe"
     n = 0
