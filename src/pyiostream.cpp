@@ -9,13 +9,14 @@
 #include <streambuf>
 
 pystreambuf::pystreambuf(py::object iohandle, int size)
-    : buffer_(size), iohandle_(iohandle) {
+    : buffer_(nullptr, size), iohandle_(iohandle) {
   // this ctor must not throw
+  py::gil_scoped_acquire g;
   const bool has_readinto1 = py::hasattr(iohandle, "readinto1");
   if (has_readinto1 || py::hasattr(iohandle, "readinto"))
     readinto_ = iohandle.attr(has_readinto1 ? "readinto1" : "readinto");
   if (py::hasattr(iohandle, "write")) write_ = iohandle.attr("write");
-  char* b = buffer_.mutable_data();
+  char* b = PyByteArray_AS_STRING(buffer_.ptr());
   setp(b, b + size);
 }
 
@@ -26,18 +27,8 @@ pystreambuf& pystreambuf::operator=(const pystreambuf& other) {
   return *this;
 }
 
-// for some reason, buffer may be partially filled although all data
-// has already been written to sink; must prevent calling sync
-// here when file was already closed as workaround
-pystreambuf::~pystreambuf() {
-  if (py::cast<bool>(iohandle_.attr("closed"))) return;
-  try {
-    sync_();
-  } catch (py::error_already_set& e) {
-    // dtor must not throw
-    e.discard_as_unraisable("~pystreambuf");
-  };
-}
+// do nothing here, everything should be flushed beforehand
+pystreambuf::~pystreambuf() {}
 
 // reading from python
 pystreambuf::int_type pystreambuf::underflow() {
@@ -107,20 +98,24 @@ pystreambuf::int_type pystreambuf::overflow(pystreambuf::int_type c) {
 }
 
 int pystreambuf::sync_() {
-  // if buffer is not empty, write buffer to sink
+  // std::cout << "sync \n" << pbase() << " pptr-pbase " << pptr()-pbase() << "
+  // epptr-pbase " << epptr()-pbase() << std::endl; if buffer is not empty, write buffer
+  // to sink
   if (pbase() != pptr()) {
     pywrite_buffer();
     setp(pbase(), epptr());
+    assert(pbase() == pptr());
   }
   return 0;
 }
 
 void pystreambuf::pywrite_buffer() {
-  py::gil_scoped_acquire g;
   assert(write_);
   const int s = std::distance(pbase(), pptr());
-  // TODO there is probably a more efficient way
-  write_(buffer_[py::slice(0, s, 1)]);
+  py::gil_scoped_acquire g;
+  Py_SET_SIZE(buffer_.ptr(), s);
+  PyByteArray_AS_STRING(buffer_.ptr())[s] = '\0'; /* Trailing null */
+  write_(buffer_);
 }
 
 int pystreambuf::pyreadinto_buffer() {

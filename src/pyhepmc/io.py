@@ -23,7 +23,7 @@ from ._core import (
     pyiostream,
 )
 from pathlib import PurePath
-from typing import Union, Any, Optional
+from typing import Union, Any, Optional, Callable
 
 __all__ = [
     "open",
@@ -131,7 +131,7 @@ pyiostream.__enter__ = _enter
 pyiostream.__exit__ = _exit_flush
 
 
-_Filename = Union[str, PurePath]
+Filename = Union[str, PurePath]
 
 
 class _WrappedWriter:
@@ -190,10 +190,11 @@ class HepMCFile:
 
     Parameters
     ----------
-    filename : str or Path
-        Filename to open for reading or writing. When writing to existing files,
-        the contents are replaced. When the filename ends with the suffixes ".gz",
-        ".bz2", or ".xz", the contents are transparently compressed/decompressed.
+    fileobj : str or Path or IO object
+        Filename to open for reading or writing or file object. When writing to
+        existing files, the contents are replaced. When the filename ends with the
+        suffixes ".gz", ".bz2", or ".xz", the contents are transparently compressed
+        and decompressed.
     mode : str, optional
         Must be either "r" (default) or "w", to indicate whether to open for reading
         or writing.
@@ -213,32 +214,46 @@ class HepMCFile:
 
     def __init__(
         self,
-        filename: _Filename,
+        fileobj: Filename,
         mode: str = "r",
         precision: int = None,
         format: str = None,
     ):
-        fn = str(filename)
-
-        if fn.endswith(".gz"):
-            import gzip
-
-            open = gzip.open
-        elif fn.endswith(".bz2"):
-            import bz2
-
-            open = bz2.open  # type:ignore
-        elif fn.endswith(".xz"):
-            import lzma
-
-            open = lzma.open  # type:ignore
+        open_file: Optional[Callable[[], Any]] = None
+        if hasattr(fileobj, "read") and hasattr(fileobj, "write"):
+            if hasattr(fileobj, "buffer"):
+                self._file = fileobj.buffer
+            else:
+                self._file = fileobj
+            self._close_file = False
         else:
-            from builtins import open  # type:ignore
+            fn = str(fileobj)
 
-            mode += "b"
+            if fn.endswith(".gz"):
+                import gzip
+
+                open = gzip.open
+            elif fn.endswith(".bz2"):
+                import bz2
+
+                open = bz2.open  # type:ignore
+            elif fn.endswith(".xz"):
+                import lzma
+
+                open = lzma.open  # type:ignore
+            else:
+                from builtins import open  # type:ignore
+
+                mode += "b"
+
+            def open_file() -> Any:
+                return open(fn, mode)
+
+            self._close_file = True
 
         if mode.startswith("r"):
-            self._file = open(fn, mode)
+            if open_file:
+                self._file = open_file()
             self._ios = pyiostream(self._file)
 
             if format is None:
@@ -282,7 +297,8 @@ class HepMCFile:
                 if Writer is None:
                     raise ValueError(f"format {format!r} not recognized for writing")
 
-            self._file = open(fn, mode)
+            if open_file:
+                self._file = open_file()
             self._ios = pyiostream(self._file)
             self._reader = None
             self._writer = _WrappedWriter(self._ios, precision, Writer)
@@ -319,11 +335,12 @@ class HepMCFile:
         if self._writer:
             self._writer.close()
         self._ios.flush()
-        self._file.close()
+        if self._close_file:
+            self._file.close()
 
 
 def open(
-    filename: _Filename,
+    fileobj: Filename,
     mode: str = "r",
     precision: int = None,
     format: str = None,
@@ -333,4 +350,4 @@ def open(
 
     See HepMCFile.
     """
-    return HepMCFile(filename, mode, precision, format)
+    return HepMCFile(fileobj, mode, precision, format)
