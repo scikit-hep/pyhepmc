@@ -41,12 +41,12 @@ pyhepmc is part of the Scikit-HEP project, which aims to provide all tools neede
 
 **pyhepmc is thoroughly unit tested**
 
-We have 100% coverage for the Python API.
+We have close to 100% coverage for the Python API.
 
 Documentation
 -------------
 
-pyhepmc largely mirrors the C++ interface of the `HepMC3 library, which is documented here <http://hepmc.web.cern.ch/hepmc>`_. Parts of the documentation have been copied from HepMC3. Documentation is available as Python docstrings, so you can use Python's ``help()`` browser to learn about the API. Alternatively, you can consult `the online reference generated from these docstrings <https://scikit-hep.org/pyhepmc/>`_ which includes some examples.
+`Documentation is available here <https://scikit-hep.org/pyhepmc/>`_, and includes some examples (Jupyter notebooks). Furthermore, you can use Python's ``help()`` browser to learn about the API. The documentation is generated from Python docstrings, which are translated from the `HepMC3 library, which is documented here <http://hepmc.web.cern.ch/hepmc>`_.
 
 License
 -------
