@@ -34,7 +34,7 @@ pyhepmc is a hand-crafted mapping of C++ code to Python, `see documentation for 
 - An alternative Numpy API accelerates event processing up to **70x** compared to the standard API.
 - The public API is fully documented with Python docstrings.
 - Objects are inspectable in Jupyter notebooks (have useful ``repr`` strings).
-- Events render as graphs in Jupyter notebooks (see next item). 
+- Events render as graphs in Jupyter notebooks (see next item).
 
 **pyhepmc supports visualizations powered by graphviz**
 
