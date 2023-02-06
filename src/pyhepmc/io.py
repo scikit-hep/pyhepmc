@@ -12,10 +12,10 @@ reading and writing.
 from __future__ import annotations
 from ._core import (
     GenEvent,
-    ReaderAscii,
-    ReaderAsciiHepMC2,
-    ReaderLHEF,
-    ReaderHEPEVT,
+    ReaderAscii as ReaderAsciiBase,
+    ReaderAsciiHepMC2 as ReaderAsciiHepMC2Base,
+    ReaderLHEF as ReaderLHEFBase,
+    ReaderHEPEVT as ReaderHEPEVTBase,
     WriterAscii,
     WriterAsciiHepMC2,
     WriterHEPEVT,
@@ -38,25 +38,6 @@ __all__ = [
 ]
 
 
-class _Iter:
-    def __init__(self, parent: Any):
-        self.parent = parent
-
-    def __next__(self) -> GenEvent:
-        evt = GenEvent()
-        success = self.parent.read_event(evt)
-        if self.parent.failed():
-            if success:  # indicates EOF
-                raise StopIteration
-            raise IOError("error reading event")
-        return evt
-
-    def __iter__(self) -> "_Iter":
-        return self
-
-    next = __next__
-
-
 def _enter(self: Any) -> Any:
     return self
 
@@ -71,20 +52,6 @@ def _exit_flush(self: Any, type: Exception, value: str, tb: Any) -> bool:
     return False
 
 
-def _iter(self: Any) -> _Iter:
-    return _Iter(self)
-
-
-def _read(self: Any) -> Optional[GenEvent]:
-    evt = GenEvent()
-    success = self.read_event(evt)
-    if self.failed():
-        if success:  # indicates EOF
-            return None
-        raise IOError("error reading event")
-    return evt if success else None
-
-
 def _read_event_lhef_patch(self: Any, evt: GenEvent) -> bool:
     failed = self._read_event_unpatched(evt)
     if failed and self.failed():  # probably EOF
@@ -92,28 +59,61 @@ def _read_event_lhef_patch(self: Any, evt: GenEvent) -> bool:
     return not failed
 
 
+class _Iter:
+    def __init__(self, reader: Any):
+        self.reader = reader
+
+    def __next__(self) -> GenEvent:
+        evt = self.reader.read()
+        if evt is None:
+            raise StopIteration
+        return evt
+
+    def __iter__(self) -> "_Iter":
+        return self
+
+    next = __next__
+
+
+class ReaderMixin:
+    def read(self) -> Optional[GenEvent]:
+        assert hasattr(self, "failed")
+        assert hasattr(self, "read_event")
+        if self.failed():
+            # usually this means EOF was reached previously
+            return None
+        evt = GenEvent()
+        success = self.read_event(evt)
+        # workaround for bug in HepMC3, which reports success even if
+        # the next section of the file does not contain any event data
+        if len(evt.particles) == 0:
+            success = False
+        return evt if success else None
+
+    def __iter__(self: Any) -> _Iter:
+        return _Iter(self)
+
+    __enter__ = _enter
+    __exit__ = _exit_close
+
+
 # add contextmanager interface to IO classes
-ReaderAscii.__enter__ = _enter
-ReaderAscii.__exit__ = _exit_close
-ReaderAscii.__iter__ = _iter
-ReaderAscii.read = _read
+class ReaderAscii(ReaderAsciiBase, ReaderMixin):  # type:ignore
+    pass
 
-ReaderAsciiHepMC2.__enter__ = _enter
-ReaderAsciiHepMC2.__exit__ = _exit_close
-ReaderAsciiHepMC2.__iter__ = _iter
-ReaderAsciiHepMC2.read = _read
 
-ReaderLHEF.__enter__ = _enter
-ReaderLHEF.__exit__ = _exit_close
-ReaderLHEF.__iter__ = _iter
-ReaderLHEF._read_event_unpatched = ReaderLHEF.read_event
-ReaderLHEF.read_event = _read_event_lhef_patch
-ReaderLHEF.read = _read
+class ReaderAsciiHepMC2(ReaderAsciiHepMC2Base, ReaderMixin):  # type:ignore
+    pass
 
-ReaderHEPEVT.__enter__ = _enter
-ReaderHEPEVT.__exit__ = _exit_close
-ReaderHEPEVT.__iter__ = _iter
-ReaderHEPEVT.read = _read
+
+class ReaderLHEF(ReaderLHEFBase, ReaderMixin):  # type:ignore
+    _read_event_unpatched = ReaderLHEFBase.read_event
+    read_event = _read_event_lhef_patch
+
+
+class ReaderHEPEVT(ReaderHEPEVTBase, ReaderMixin):  # type:ignore
+    pass
+
 
 WriterAscii.__enter__ = _enter
 WriterAscii.__exit__ = _exit_close
@@ -256,6 +256,7 @@ class HepMCFile:
                 self._file = open_file()
             self._ios = pyiostream(self._file)
 
+            Reader: Optional[Any] = None
             if format is None:
                 # auto-detect
                 if not self._file.seekable():
@@ -305,9 +306,7 @@ class HepMCFile:
         else:
             raise ValueError(f"mode must be 'r' or 'w', got {mode!r}")
 
-    def __enter__(self) -> HepMCFile:
-        return self
-
+    __enter__ = _enter
     __exit__ = _exit_close
 
     def __iter__(self) -> Any:
@@ -331,7 +330,7 @@ class HepMCFile:
 
     def close(self) -> None:
         if self._reader:
-            self._reader.close()
+            self._reader.close()  # type:ignore
         if self._writer:
             self._writer.close()
         self._ios.flush()

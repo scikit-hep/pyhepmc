@@ -2,7 +2,7 @@ import os
 import pyhepmc as hep
 import pyhepmc.io as io
 import pytest
-from test_basic import evt  # noqa
+from test_basic import make_evt
 from pyhepmc._core import stringstream, pyiostream
 from io import BytesIO
 from pathlib import Path
@@ -16,6 +16,13 @@ if version_info >= (3, 9):
     list_type = list
 else:
     list_type = typing.List
+
+hep.Setup.print_warnings = True
+
+
+@pytest.fixture()
+def evt():
+    return make_evt()
 
 
 def test_pystream_1():
@@ -53,7 +60,7 @@ def test_pystream_2():
     os.unlink(fn2)
 
 
-def test_pystream_3(evt):  # noqa
+def test_pystream_3(evt):
     fn = "test_pystream_3.dat.gz"
     with gzip.open(fn, "w") as f:
         with pyiostream(f, 1000) as s:
@@ -92,7 +99,7 @@ def test_pystream_5():
         pio.write(b"foo")
 
 
-def test_read_event_write_event(evt):  # noqa
+def test_read_event_write_event(evt):
     oss = stringstream()
     with io.WriterAscii(oss) as f:
         f.write_event(evt)
@@ -115,7 +122,7 @@ def test_read_event_write_event(evt):  # noqa
     assert evt == evt2
 
 
-def test_pythonic_read_write_from_stream(evt):  # noqa
+def test_pythonic_read_write_from_stream(evt):
     oss = stringstream()
     with io.WriterAscii(oss) as f:
         f.write(evt)
@@ -137,29 +144,29 @@ def test_pythonic_read_write_from_stream(evt):  # noqa
 
 
 def test_failed_read_file():
-    with io.ReaderAscii("test_failed_read_file.dat") as f:
-        with pytest.raises(IOError):
-            f.read()
+    with io.ReaderAscii("file_does_not_exist.dat") as f:
+        evt = f.read()
+
+    assert evt is None
 
     n = 0
-    with io.ReaderAscii("test_failed_read_file.dat") as f:
-        with pytest.raises(IOError):
-            for ev in f:
-                n += 1
+    with io.ReaderAscii("file_does_not_exist.dat") as f:
+        for ev in f:
+            n += 1
     assert n == 0
 
 
 def test_failed_read_file_2():
     fn = str(Path(__file__).parent / "broken.dat")
     with io.ReaderAscii(fn) as f:
-        with pytest.raises(IOError):
-            f.read()
+        event = f.read()
+
+    assert event is None
 
     n = 0
     with io.ReaderAscii(fn) as f:
-        with pytest.raises(IOError):
-            for ev in f:
-                n += 1
+        for ev in f:
+            n += 1
     assert n == 0
 
 
@@ -180,7 +187,7 @@ def test_read_empty_stream():
 
 
 @pytest.mark.parametrize("format", ("hepmc3", "hepmc2", "hepevt"))
-def test_open_1(evt, format):  # noqa
+def test_open_1(evt, format):
     with hep.open("test_read_write_file.dat", "w", format=format) as f:
         f.write(evt)
 
@@ -205,7 +212,7 @@ def test_open_1(evt, format):  # noqa
     os.unlink("test_read_write_file.dat")
 
 
-def test_open_2(evt):  # noqa
+def test_open_2(evt):
     filename = "test_read_write_file.dat"
     with hep.open(filename, "w", precision=3) as f:
         f.write(evt)
@@ -230,7 +237,7 @@ def test_open_2(evt):  # noqa
     os.unlink(filename)
 
 
-def test_open_3(evt):  # noqa
+def test_open_3(evt):
     filename = Path("test_read_write_file.dat")
 
     with hep.open(filename, "w") as f:
@@ -271,7 +278,7 @@ def test_open_4():
         for i in range(3):
             ev = hep.GenEvent()
             ev.event_number = i + 1
-            for k in range(i):
+            for k in range(ev.event_number):
                 ev.add_particle(hep.GenParticle((1, 2, 3, 4), 1, 1))
             f.write(ev)
 
@@ -280,7 +287,7 @@ def test_open_4():
         for ev in f:
             n += 1
             assert ev.event_number == n
-            assert len(ev.particles) == n - 1
+            assert len(ev.particles) == n
         assert n == 3
 
     # iterator is itself iterable
@@ -324,8 +331,6 @@ def test_open_6(evt, capsys):
 
 
 def test_open_7():
-    import sys
-
     fn = str(Path(__file__).parent / "sibyll21.dat")
 
     with open(fn, "r") as f:
@@ -334,6 +339,35 @@ def test_open_7():
 
     assert len(evt.particles) == 23
     assert len(evt.vertices) == 7
+
+
+def test_open_last_event_issue():
+    fn = str(Path(__file__).parent / "last_event_issue.hepmc")
+
+    n = 0
+    with io.open(fn) as f:
+        while True:
+            event = f.read()
+            if event is None:
+                break
+            n += 1
+            assert len(event.particles) > 0
+
+    assert n == 1
+
+
+def test_ReaderAscii_last_event_issue():
+    fn = str(Path(__file__).parent / "last_event_issue.hepmc")
+
+    n = 0
+    evt = hep.GenEvent()
+    with io.ReaderAscii(fn) as f:
+        while not f.failed():
+            if f.read_event(evt):
+                n += 1
+            print(f.rdstate)
+
+    assert n == 1
 
 
 def test_open_failures():
@@ -385,9 +419,8 @@ def test_open_broken():
     fn = Path(__file__).parent / "broken.dat"
     n = 0
     with hep.open(fn) as f:
-        with pytest.raises(IOError):
-            for ev in f:
-                n += 1
+        for ev in f:
+            n += 1
     assert n == 0
 
 
@@ -411,8 +444,8 @@ def test_open_with_writer(evt, writer):  # noqa
     os.unlink(filename)
 
 
-def test_open_standalone(evt):
-    filename = f"test_open_standalone.dat"
+def test_open_standalone(evt):  # noqa
+    filename = "test_open_standalone.dat"
 
     f = hep.open(filename, "w")
     f.write(evt)
@@ -492,40 +525,34 @@ def test_attributes():
 
 
 @pytest.mark.parametrize("format", ["hepmc3", "hepmc2", "hepevt"])
-def test_roundtrip(format):
-    ev = hep.GenEvent()
-    ev.run_info = hep.GenRunInfo()
-
+def test_roundtrip(evt, format):
     fn = "test_roundtrip.dat"
 
+    if format != "hepmc3":
+        # only HepMC3 support non-empty GenRunInfo
+        evt.run_info = hep.GenRunInfo()
+    # HepMC3 adds "0" to weight_names upon reading event if weight_names is empty
+    evt.run_info.weight_names = ["0"]
+
     with io.open(fn, "w", format=format) as f:
-        f.write(ev)
+        f.write(evt)
 
     with io.open(fn, "r", format=format) as f:
-        ev2 = f.read()
+        evt2 = f.read()
 
     os.unlink(fn)
 
-    assert ev.particles == ev2.particles
-    assert ev.vertices == ev2.vertices
-
-    if format == "hepevt":
-        pytest.xfail(
-            reason="issue in HepMC3, see https://gitlab.cern.ch/hepmc/HepMC3/-/issues/21"
-        )
-
-    assert ev == ev2
+    assert evt == evt2
 
 
 @pytest.mark.parametrize("zip", ["gz", "bz2", "xz"])
-def test_zip(zip):
-    ev = hep.GenEvent()
-    ev.run_info = hep.GenRunInfo()
-
+def test_zip(evt, zip):
     fn = f"test_zip.{zip}"
+    # HepMC3 adds "0" to weight_names upon reading event if weight_names is empty
+    evt.run_info.weight_names = ["0"]
 
     with io.open(fn, "w") as f:
-        f.write(ev)
+        f.write(evt)
 
     try:
         out = subp.check_output(["file", fn], text=True)
@@ -535,8 +562,8 @@ def test_zip(zip):
         pass
 
     with io.open(fn, "r") as f:
-        ev2 = f.read()
+        evt2 = f.read()
 
     os.unlink(fn)
 
-    assert ev == ev2
+    assert evt == evt2
