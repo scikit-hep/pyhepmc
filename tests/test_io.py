@@ -17,6 +17,7 @@ if version_info >= (3, 9):
 else:
     list_type = typing.List
 
+# this only does something if pyhepmc is compiled in debug mode
 hep.Setup.print_warnings = True
 
 
@@ -45,15 +46,22 @@ def test_pystream_2():
 
     with open(fn, "rb") as f:
         with gzip.open(fn2, "w") as f2:
-            f2.write(f.read())
+            for evt in f:
+                f2.write(evt)
 
+    ev1 = []
     with gzip.open(fn2) as f:
         with pyiostream(f, 1000) as s:
             with io.ReaderAscii(s) as r:
-                ev1 = r.read()
+                for evt in r:
+                    ev1.append(evt)
 
+    assert len(ev1) == 1
+
+    ev2 = []
     with io.ReaderAscii(fn) as r:
-        ev2 = r.read()
+        for evt in r:
+            ev2.append(evt)
 
     assert ev1 == ev2
 
