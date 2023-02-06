@@ -373,7 +373,6 @@ def test_ReaderAscii_last_event_issue():
         while not f.failed():
             if f.read_event(evt):
                 n += 1
-            print(f.rdstate)
 
     assert n == 1
 
