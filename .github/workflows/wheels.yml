@@ -34,6 +34,9 @@ jobs:
             arch: aarch64
           - os: ubuntu-latest
             arch: universal2
+          # some unrelated error with installing pillow
+          - os: ubuntu-latest
+            py: cp38
     env:
       CIBW_BUILD: ${{ matrix.py }}-*
       CIBW_ARCHS_LINUX: ${{ matrix.arch }}
