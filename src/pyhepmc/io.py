@@ -212,6 +212,9 @@ class HepMCFile:
     IOError if reading or writing fails.
     """
 
+    _reader: Optional[ReaderMixin]
+    _writer: Optional[Union[WriterAscii, WriterAsciiHepMC2, WriterHEPEVT]]
+
     def __init__(
         self,
         fileobj: Filename,
@@ -246,8 +249,7 @@ class HepMCFile:
 
                 mode += "b"
 
-            def open_file() -> Any:
-                return open(fn, mode)
+            open_file = lambda: open(fn, mode)  # noqa: E731
 
             self._close_file = True
 
@@ -310,6 +312,7 @@ class HepMCFile:
     __exit__ = _exit_close
 
     def __iter__(self) -> Any:
+        assert self._reader is not None
         return self._reader.__iter__()
 
     def flush(self) -> None:
