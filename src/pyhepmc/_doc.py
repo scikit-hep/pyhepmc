@@ -54,7 +54,11 @@ The units of cross-sections are expected to be pb.""",
     status: array-like
         Status codes of particles.
     parents: array-like or None, optional
-        Array of int with shape (N, 2). Start and stop index (inclusive) in the record for the parents of each particle in Fortran numbering (starting with 1). No parents for a particle are indicated by the pair (0, 0) or (-1, -1). Single parents are indicated either by (N, 0) or (N, N) with N > 0.
+        Array of int with shape (N, 2). Start and stop index (inclusive) in the record
+        for the parents of each particle. Indices must be zero-based (C) or one-based
+        (Fortran). In the latter case, keyword `subtract_one` must be set to true. No
+        parents for a particle are indicated by the pair (-1, -1). Single parents are
+        indicated either by (N, -1) or (N, N) with N > 0.
     children: array-like or None, optional
         Like parents but for the children of this particle.
     vx : array-like or None, optional
@@ -65,6 +69,9 @@ The units of cross-sections are expected to be pb.""",
         Z-component of location of production vertex of particles in mm.
     vt : array-like or None, optional
         Time (ct) of production vertex of particles in mm.
+    subtract_one : bool, optional
+        Set this to True, if the source indices are one-based (Fortran). Default is
+        False, which is correct for zero-based indices (C).
     """,
     "GenEvent.weight": """Get event weight accessed by index (or the canonical/first one if there is no argument) or name.
 
