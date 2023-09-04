@@ -18,21 +18,33 @@ struct std::less<std::pair<int, int>> {
   }
 };
 
-void normalize(int& m1, int& m2) {
+void normalize(int& m1, int& m2, bool fortran) {
   // normalize mother range, see
   // https://pythia.org/latest-manual/ParticleProperties.html
-  // m1 == m2 == 0 : no mothers
-  // m1 == m2 > 0 : elastic scattering
-  // m1 > 0, m2 == 0 : one mother
-  // m1 < m2, both > 0: interaction
-  // m2 < m1, both > 0: same, needs swapping
+  //   m1 == m2 == 0 : no mothers
+  //   m1 == m2 > 0 : elastic scattering
+  //   m1 > 0, m2 == 0 : one mother
+  //   m1 < m2, both > 0: interaction
+  //   m2 < m1, both > 0: same, needs swapping
+  // If the input is coming from C, all indices one less.
+  // After normalization, we want m1, m2 to be a valid
+  // c-style integer range, where m2 points one past the
+  // last included index or m1 == m2 (empty range).
 
-  if (m1 > 0 && m2 == 0)
+  const int invalid = fortran ? 0 : -1;
+
+  if (m1 > invalid && m2 == invalid)
     m2 = m1;
   else if (m2 < m1)
     std::swap(m1, m2);
 
-  --m1; // fortran to c index
+  if (fortran)
+    --m1;
+  else
+    ++m2;
+
+  // postcondition after normalize
+  assert((m1 == 0 && m2 == 0) || m1 < m2);
 }
 
 namespace HepMC3 {
@@ -52,7 +64,8 @@ void modded_add_particle_in(int vid, GenVertexPtr v, GenParticlePtr p) {
 
 void connect_parents_and_children(GenEvent& event, bool parents,
                                   py::array_t<int> parents_or_children, py::object vx,
-                                  py::object vy, py::object vz, py::object vt) {
+                                  py::object vy, py::object vz, py::object vt,
+                                  bool fortran) {
 
   if (parents_or_children.request().ndim != 2)
     throw std::runtime_error("parents or children must be 2D");
@@ -69,8 +82,9 @@ void connect_parents_and_children(GenEvent& event, bool parents,
   // if parents: map from parents to children
   // if children: map from children to parents
   std::map<std::pair<int, int>, std::vector<int>> vmap;
+  const int invalid = fortran ? 0 : -1;
   for (int i = 0; i < n; ++i) {
-    if (rco(i, 0) == 0 && rco(i, 1) == 0) continue;
+    if (rco(i, 0) <= invalid && rco(i, 1) <= invalid) continue;
     vmap[std::make_pair(rco(i, 0), rco(i, 1))].push_back(i);
   }
 
@@ -110,8 +124,7 @@ void connect_parents_and_children(GenEvent& event, bool parents,
     int m2 = vi.first.second;
 
     // there must be at least one parent or child when we arrive here...
-    normalize(m1, m2);
-    assert(m1 < m2); // postcondition after normalize
+    normalize(m1, m2, fortran);
 
     if (m1 < 0 || m2 > n) {
       std::ostringstream os;
@@ -158,7 +171,7 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> py, py::array_t<double> pz, py::array_t<double> en,
                  py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
                  py::object parents, py::object children, py::object vx, py::object vy,
-                 py::object vz, py::object vt) {
+                 py::object vz, py::object vt, bool fortran) {
   if (px.request().ndim != 1) throw std::runtime_error("px must be 1D");
   if (py.request().ndim != 1) throw std::runtime_error("py must be 1D");
   if (pz.request().ndim != 1) throw std::runtime_error("pz must be 1D");
@@ -196,7 +209,8 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
   if (have_parents || have_children)
     connect_parents_and_children(
         event, have_parents,
-        py::cast<py::array_t<int>>(have_parents ? parents : children), vx, vy, vz, vt);
+        py::cast<py::array_t<int>>(have_parents ? parents : children), vx, vy, vz, vt,
+        fortran);
 }
 
 } // namespace HepMC3

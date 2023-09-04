@@ -26,28 +26,28 @@ void register_numpy_api(py::module& m) {
   py::class_<ParticlesAPI>(m, "ParticlesAPI")
       .def(py::init<py::object>())
       // clang-format off
-        NP_ARRAY(ParticlesAPI, particles, int, id)
-        NP_ARRAY(ParticlesAPI, particles, int, pid)
-        NP_ARRAY(ParticlesAPI, particles, int, status)
-        NP_ARRAY(ParticlesAPI, particles, bool, is_generated_mass_set)
-        NP_ARRAY(ParticlesAPI, particles, double, generated_mass)
-        NP_ARRAY2(ParticlesAPI, particles, double, momentum, px)
-        NP_ARRAY2(ParticlesAPI, particles, double, momentum, py)
-        NP_ARRAY2(ParticlesAPI, particles, double, momentum, pz)
-        NP_ARRAY2(ParticlesAPI, particles, double, momentum, e)
+      NP_ARRAY(ParticlesAPI, particles, int, id)
+      NP_ARRAY(ParticlesAPI, particles, int, pid)
+      NP_ARRAY(ParticlesAPI, particles, int, status)
+      NP_ARRAY(ParticlesAPI, particles, bool, is_generated_mass_set)
+      NP_ARRAY(ParticlesAPI, particles, double, generated_mass)
+      NP_ARRAY2(ParticlesAPI, particles, double, momentum, px)
+      NP_ARRAY2(ParticlesAPI, particles, double, momentum, py)
+      NP_ARRAY2(ParticlesAPI, particles, double, momentum, pz)
+      NP_ARRAY2(ParticlesAPI, particles, double, momentum, e)
       // clang-format on
       ;
 
   py::class_<VerticesAPI>(m, "VerticesAPI")
       .def(py::init<py::object>())
       // clang-format off
-        NP_ARRAY(VerticesAPI, vertices, int, id)
-        NP_ARRAY(VerticesAPI, vertices, int, status)
-        NP_ARRAY(VerticesAPI, vertices, bool, has_set_position)
-        NP_ARRAY2(VerticesAPI, vertices, double, position, x)
-        NP_ARRAY2(VerticesAPI, vertices, double, position, y)
-        NP_ARRAY2(VerticesAPI, vertices, double, position, z)
-        NP_ARRAY2(VerticesAPI, vertices, double, position, t)
+      NP_ARRAY(VerticesAPI, vertices, int, id)
+      NP_ARRAY(VerticesAPI, vertices, int, status)
+      NP_ARRAY(VerticesAPI, vertices, bool, has_set_position)
+      NP_ARRAY2(VerticesAPI, vertices, double, position, x)
+      NP_ARRAY2(VerticesAPI, vertices, double, position, y)
+      NP_ARRAY2(VerticesAPI, vertices, double, position, z)
+      NP_ARRAY2(VerticesAPI, vertices, double, position, t)
       // clang-format on
       ;
 

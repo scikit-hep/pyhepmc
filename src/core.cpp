@@ -63,7 +63,7 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
                  py::array_t<double> py, py::array_t<double> pz, py::array_t<double> en,
                  py::array_t<double> m, py::array_t<int> pid, py::array_t<int> status,
                  py::object parents, py::object children, py::object vx, py::object vy,
-                 py::object vz, py::object vt);
+                 py::object vz, py::object vt, bool fortran);
 
 } // namespace HepMC3
 
@@ -522,7 +522,8 @@ PYBIND11_MODULE(_core, m) {
       .def("from_hepevt", from_hepevt, "event_number"_a, "px"_a, "py"_a, "pz"_a, "en"_a,
            "m"_a, "pid"_a, "status"_a, "parents"_a = py::none(),
            "children"_a = py::none(), "vx"_a = py::none(), "vy"_a = py::none(),
-           "vz"_a = py::none(), "vt"_a = py::none(), DOC(GenEvent.from_hepevt))
+           "vz"_a = py::none(), "vt"_a = py::none(), "fortran"_a = true,
+           DOC(GenEvent.from_hepevt))
       .def("write_data", &GenEvent::write_data, "data"_a, DOC(GenEvent.write_data))
       .def("read_data", &GenEvent::read_data, "data"_a, DOC(GenEvent.read_data))
       .def_property_readonly("numpy", [](py::object self) { return NumpyAPI(self); })
