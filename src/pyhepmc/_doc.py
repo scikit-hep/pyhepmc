@@ -69,9 +69,9 @@ The units of cross-sections are expected to be pb.""",
         Z-component of location of production vertex of particles in mm.
     vt : array-like or None, optional
         Time (ct) of production vertex of particles in mm.
-    subtract_one : bool, optional
-        Set this to True, if the source indices are one-based (Fortran). Default is
-        False, which is correct for zero-based indices (C).
+    fortran : bool, optional
+        If True (default), the source indices are 1-based (Fortran, Pythia8). Set this
+        to False, if the indices are 0-based (C-style).
     """,
     "GenEvent.weight": """Get event weight accessed by index (or the canonical/first one if there is no argument) or name.
 
