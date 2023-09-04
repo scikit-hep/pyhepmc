@@ -21,18 +21,27 @@ struct std::less<std::pair<int, int>> {
 void normalize(int& m1, int& m2, bool fortran) {
   // normalize mother range, see
   // https://pythia.org/latest-manual/ParticleProperties.html
-  // m1 == m2 == 0 : no mothers
-  // m1 == m2 > 0 : elastic scattering
-  // m1 > 0, m2 == 0 : one mother
-  // m1 < m2, both > 0: interaction
-  // m2 < m1, both > 0: same, needs swapping
+  //   m1 == m2 == 0 : no mothers
+  //   m1 == m2 > 0 : elastic scattering
+  //   m1 > 0, m2 == 0 : one mother
+  //   m1 < m2, both > 0: interaction
+  //   m2 < m1, both > 0: same, needs swapping
+  // If the input is coming from C, all indices one less.
+  // After normalization, we want m1, m2 to be a valid
+  // c-style integer range, where m2 points one past the
+  // last included index or m1 == m2 (empty range).
 
-  if (m1 > 0 && m2 == 0)
+  const int invalid = fortran ? 0 : -1;
+
+  if (m1 > invalid && m2 == invalid)
     m2 = m1;
   else if (m2 < m1)
     std::swap(m1, m2);
 
-  --m1; // fortran to c index
+  if (fortran)
+    --m1;
+  else
+    ++m2;
 
   // postcondition after normalize
   assert((m1 == 0 && m2 == 0) || m1 < m2);

@@ -1,6 +1,7 @@
 import pytest
 import pyhepmc as hep
 from numpy.testing import assert_equal
+import numpy as np
 
 
 def make_evt():
@@ -325,7 +326,8 @@ def test_GenEvent_generated_mass():
 
 
 @pytest.mark.parametrize("use_parent", (True, False))
-def test_GenEvent_from_hepevt(use_parent, evt):
+@pytest.mark.parametrize("fortran", (True, False))
+def test_GenEvent_from_hepevt(use_parent, fortran, evt):
     status = [p.status for p in evt.particles]
     pid = [p.pid for p in evt.particles]
     px = [p.momentum[0] for p in evt.particles]
@@ -346,8 +348,13 @@ def test_GenEvent_from_hepevt(use_parent, evt):
     #       /            p6
     #     p2
 
+    # fortran style
     parents = [(0, 0), (0, 0), (1, 1), (2, 2), (3, 4), (3, 4), (5, 5), (5, 5)]
     children = [(3, 0), (4, 0), (5, 6), (5, 6), (7, 8), (0, 0), (0, 0), (0, 0)]
+
+    if not fortran:
+        parents = np.subtract(parents, 1)
+        children = np.subtract(children, 1)
 
     ev = hep.GenEvent()
     if use_parent:
@@ -366,6 +373,7 @@ def test_GenEvent_from_hepevt(use_parent, evt):
             vy,
             vz,
             vt,
+            fortran=fortran,
         )
     else:
         ev.from_hepevt(
@@ -383,6 +391,7 @@ def test_GenEvent_from_hepevt(use_parent, evt):
             vy,
             vz,
             vt,
+            fortran=fortran,
         )
 
     # cannot be taken from HepEvt record, but is set for evt
