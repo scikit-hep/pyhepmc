@@ -15,7 +15,7 @@
 repos:
 # Standard hooks
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
   - id: check-case-conflict
   - id: check-docstring-first
@@ -35,7 +35,7 @@ repos:
 
 # Python formatting
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 23.7.0
+  rev: 24.1.1
   hooks:
   - id: black
 
@@ -48,14 +48,14 @@ repos:
 
 # Python linter (Flake8)
 - repo: https://github.com/pycqa/flake8
-  rev: 6.1.0
+  rev: 7.0.0
   hooks:
   - id: flake8
     exclude: ^(docs/.*|tests/.*)$
 
 # C++ formatting
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v16.0.6
+  rev: v17.0.6
   hooks:
   - id: clang-format
 
@@ -70,7 +70,7 @@ repos:
 
 # Python type checking
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 'v1.5.1'
+  rev: 'v1.8.0'
   hooks:
   - id: mypy
     # additional_dependencies: [numpy]
