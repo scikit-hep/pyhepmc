@@ -9,6 +9,7 @@ The :func:`open` function is even easier to use. It can read any
 supported file and will auto-detect the format. It can be used for
 reading and writing.
 """
+
 from __future__ import annotations
 from ._core import (
     GenEvent,

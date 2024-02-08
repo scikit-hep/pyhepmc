@@ -36,6 +36,7 @@ Missing functionality
   processing the current event in the main thread.
 
 """
+
 from pyhepmc._core import (
     Units,
     FourVector,
