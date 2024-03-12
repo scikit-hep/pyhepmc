@@ -35,7 +35,7 @@ repos:
 
 # Python formatting
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 24.1.1
+  rev: 24.2.0
   hooks:
   - id: black
 
@@ -55,7 +55,7 @@ repos:
 
 # C++ formatting
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v17.0.6
+  rev: v18.1.1
   hooks:
   - id: clang-format
 
@@ -70,7 +70,7 @@ repos:
 
 # Python type checking
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 'v1.8.0'
+  rev: 'v1.9.0'
   hooks:
   - id: mypy
     # additional_dependencies: [numpy]
