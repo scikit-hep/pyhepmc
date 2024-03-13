@@ -498,10 +498,7 @@ PYBIND11_MODULE(_core, m) {
           overload_cast<GenCrossSectionPtr, GenEvent>(&GenEvent::cross_section),
           &GenEvent::set_cross_section, DOC(GenEvent.cross_section))
       .def_property(
-          "attributes",
-          [](GenEvent& self) {
-            return AttributesView{&self, 0};
-          },
+          "attributes", [](GenEvent& self) { return AttributesView{&self, 0}; },
           [](GenEvent& self, py::dict obj) {
             auto amv = AttributesView{&self, 0};
             py::cast(amv).attr("clear")();
