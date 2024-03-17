@@ -77,13 +77,10 @@ std::ostream& repr_ostream(std::ostream& os, const HepMC3::GenEvent& x) {
   // incomplete:
   // missing comparison of GenHeavyIon, GenPdfInfo, GenCrossSection
 
-  os << "<GenEvent "
-     << "momentum_unit=" << x.momentum_unit() << ", "
-     << "length_unit=" << x.length_unit() << ", "
-     << "event_number=" << x.event_number() << ", "
-     << "particles=" << x.particles().size() << ", "
-     << "vertices=" << x.vertices().size() << ", "
-     << "run_info=";
+  os << "<GenEvent " << "momentum_unit=" << x.momentum_unit() << ", "
+     << "length_unit=" << x.length_unit() << ", " << "event_number=" << x.event_number()
+     << ", " << "particles=" << x.particles().size() << ", "
+     << "vertices=" << x.vertices().size() << ", " << "run_info=";
   repr_ostream(os, x.run_info()) << ">";
   return os;
 }
