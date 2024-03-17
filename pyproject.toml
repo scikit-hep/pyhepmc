@@ -3,7 +3,7 @@ requires = [
     "setuptools>=46.4",
     "setuptools_scm[toml]>=6.2",
     "cmake>=3.13",
-    "wheel"
+    "wheel",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -12,11 +12,11 @@ name = "pyhepmc"
 description = "Pythonic interface to the HepMC3 C++ library licensed under LGPL-v3."
 maintainers = [
     { name = "Hans Dembinski" },
-    { email = "hans.dembinski@gmail.com" }
+    { email = "hans.dembinski@gmail.com" },
 ]
 readme = "README.rst"
 requires-python = ">=3.8"
-license = {text = "BSD 3-Clause License"}
+license = { text = "BSD 3-Clause License" }
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: BSD License",
@@ -25,7 +25,7 @@ classifiers = [
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
     "Topic :: Scientific/Engineering",
-    "Intended Audience :: Developers"
+    "Intended Audience :: Developers",
 ]
 dependencies = ["numpy"]
 dynamic = ["version"]
@@ -35,18 +35,8 @@ repository = "https://github.com/scikit-hep/pyhepmc"
 documentation = "https://scikit-hep.org/pyhepmc"
 
 [project.optional-dependencies]
-test = [
-    "pytest",
-    "particle",
-    "matplotlib"
-]
-doc = [
-    "sphinx",
-    "sphinx-rtd-theme",
-    "nbsphinx",
-    "ipython",
-    "ipykernel",
-]
+test = ["pytest", "particle", "matplotlib"]
+doc = ["sphinx", "sphinx-rtd-theme", "nbsphinx", "ipython", "ipykernel"]
 
 [tool.setuptools_scm]
 
@@ -75,8 +65,30 @@ source = ["pyhepmc"]
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover"]
 
-[tool.pydocstyle]
-convention = "numpy"
+[tool.ruff]
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F", # flake8
+    "D", # pydocstyle
+]
+unfixable = [
+    "F841", # Removes unused variables
+]
+extend-ignore = [
+    "D212", # multi-line-summary-first-line
+]
+pydocstyle.convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["B", "D"]
+"bench/*.py" = ["D"]
+"docs/*.py" = ["D"]
+"cmake_ext.py" = ["D"]
+"generate_*.py" = ["D"]
+"setup*.py" = ["D"]
 
 [tool.cibuildwheel]
 # update skip when numpy wheels become available

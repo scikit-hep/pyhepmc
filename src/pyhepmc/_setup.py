@@ -12,17 +12,17 @@ from typing import Any
 class _SetupMeta(type):
     @property
     def print_errors(cls) -> bool:
-        "Whether to print errors or not."
+        """Whether to print errors or not."""
         return _Setup_print_errors()  # type:ignore
 
     @property
     def print_warnings(cls) -> bool:
-        "Whether to print warnings or not."
+        """Whether to print warnings or not."""
         return _Setup_print_warnings()  # type:ignore
 
     @property
     def debug_level(cls) -> int:
-        "Access debug level."
+        """Access debug level."""
         return _Setup_debug_level()  # type:ignore
 
     def __setattr__(self, name: str, value: Any) -> None:

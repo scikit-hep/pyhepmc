@@ -113,7 +113,8 @@ def __getattr__(name: str) -> Any:
 
     if name in dir(io):
         warnings.warn(
-            f"importing {name} from pyhepmc is deprecated, please import from pyhepmc.io",
+            f"importing {name} from pyhepmc is deprecated, "
+            "please import from pyhepmc.io",
             category=VisibleDeprecationWarning,
             stacklevel=2,
         )

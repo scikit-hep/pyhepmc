@@ -9,7 +9,6 @@ def merge_license_files():
     This follows the approach of Scipy and is to keep LICENSE in repo as an
     exact BSD 3-clause, to make GitHub state correctly how pyhepmc is licensed.
     """
-
     l1 = "LICENSE"
     l2 = "LICENSES_bundled"
 

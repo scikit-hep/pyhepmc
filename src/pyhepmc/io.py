@@ -100,20 +100,22 @@ class ReaderMixin:
 
 # add contextmanager interface to IO classes
 class ReaderAscii(ReaderAsciiBase, ReaderMixin):  # type:ignore
-    pass
+    """Reader for HepMC3 ASCII files."""
 
 
 class ReaderAsciiHepMC2(ReaderAsciiHepMC2Base, ReaderMixin):  # type:ignore
-    pass
+    """Reader for HepMC2 ASCII files."""
 
 
 class ReaderLHEF(ReaderLHEFBase, ReaderMixin):  # type:ignore
+    """Reader for LHEF files."""
+
     _read_event_unpatched = ReaderLHEFBase.read_event
     read_event = _read_event_lhef_patch
 
 
 class ReaderHEPEVT(ReaderHEPEVTBase, ReaderMixin):  # type:ignore
-    pass
+    """Reader for HEPEVT files."""
 
 
 WriterAscii.__enter__ = _enter

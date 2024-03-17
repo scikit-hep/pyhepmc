@@ -1,6 +1,4 @@
-"""
-Visualization for GenEvent.
-"""
+"""Visualization for GenEvent."""
 
 from __future__ import annotations
 from pyhepmc._graphviz import Digraph
