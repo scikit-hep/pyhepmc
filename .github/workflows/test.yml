@@ -22,7 +22,7 @@ jobs:
           # version number must be string, otherwise 3.10 becomes 3.1
           - os: windows-latest
             python-version: "3.11"
-          - os: macos-latest
+          - os: macos-13
             python-version: "3.8"
           - os: ubuntu-latest
             python-version: "pypy-3.8"
@@ -44,5 +44,5 @@ jobs:
       env:
         DEBUG: 1
     - uses: ts-graphviz/setup-graphviz@v1
-      if: ${{ matrix.os != 'macos-latest' }}
+      if: ${{ matrix.os != 'macos-13' }}
     - run: python -m pytest
