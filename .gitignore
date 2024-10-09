@@ -7,7 +7,7 @@ dist
 *.pyd
 *.so
 *.egg-info
-tests/__pycache__
+__pycache__
 .eggs
 .cache
 .compiler_support_cache

@@ -10,12 +10,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pyhepmc"
 description = "Pythonic interface to the HepMC3 C++ library licensed under LGPL-v3."
-maintainers = [
-    { name = "Hans Dembinski" },
-    { email = "hans.dembinski@gmail.com" },
-]
+maintainers = [{ name = "Hans Dembinski", email = "hans.dembinski@gmail.com" }]
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { text = "BSD 3-Clause License" }
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -27,7 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Intended Audience :: Developers",
 ]
-dependencies = ["numpy", "packaging"]
+dependencies = ["numpy>=1.21", "packaging"]
 dynamic = ["version"]
 
 [project.urls]
