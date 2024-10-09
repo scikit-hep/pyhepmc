@@ -14,13 +14,10 @@ class deprecated:
         self.removal = Version(removal) if removal else None
 
     def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
-        category: Any = FutureWarning
+        category: Any = DeprecationWarning
         extra = ""
-        if self.removal:
-            vstring = ".".join(str(x) for x in self.removal)
-            extra = f" and will be removed in version {vstring}"
-            if CURRENT_VERSION >= self.removal:
-                category = DeprecationWarning
+        if self.removal and CURRENT_VERSION < self.removal:
+            extra = f" and will be removed in version {self.removal}"
         msg = f"{func.__name__} is deprecated{extra}: {self.reason}"
 
         def decorated_func(*args: Any, **kwargs: Any) -> Any:

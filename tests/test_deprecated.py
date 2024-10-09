@@ -25,7 +25,7 @@ def test_deprecated():
         foo.bar()
 
     with pytest.warns(
-        FutureWarning,
-        match="bar is deprecated and will be removed in version 1000.0.0: use baz",
+        DeprecationWarning,
+        match="foo is deprecated and will be removed in version 1000.0.0: use baz",
     ):
         foo.foo()
