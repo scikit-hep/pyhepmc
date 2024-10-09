@@ -4,6 +4,7 @@ var
 build
 dist
 *.pyc
+*.pyd
 *.so
 *.egg-info
 tests/__pycache__
@@ -17,6 +18,7 @@ py??
 py???
 .ci_bak
 venv
+.venv
 .coverage
 htmlcov
 src/pyhepmc/_version.py
