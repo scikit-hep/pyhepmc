@@ -48,7 +48,7 @@ jobs:
           allow-prereleases: true
       - uses: ts-graphviz/setup-graphviz@v1
         if: ${{ matrix.os != 'macos-13' }}
-      - run: uv pip install --system .[test] pytest pytest-xdist ${{ matrix.installs }}
+      - run: uv pip install --system .[test] ${{ matrix.installs }}
         env:
           DEBUG: 1
-      - run: python -m pytest -n 3
+      - run: python -m pytest
