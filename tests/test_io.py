@@ -476,7 +476,7 @@ def test_open_standalone(evt):  # noqa
 
 
 def test_deprecated_import():
-    with pytest.warns(np.VisibleDeprecationWarning):
+    with pytest.warns(DeprecationWarning):
         from pyhepmc import ReaderAscii  # noqa F401
 
 

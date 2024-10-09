@@ -109,13 +109,12 @@ GenEvent._repr_html_ = lambda self: to_dot(self)._repr_html_()
 def __getattr__(name: str) -> Any:
     from . import io
     import warnings
-    from numpy import VisibleDeprecationWarning
 
     if name in dir(io):
         warnings.warn(
             f"importing {name} from pyhepmc is deprecated, "
             "please import from pyhepmc.io",
-            category=VisibleDeprecationWarning,
+            category=DeprecationWarning,
             stacklevel=2,
         )
         return getattr(io, name)

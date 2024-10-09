@@ -1,6 +1,5 @@
 from pyhepmc._deprecated import deprecated
 import pytest
-import numpy as np
 
 
 class Foo:
@@ -18,5 +17,5 @@ def test_deprecated():
         def bad(self):
             return 0
 
-    with pytest.warns(np.VisibleDeprecationWarning, match="bar is deprecated: use baz"):
+    with pytest.warns(DeprecationWarning, match="bar is deprecated: use baz"):
         foo.bar()

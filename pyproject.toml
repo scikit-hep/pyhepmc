@@ -27,7 +27,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Intended Audience :: Developers",
 ]
-dependencies = ["numpy"]
+dependencies = ["numpy", "packaging"]
 dynamic = ["version"]
 
 [project.urls]
@@ -54,8 +54,9 @@ testpaths = ["tests"]
 log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = [
+    "error::PendingDeprecationWarning",
     "error::DeprecationWarning",
-    "error::numpy.VisibleDeprecationWarning",
+    "error::FutureWarning",
 ]
 
 [tool.coverage.run]
@@ -69,7 +70,7 @@ exclude_lines = ["pragma: no cover"]
 src = ["src"]
 
 [tool.ruff.lint]
-select = [
+extend-select = [
     "E",
     "F", # flake8
     "D", # pydocstyle
