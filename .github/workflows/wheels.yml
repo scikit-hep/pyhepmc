@@ -88,7 +88,7 @@ jobs:
       attestations: write
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4.1.7
         with:
           pattern: "*"
           name: artifact
