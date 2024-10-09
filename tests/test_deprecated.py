@@ -7,11 +7,15 @@ class Foo:
     def bar(self):
         return 0
 
+    @deprecated("use baz", removal="1000.0.0")
+    def foo(self):
+        return 0
+
 
 def test_deprecated():
     foo = Foo()
 
-    with pytest.raises(ValueError, match="reason.*required"):
+    with pytest.raises(AssertionError):
 
         @deprecated
         def bad(self):
@@ -19,3 +23,9 @@ def test_deprecated():
 
     with pytest.warns(DeprecationWarning, match="bar is deprecated: use baz"):
         foo.bar()
+
+    with pytest.warns(
+        FutureWarning,
+        match="bar is deprecated and will be removed in version 1000.0.0: use baz",
+    ):
+        foo.foo()

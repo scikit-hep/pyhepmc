@@ -9,6 +9,7 @@ CURRENT_VERSION = Version(version("pyhepmc"))
 
 class deprecated:
     def __init__(self, reason: str, removal: str = ""):
+        assert isinstance(reason, str)
         self.reason = reason
         self.removal = Version(removal) if removal else None
 
