@@ -6,7 +6,6 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import pyhepmc
-import os
 
 project = "pyhepmc"
 copyright = "2022, Hans Dembinski"
@@ -31,7 +30,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_static_path = ["_static"]
 
 # Import and set the theme if we're building docs locally
-import sphinx_rtd_theme
 
 html_theme = "sphinx_rtd_theme"
 
