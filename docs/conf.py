@@ -30,9 +30,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_static_path = ["_static"]
 
-# Import and set the theme if we're building docs locally
-import sphinx_rtd_theme
-
 html_theme = "sphinx_rtd_theme"
 
 # Autodoc options
