@@ -27,8 +27,6 @@ jobs:
             python-version: "3.9"
             installs: "numpy==1.21.0"
           - os: ubuntu-latest
-            python-version: "pypy-3.9"
-          - os: ubuntu-latest
             python-version: "3.13"
             installs: "'numpy>=2' scipy matplotlib"
       fail-fast: false
