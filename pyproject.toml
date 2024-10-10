@@ -64,7 +64,7 @@ source = ["pyhepmc"]
 exclude_lines = ["pragma: no cover"]
 
 [tool.ruff]
-src = ["src"]
+exclude = ["docs/examples/*"]
 
 [tool.ruff.lint]
 extend-select = [

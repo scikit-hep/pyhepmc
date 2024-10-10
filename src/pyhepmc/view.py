@@ -6,7 +6,7 @@ from pyhepmc._prettify import db as prettify
 from pyhepmc import Units, GenEvent
 import numpy as np
 import os
-from pathlib import PurePath
+from pathlib import Path
 from typing import BinaryIO, Union, Set, Any, Optional, Tuple
 
 
@@ -245,15 +245,16 @@ def savefig(
         Other arguments are forwarded to pyhepmc.view.to_dot.
     """
     if isinstance(fname, (str, os.PathLike)):
-        p = PurePath(fname)
+        p = Path(fname)
         if format is None:
             format = "".join(p.suffixes)[1:]
-        if format in SUPPORTED_FORMATS:
+        try:
+            # unknown format raises exception in nested call
             with open(p, "wb") as fo:
                 savefig(event, fo, format=format, **kwargs)
-        # unknown format raises exception in nested call
-        with open(os.devnull, "wb") as fo:
-            savefig(event, fo, format=format, **kwargs)
+        except ValueError:
+            if p.exists():
+                p.unlink()
         return
 
     # if we arrive here, fname is a file-like object
