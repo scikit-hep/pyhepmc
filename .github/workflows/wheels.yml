@@ -3,7 +3,7 @@ name: Wheels
 on:
   push:
     tags:
-      - '**'
+      - "**"
   workflow_dispatch:
 
 concurrency:
@@ -22,40 +22,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13]
-        arch: [auto, aarch64, universal2]
-        py: [cp38, cp39, cp310, cp311, cp312]
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+        arch: [auto, aarch64]
+        py: [cp39, cp310, cp311, cp312, cp313]
         exclude:
           - os: windows-latest
             arch: aarch64
-          - os: windows-latest
-            arch: universal2
           - os: macos-13
             arch: aarch64
-          - os: ubuntu-latest
-            arch: universal2
-          # some unrelated error with installing pillow
-          - os: ubuntu-latest
-            py: cp38
-    env:
-      CIBW_BUILD: ${{ matrix.py }}-*
-      CIBW_ARCHS_LINUX: ${{ matrix.arch }}
+          - os: macos-14
+            arch: aarch64
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-          fetch-depth: 0  # needed by setuptools_scm
+          fetch-depth: 0 # needed by setuptools_scm
 
       - if: ${{ matrix.arch == 'aarch64' }}
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
-      - uses: pypa/cibuildwheel@v2.16.5
+      - uses: pypa/cibuildwheel@v2.21
         env:
           CIBW_BUILD: ${{ matrix.py }}-*
           CIBW_ARCHS: ${{ matrix.arch }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: wheel-${{ matrix.py }}-${{ matrix.os }}-${{ matrix.arch }}
           path: ./wheelhouse/*.whl
 
   sdist:
@@ -65,28 +58,39 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-          fetch-depth: 0  # needed by setuptools_scm
+          fetch-depth: 0 # needed by setuptools_scm
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      - run: python -m pip install --upgrade pip setuptools wheel
-      - run: python setup.py sdist
+      - run: pipx run build --sdist
+      - run: python -m pip install --upgrade pip setuptools
       - run: python -m pip install -v $(echo dist/*)'[test]'
       - run: python -m pytest
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: sdist
           path: dist/*.tar.gz
 
   upload:
+    if: github.event_name == 'push' && contains(github.event.ref, '/tags/')
     needs: [wheels, sdist]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && contains(github.event.ref, '/tags/')
+
+    environment:
+      name: pypi
+      url: https://pypi.org/project/pyhepmc/
+
+    permissions:
+      id-token: write
+      attestations: write
+
     steps:
       - uses: actions/download-artifact@v4.1.7
         with:
+          pattern: "*"
           name: artifact
           path: dist
 

@@ -6,7 +6,6 @@ from test_basic import make_evt
 from pyhepmc._core import stringstream, pyiostream
 from io import BytesIO
 from pathlib import Path
-import numpy as np
 import typing
 import gzip
 from sys import version_info
@@ -476,7 +475,7 @@ def test_open_standalone(evt):  # noqa
 
 
 def test_deprecated_import():
-    with pytest.warns(np.VisibleDeprecationWarning):
+    with pytest.warns(DeprecationWarning):
         from pyhepmc import ReaderAscii  # noqa F401
 
 

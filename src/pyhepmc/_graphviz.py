@@ -125,8 +125,11 @@ class Digraph:
         return r.stdout
 
     def _repr_svg_(self) -> str:
-        s = self.pipe(format="svg", encoding="utf-8")
-        assert isinstance(s, str)
+        try:
+            s = self.pipe(format="svg", encoding="utf-8")
+            assert isinstance(s, str)
+        except FileNotFoundError as e:
+            return f"SVG view not available: {e.args[0]}"
         return s
 
     def _repr_png_(self) -> bytes:

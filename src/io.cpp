@@ -70,7 +70,7 @@ void register_io(py::module& m) {
       .def(py::init<>())
       .def(py::init<std::string>())
       .def("__str__",
-           (std::string(std::stringstream::*)() const) & std::stringstream::str);
+           (std::string(std::stringstream::*)() const)&std::stringstream::str);
 
   py::class_<Reader>(m, "Reader")
       // clang-format off

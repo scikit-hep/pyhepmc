@@ -14,24 +14,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-        fetch-depth: 0  # needed for setuptools_scm
-    # must come after checkout
-    - uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.python-version }}
-    - uses: actions/setup-python@v4
-      with:
-        python-version: "3.9"
-    - run: sudo apt-get install pandoc
-    - run: python -m pip install --prefer-binary -v .[doc]
-    - run: python -m ipykernel install --user --name python3
-    - run: python docs/build.py
-    - uses: actions/upload-pages-artifact@v1
-      with:
-        path: 'docs/_build/html'
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0 # needed for setuptools_scm
+      # must come after checkout
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.python-version }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: sudo apt-get install pandoc
+      - run: python -m pip install --prefer-binary -v .[doc]
+      - run: python -m ipykernel install --user --name python3
+      - run: python docs/build.py
+      - uses: actions/upload-pages-artifact@v1
+        with:
+          path: "docs/_build/html"
 
   deploy:
     if: github.ref_type == 'tag' || github.ref_name == 'main'
@@ -49,5 +49,5 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/configure-pages@v2
-    - uses: actions/deploy-pages@v1
+      - uses: actions/configure-pages@v2
+      - uses: actions/deploy-pages@v1

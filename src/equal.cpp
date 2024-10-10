@@ -9,10 +9,21 @@
 #include <HepMC3/GenParticle.h>
 #include <HepMC3/GenRunInfo.h>
 #include <HepMC3/GenVertex.h>
+#include <type_traits>
 
 namespace HepMC3 {
 
+template <class...>
+using void_t = void;
+
+template <class, class = void>
+struct has_unequal_op : std::false_type {};
+
 template <class T>
+struct has_unequal_op<T, void_t<decltype(std::declval<T>() != std::declval<T>())>>
+    : std::true_type {};
+
+template <class T, class = std::enable_if_t<!has_unequal_op<T>::value>>
 bool operator!=(const T& a, const T& b) {
   return !operator==(a, b);
 }
