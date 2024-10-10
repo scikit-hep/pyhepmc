@@ -255,6 +255,7 @@ def savefig(
         except ValueError:
             if p.exists():
                 p.unlink()
+            raise
         return
 
     # if we arrive here, fname is a file-like object

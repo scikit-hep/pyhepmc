@@ -121,13 +121,17 @@ def test_savefig_1(evt, ext):
             assert np.sum(a1[:size] != a2[:size]) < 150
 
 
-def test_savefig_2(evt):
+def test_savefig_2a(evt):
     with pytest.raises(ValueError):
         view.savefig(evt, "foo")
 
+
+def test_savefig_2b(evt):
     with pytest.raises(ValueError):
         view.savefig(evt, "foo.foo")
 
+
+def test_savefig_2c(evt):
     with pytest.raises(ValueError):
         with io.BytesIO() as f:
             view.savefig(evt, f)
