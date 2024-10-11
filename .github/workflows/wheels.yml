@@ -21,17 +21,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
+      # matrix:
+      #   os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+      #   arch: [auto, aarch64]
+      #   py: [cp39, cp310, cp311, cp312, cp313]
+      #   exclude:
+      #     - os: windows-latest
+      #       arch: aarch64
+      #     - os: macos-13
+      #       arch: aarch64
+      #     - os: macos-14
+      #       arch: aarch64
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
-        arch: [auto, aarch64]
-        py: [cp39, cp310, cp311, cp312, cp313]
-        exclude:
-          - os: windows-latest
-            arch: aarch64
-          - os: macos-13
-            arch: aarch64
-          - os: macos-14
-            arch: aarch64
+        os: [ubuntu-latest]
+        arch: [auto]
+        py: [cp39]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -95,6 +99,3 @@ jobs:
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1.8
-        with:
-          user: __token__
-          password: ${{secrets.pypi}}
