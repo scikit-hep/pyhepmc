@@ -9,6 +9,9 @@ A Pythonic wrapper for the `HepMC3 C++ library <http://hepmc.web.cern.ch/hepmc>`
 .. image:: https://badge.fury.io/py/pyhepmc.svg
   :target: https://pypi.org/project/pyhepmc
 
+.. image:: https://img.shields.io/conda/vn/conda-forge/pyhepmc.svg
+  :target: https://github.com/conda-forge/pyhepmc-feedstock
+
 .. image:: https://coveralls.io/repos/github/scikit-hep/pyhepmc/badge.svg?branch=main
   :target: https://coveralls.io/github/scikit-hep/pyhepmc?branch=main
 
@@ -21,9 +24,21 @@ HepMC3 has its own Python bindings. Why should you use these?
 
 **pyhepmc is easy to install**
 
-The command ``pip install pyhepmc`` just works on all common platforms. Since we publish binary wheels, you don't need to compile anything. Since we include the HepMC3 library, you don't need to install it separately either.
+The command
 
-However, building from source is also easy. External software is not required. Just download the repository with ``git clone --recursive`` and run ``pip install -v -e .``.
+.. code:: bash
+
+   python -m pip install pyhepmc
+
+just works on all common platforms. Since we publish binary wheels, you don't need to compile anything. Since we include the HepMC3 library, you don't need to install it separately either.
+
+However, building from source is also easy. External software is not required. Just download the repository with ``git clone --recursive`` and run ``python -m pip install -v -e .``.
+
+``pyhepmc`` is also available on conda-forge
+
+.. code:: bash
+
+   conda install --channel conda-forge pyhepmc
 
 **pyhepmc is Pythonic, Numpy-friendy, and Jupyter notebook-friendly**
 
