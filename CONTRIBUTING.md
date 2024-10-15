@@ -44,7 +44,7 @@ python3 -m venv venv
 Activate the virtualenv and install the required packages for development:
 ```
 . venv/bin/activate
-pip install -v -e .'[test]'
+python -m pip install -v -e .'[test]'
 ```
 This builds the package in develop mode and installs the extra libraries used for testing. The build should work fine if you have a reasonably recent C++ compiler, since pyhepmc is continuously tested on against gcc, clang and msvc. If it does not, please submit an issue with the build log and your compiler version.
 
@@ -60,6 +60,6 @@ To leave the virtualenv, call `deactivate` or close the shell.
 
 If you want to use your local version for productive work, install it from the local project folder:
 ```
-pip install --upgrade <project folder>
+python -m pip install --upgrade <project folder>
 ```
 The `--upgrade` option makes sure that an already existing pyhepmc version is replaced.
