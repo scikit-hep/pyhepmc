@@ -69,8 +69,7 @@ void register_io(py::module& m) {
   py::class_<std::stringstream, std::iostream>(m, "stringstream")
       .def(py::init<>())
       .def(py::init<std::string>())
-      .def("__str__",
-           py::overload_cast<>(&std::stringstream::str, py::const_));
+      .def("__str__", py::overload_cast<>(&std::stringstream::str, py::const_));
 
   py::class_<Reader>(m, "Reader")
       // clang-format off
