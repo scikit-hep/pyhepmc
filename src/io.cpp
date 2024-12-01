@@ -70,7 +70,12 @@ void register_io(py::module& m) {
       .def(py::init<>())
       .def(py::init<std::string>())
       .def("__str__",
-           (std::string(std::stringstream::*)() const)&std::stringstream::str);
+#if __cplusplus > 201703L && _GLIBCXX_USE_CXX11_ABI
+           (std::string (std::stringstream::*)() const &)
+#else
+           (std::string (std::stringstream::*)() const)
+#endif
+	   & std::stringstream::str);
 
   py::class_<Reader>(m, "Reader")
       // clang-format off
