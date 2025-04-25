@@ -10,6 +10,7 @@ dist
 __pycache__
 .eggs
 .cache
+.ruff_cache
 .compiler_support_cache
 .flag_filter_cache
 .pytest_cache
