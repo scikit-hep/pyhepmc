@@ -37,7 +37,7 @@ _T overload_cast(_T x) {
                 DOC(cls.name))
 #define METH(name, cls, ...) .def(#name, &cls::name, ##__VA_ARGS__, DOC(cls.name))
 #define METH_OL(name, cls, rval, args) \
-  .def(#name, (rval(cls::*)(args)) & cls::name, DOC(cls.name))
+  .def(#name, (rval (cls::*)(args)) & cls::name, DOC(cls.name))
 #define ATTR(name, cls) .def_readwrite(#name, &cls::name, DOC(cls.name))
 #define REPR(name) .def("__repr__", repr<name>)
 #define EQ(name) \
