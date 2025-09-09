@@ -10,30 +10,30 @@ Now `cd` to the project folder (the rest assumes you are in the project folder).
 ```
 git submodule update --init
 ```
-Add a remote endpoint called *upstream* to keep in sync with the master of the scikit-hep repository:
+Add a remote endpoint called *upstream* to keep in sync with the main of the scikit-hep repository:
 ```
 git remote add upstream https://github.com/scikit-hep/pyhepmc.git
 ```
 This concludes the initial set up.
 
-To develop a feature or a fix, create a branch from your master (make sure your master is in sync with the scikit-hep master):
+To develop a feature or a fix, create a branch from your main (make sure your main is in sync with the scikit-hep main):
 ```
-git checkout -b my_cool_feature master
+git checkout -b my_cool_feature main
 ```
-Commit to your branch and initiate a pull request from the Github web page when you feel the feature is ready to be reviewed. Note: Never commit to the master, only to feature branches.
+Commit to your branch and initiate a pull request from the Github web page when you feel the feature is ready to be reviewed. Note: Never commit to the main, only to feature branches.
 
-The scikit-hep master may have moved forward in the meantime. Keep your local master branch in sync with these commands:
+The scikit-hep main may have moved forward in the meantime. Keep your local main branch in sync with these commands:
 ```
-git checkout master
-git pull upstream master
+git checkout main
+git pull upstream main
 git submodule update # update the nested sub-repositories if necessary
 ```
-If you have followed the rule to never commit to the master, then these commands always work. Rebase your feature branch onto the updated master:
+If you have followed the rule to never commit to the main, then these commands always work. Rebase your feature branch onto the updated main:
 ```
 git checkout my_cool_feature
-git rebase master
+git rebase main
 ```
-If conflicts between your changes and those in the master appear, you need to resolve them. Follow the instructions printed by git.
+If conflicts between your changes and those in the main appear, you need to resolve them. Follow the instructions printed by git.
 
 ## Building
 
