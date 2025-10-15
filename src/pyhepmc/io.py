@@ -247,6 +247,14 @@ class HepMCFile:
                 import lzma
 
                 open = lzma.open  # type:ignore
+            elif fn.endswith(".zst") or fn.endswith(".zstd"):
+                from sys import version_info
+
+                if version_info >= (3, 14):
+                    from compression import zstd
+                else:
+                    from backports import zstd
+                open = zstd.open
             else:
                 from builtins import open  # type:ignore
 
