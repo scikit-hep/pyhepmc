@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Intended Audience :: Developers",
 ]
-dependencies = ["numpy>=1.21", "packaging"]
+dependencies = ["numpy>=1.21", "packaging", "backports.zstd"]
 dynamic = ["version"]
 
 [project.urls]

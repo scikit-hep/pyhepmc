@@ -16,6 +16,11 @@ if version_info >= (3, 9):
 else:
     list_type = typing.List
 
+if version_info >= (3, 14):
+    from compression import zstd
+else:
+    from backports import zstd
+
 # this only does something if pyhepmc is compiled in debug mode
 hep.Setup.print_warnings = True
 
@@ -104,6 +109,23 @@ def test_pystream_5():
     io = sys.stdout.buffer
     with pyiostream(io, 100) as pio:
         pio.write(b"foo")
+
+
+def test_pystream_6(evt):
+    fn = "test_pystream_6.dat.zst"
+    with zstd.open(fn, "w") as f:
+        with pyiostream(f, 1000) as s:
+            with io.WriterAscii(s) as w:
+                w.write(evt)
+
+    with zstd.open(fn) as f:
+        with pyiostream(f, 1000) as s:
+            with io.ReaderAscii(s) as r:
+                evt2 = r.read()
+
+    assert evt == evt2
+
+    os.unlink(fn)
 
 
 def test_read_event_write_event(evt):
