@@ -196,8 +196,8 @@ class HepMCFile:
     fileobj : str or Path or IO object
         Filename to open for reading or writing or file object. When writing to
         existing files, the contents are replaced. When the filename ends with the
-        suffixes ".gz", ".bz2", or ".xz", the contents are transparently compressed
-        and decompressed.
+        suffixes ".gz", ".bz2", ".xz", ".zst" or ".zstd",
+        the contents are transparently compressed and decompressed.
     mode : str, optional
         Must be either "r" (default) or "w", to indicate whether to open for reading
         or writing.
