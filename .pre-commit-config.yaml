@@ -64,3 +64,8 @@ repos:
         # additional_dependencies: [numpy]
         args: [src]
         pass_filenames: false
+
+  - repo: https://github.com/henryiii/validate-pyproject-schema-store
+    rev: 2025.10.11
+    hooks:
+      - id: validate-pyproject
