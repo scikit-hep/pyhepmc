@@ -248,11 +248,13 @@ class HepMCFile:
 
                 open = lzma.open  # type:ignore
             elif fn.endswith(".zst") or fn.endswith(".zstd"):
-                try:
+                from sys import version_info
+
+                if version_info >= (3, 14):
                     # The canonical import should work from 3.14 onwards,
                     # but right now fails on Ubuntu even on 3.14
                     from compression import zstd  # pyright: ignore[reportMissingImports]
-                except ModuleNotFoundError:
+                else:
                     from backports import zstd
                 open = zstd.open
             else:

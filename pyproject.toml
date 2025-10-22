@@ -27,10 +27,7 @@ classifiers = [
 dependencies = [
     "numpy>=1.21",
     "packaging",
-    # This conditional dependency is not good enough right now
-    # on Ubuntu 3.14 we still need the backports
-    # "backports.zstd ; python_version<'3.14'",
-    "backports.zstd",
+    "backports.zstd ; python_version<'3.14'",
 ]
 
 dynamic = ["version"]
