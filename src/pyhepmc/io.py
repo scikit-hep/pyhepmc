@@ -222,8 +222,8 @@ class HepMCFile:
         self,
         fileobj: Filename,
         mode: str = "r",
-        precision: int = None,
-        format: str = None,
+        precision: Optional[int] = None,
+        format: Optional[str] = None,
     ):
         open_file: Optional[Callable[[], Any]] = None
         if hasattr(fileobj, "read") and hasattr(fileobj, "write"):
@@ -248,11 +248,11 @@ class HepMCFile:
 
                 open = lzma.open  # type:ignore
             elif fn.endswith(".zst") or fn.endswith(".zstd"):
-                from sys import version_info
-
-                if version_info >= (3, 14):
-                    from compression import zstd
-                else:
+                try:
+                    # The canonical import should work from 3.14 onwards,
+                    # but right now fails on Ubuntu even on 3.14
+                    from compression import zstd  # pyright: ignore[reportMissingImports]
+                except ModuleNotFoundError:
                     from backports import zstd
                 open = zstd.open
             else:
@@ -260,7 +260,7 @@ class HepMCFile:
 
                 mode += "b"
 
-            open_file = lambda: open(fn, mode)  # noqa: E731
+            open_file = lambda: open(fn, mode)
 
             self._close_file = True
 
@@ -355,8 +355,8 @@ class HepMCFile:
 def open(
     fileobj: Filename,
     mode: str = "r",
-    precision: int = None,
-    format: str = None,
+    precision: Optional[int] = None,
+    format: Optional[str] = None,
 ) -> Any:
     """
     Open HepMC files for reading or writing.

@@ -27,8 +27,12 @@ classifiers = [
 dependencies = [
     "numpy>=1.21",
     "packaging",
-    "backports.zstd ; python_version<'3.14'",
+    # This conditional dependency is not good enough right now
+    # on Ubuntu 3.14 we still need the backports
+    # "backports.zstd ; python_version<'3.14'",
+    "backports.zstd",
 ]
+
 dynamic = ["version"]
 
 [project.urls]
@@ -81,6 +85,7 @@ unfixable = [
 ]
 extend-ignore = [
     "D212", # multi-line-summary-first-line
+    "E731", # lambda-assignment
 ]
 pydocstyle.convention = "numpy"
 
