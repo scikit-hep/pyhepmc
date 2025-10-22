@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - .github/workflows/release.yml
+      - .github/workflows/wheels.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
