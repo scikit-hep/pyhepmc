@@ -24,7 +24,12 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Intended Audience :: Developers",
 ]
-dependencies = ["numpy>=1.21", "packaging", "backports.zstd"]
+dependencies = [
+    "numpy>=1.21",
+    "packaging",
+    "backports.zstd ; python_version<'3.14'",
+]
+
 dynamic = ["version"]
 
 [project.urls]
@@ -32,7 +37,12 @@ repository = "https://github.com/scikit-hep/pyhepmc"
 documentation = "https://scikit-hep.org/pyhepmc"
 
 [project.optional-dependencies]
-test = ["pytest", "particle", "matplotlib"]
+test = [
+    "pytest",
+    "particle",
+    # There are issues with binary wheels on some platforms right now
+    'matplotlib; (platform_system != "Windows" or python_version <"3.12") and (platform_system != "Linux" or platform_machine != "aarch64")',
+]
 doc = ["sphinx", "sphinx-rtd-theme", "nbsphinx", "ipython", "ipykernel"]
 
 [tool.setuptools_scm]
@@ -77,6 +87,7 @@ unfixable = [
 ]
 extend-ignore = [
     "D212", # multi-line-summary-first-line
+    "E731", # lambda-assignment
 ]
 pydocstyle.convention = "numpy"
 
@@ -89,22 +100,18 @@ pydocstyle.convention = "numpy"
 "setup*.py" = ["D"]
 
 [tool.cibuildwheel]
-# update skip when numpy wheels become available
-skip = ["*-musllinux_*", "cp31?-win32", "cp31?-manylinux_i686"]
+skip = ["cp39-musllinux_i686"]                    # no numpy wheel
 test-extras = ["test"]
 test-command = "python -m pytest {package}/tests"
 test-skip = ["*universal2:arm64"]
-# to match numpy, we use manylinux2014 for cp310+
-manylinux-x86_64-image = "manylinux2014"
-manylinux-i686-image = "manylinux2014"
 
 [tool.cibuildwheel.environment]
 # this makes sure that we build only on platforms that have a corresponding numpy wheel
 PIP_ONLY_BINARY = ":all:"
+# flag is used to disable a test that doesn't work on CI
 CIBW = "1"
 
 [[tool.cibuildwheel.overrides]]
-# to match numpy, we use manylinux2010 for cp36 to cp39
-select = "cp3?-*"
-manylinux-x86_64-image = "manylinux2010"
-manylinux-i686-image = "manylinux2010"
+# to match numpy, we use manylinux2014 for cp310 (and 3.9, since manylinux2010 is dead)
+select = "cp3{9,10}-manylinux*"
+manylinux-x86_64-image = "manylinux2014"

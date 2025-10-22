@@ -2,10 +2,13 @@ name: Test
 
 on:
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.rst"
-      - "*.md"
+    paths:
+      - ".github/workflows/test.yml"
+      - "**.py"
+      - "**.cpp"
+      - "**.hpp"
+      - pyproject.toml
+      - CMakeLists.txt
   workflow_dispatch:
 
 concurrency:

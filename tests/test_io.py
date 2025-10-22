@@ -16,11 +16,6 @@ if version_info >= (3, 9):
 else:
     list_type = typing.List
 
-if version_info >= (3, 14):
-    from compression import zstd
-else:
-    from backports import zstd
-
 # this only does something if pyhepmc is compiled in debug mode
 hep.Setup.print_warnings = True
 
@@ -112,6 +107,13 @@ def test_pystream_5():
 
 
 def test_pystream_6(evt):
+    if version_info >= (3, 14):
+        # The canonical import should work from 3.14 onwards,
+        # but right now fails on Ubuntu even on 3.14
+        zstd = pytest.importorskip("compression.zstd")
+    else:
+        from backports import zstd
+
     fn = "test_pystream_6.dat.zst"
     with zstd.open(fn, "w") as f:
         with pyiostream(f, 1000) as s:
@@ -427,8 +429,7 @@ def test_open_failures():
 @pytest.mark.skipif(
     "CIBW" in os.environ,
     reason=(
-        "does not work in cibuildwheel, "
-        "although it works in a manually set-up docker"
+        "does not work in cibuildwheel, although it works in a manually set-up docker"
     ),
 )
 def test_open_on_readonly_file():
