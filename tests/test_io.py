@@ -427,8 +427,7 @@ def test_open_failures():
 @pytest.mark.skipif(
     "CIBW" in os.environ,
     reason=(
-        "does not work in cibuildwheel, "
-        "although it works in a manually set-up docker"
+        "does not work in cibuildwheel, although it works in a manually set-up docker"
     ),
 )
 def test_open_on_readonly_file():
