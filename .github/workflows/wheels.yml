@@ -4,11 +4,11 @@ on:
   push:
     tags:
       - "**"
-  workflow_dispatch:
   pull_request:
     paths:
       - .github/workflows/wheels.yml
       - pyproject.toml
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
