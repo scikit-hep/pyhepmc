@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/wheels.yml
+      - pyproject.toml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
