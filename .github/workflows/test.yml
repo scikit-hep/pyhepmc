@@ -2,10 +2,11 @@ name: Test
 
 on:
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.rst"
-      - "*.md"
+    paths:
+      - ".github/workflows/test.yml"
+      - "**.py"
+      - "**.cpp"
+      - "**.hpp"
   workflow_dispatch:
 
 concurrency:
