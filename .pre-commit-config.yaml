@@ -13,59 +13,54 @@
 # See https://github.com/pre-commit/pre-commit
 
 repos:
-# Standard hooks
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v6.0.0
-  hooks:
-  - id: check-case-conflict
-  - id: check-docstring-first
-  - id: check-executables-have-shebangs
-  - id: check-merge-conflict
-  - id: check-symlinks
-  - id: check-yaml
-    args: ["--allow-multiple-documents"]
-  - id: debug-statements
-    files: src/pyhepmc/.*\\.py
-  - id: end-of-file-fixer
-  - id: mixed-line-ending
-  - id: sort-simple-yaml
-  - id: file-contents-sorter
-  - id: trailing-whitespace
-    exclude: ^doc/_static/.*.svg
+  # Standard hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+      - id: debug-statements
+        files: src/pyhepmc/.*\\.py
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: sort-simple-yaml
+      - id: file-contents-sorter
+      - id: trailing-whitespace
+        exclude: ^doc/_static/.*.svg
 
-# Python formatting
-- repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 25.9.0
-  hooks:
-  - id: black
+  # Ruff linter, replacement for flake8, pydocstyle, isort
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.14.1"
+    hooks:
+      - id: ruff
+        args: [--fix, --show-fixes]
+      - id: ruff-format
 
-# Ruff linter, replacement for flake8, pydocstyle, isort
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: 'v0.14.1'
-  hooks:
-    - id: ruff
-      args: [--fix, --show-fixes]
+  # C++ formatting
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v21.1.2
+    hooks:
+      - id: clang-format
 
-# C++ formatting
-- repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v21.1.2
-  hooks:
-  - id: clang-format
+  # CMake formatting
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+        additional_dependencies: [pyyaml]
+        types: [file]
+        files: (\.cmake|CMakeLists.txt)(.in)?$
 
-# CMake formatting
-- repo: https://github.com/cheshirekow/cmake-format-precommit
-  rev: v0.6.13
-  hooks:
-  - id: cmake-format
-    additional_dependencies: [pyyaml]
-    types: [file]
-    files: (\.cmake|CMakeLists.txt)(.in)?$
-
-# Python type checking
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 'v1.18.2'
-  hooks:
-  - id: mypy
-    # additional_dependencies: [numpy]
-    args: [src]
-    pass_filenames: false
+  # Python type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.18.2"
+    hooks:
+      - id: mypy
+        # additional_dependencies: [numpy]
+        args: [src]
+        pass_filenames: false
