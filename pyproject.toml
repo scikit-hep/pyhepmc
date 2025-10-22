@@ -37,7 +37,12 @@ repository = "https://github.com/scikit-hep/pyhepmc"
 documentation = "https://scikit-hep.org/pyhepmc"
 
 [project.optional-dependencies]
-test = ["pytest", "particle", "matplotlib"]
+test = [
+    "pytest",
+    "particle",
+    # There are issues with binary wheels on some platforms right now
+    'matplotlib; not (platform_system == "Windows" and python_version >= "3.12") and not (platform_system == "Linux" and platform_machine == "aarch64")',
+]
 doc = ["sphinx", "sphinx-rtd-theme", "nbsphinx", "ipython", "ipykernel"]
 
 [tool.setuptools_scm]
