@@ -100,6 +100,8 @@ enable = ["cpython-freethreading"]
 # this makes sure that we build only on platforms that have a corresponding numpy wheel
 UV_ONLY_BINARY = ":all:"
 PIP_ONLY_BINARY = ":all:"
+# flag is used to disable a test that doesn't work on CI
+CIBW = "1"
 
 [[tool.cibuildwheel.overrides]]
 # to match numpy, we use manylinux2014 for cp310 (and 3.9, since manylinux2010 is dead)
