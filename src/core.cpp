@@ -536,6 +536,7 @@ PYBIND11_MODULE(_core, m) {
       METH(set_units, GenEvent)
       METH(event_pos, GenEvent)
       PROP_RO_OL(beams, GenEvent, std::vector<ConstGenParticlePtr>)
+      METH(add_tree, GenEvent)
       METH_OL(add_vertex, GenEvent, void, GenVertexPtr)
       METH_OL(add_particle, GenEvent, void, GenParticlePtr)
       METH(set_beam_particles, GenEvent)
