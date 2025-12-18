@@ -58,7 +58,7 @@ show_error_codes = true
 minversion = "6.0"
 addopts = "--strict-config --strict-markers -q -ra --ff"
 testpaths = ["tests"]
-log_cli_level = "INFO"
+log_level = "INFO"
 xfail_strict = true
 filterwarnings = [
     "error::PendingDeprecationWarning",
