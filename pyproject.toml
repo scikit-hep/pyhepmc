@@ -13,7 +13,7 @@ description = "Pythonic interface to the HepMC3 C++ library licensed under LGPL-
 maintainers = [{ name = "Hans Dembinski", email = "hans.dembinski@gmail.com" }]
 readme = "README.rst"
 requires-python = ">=3.9"
-license = { text = "BSD 3-Clause License" }
+license-files = ["LICENSE", "LICENSES_bundled"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: BSD License",

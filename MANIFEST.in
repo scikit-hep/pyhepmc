@@ -13,6 +13,7 @@ include src/pyhepmc/*.py
 include cmake_ext.py
 include CMakeLists.txt
 include LICENSE
+include LICENSES_bundled
 include pyproject.toml
 include README.rst
 include setup.cfg
