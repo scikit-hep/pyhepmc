@@ -35,7 +35,7 @@ repos:
 
   # Ruff linter, replacement for flake8, pydocstyle, isort
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.15.7"
+    rev: "v0.15.8"
     hooks:
       - id: ruff
         args: [--fix, --show-fixes]
@@ -43,7 +43,7 @@ repos:
 
   # C++ formatting
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v22.1.1
+    rev: v22.1.2
     hooks:
       - id: clang-format
 
@@ -66,6 +66,6 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.03.15
+    rev: 2026.03.29
     hooks:
       - id: validate-pyproject
