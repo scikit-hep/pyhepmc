@@ -35,7 +35,7 @@ repos:
 
   # Ruff linter, replacement for flake8, pydocstyle, isort
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.15.8"
+    rev: "v0.15.9"
     hooks:
       - id: ruff
         args: [--fix, --show-fixes]
@@ -58,7 +58,7 @@ repos:
 
   # Python type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.19.1"
+    rev: "v1.20.0"
     hooks:
       - id: mypy
         # additional_dependencies: [numpy]
@@ -66,6 +66,6 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.03.29
+    rev: 2026.04.03
     hooks:
       - id: validate-pyproject
