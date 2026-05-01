@@ -45,7 +45,7 @@ jobs:
           submodules: true
           fetch-depth: 0 # needed by setuptools_scm
 
-      - uses: astral-sh/setup-uv@v8.0.0
+      - uses: astral-sh/setup-uv@v8.1.0
 
       - uses: pypa/cibuildwheel@v3.4
         env:
@@ -99,4 +99,4 @@ jobs:
           merge-multiple: true
           path: dist
 
-      - uses: pypa/gh-action-pypi-publish@release/v1.13
+      - uses: pypa/gh-action-pypi-publish@release/v1.14
