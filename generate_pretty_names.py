@@ -1,7 +1,8 @@
-import unicodeit
-from particle import Particle
 import pprint
 import re
+
+import unicodeit
+from particle import Particle
 
 table = {}
 for p in Particle.findall():

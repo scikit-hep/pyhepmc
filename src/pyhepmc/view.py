@@ -1,16 +1,18 @@
 """Visualization for GenEvent."""
 
 from __future__ import annotations
-from pyhepmc._graphviz import Digraph
-from pyhepmc._prettify import db as prettify
-from pyhepmc import Units, GenEvent
-import numpy as np
+
 import os
 from pathlib import Path
-from typing import BinaryIO, Union, Set, Any, Optional, Tuple
+from typing import Any, BinaryIO, Optional, Set, Tuple, Union
 
+import numpy as np
 
-__all__ = ("to_dot", "savefig", "SUPPORTED_FORMATS")
+from pyhepmc import GenEvent, Units
+from pyhepmc._graphviz import Digraph
+from pyhepmc._prettify import db as prettify
+
+__all__ = ("SUPPORTED_FORMATS", "savefig", "to_dot")
 
 
 def _supported_formats() -> Set[str]:
@@ -38,7 +40,6 @@ def _supported_formats() -> Set[str]:
         "imap_np",
         "pct",
         "pict",
-        "ismap",
         "gd",
         "gd2",
         "json0",
@@ -142,7 +143,7 @@ def to_dot(
         ]
 
         try:
-            from particle import PDGID, Particle, ParticleNotFound, InvalidParticle
+            from particle import PDGID, InvalidParticle, Particle, ParticleNotFound
 
             pdgid = PDGID(p.pid)
 

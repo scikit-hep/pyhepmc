@@ -1,6 +1,7 @@
+import pyhepmc._core as core
+
 import pyhepmc
 import pyhepmc.io
-import pyhepmc._core as core
 
 
 def test_init():

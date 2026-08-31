@@ -1,12 +1,13 @@
 import sys
-from pathlib import Path
-from setuptools import setup
 from distutils.command.sdist import sdist
+from pathlib import Path
+
+from setuptools import setup
 
 cdir = Path(__file__).parent.absolute()
 
 sys.path.append(str(cdir))
-from cmake_ext import CMakeExtension, CMakeBuild  # noqa: E402
+from cmake_ext import CMakeBuild, CMakeExtension  # noqa: E402
 from setup_utils import merge_license_files  # noqa: E402
 
 

@@ -1,4 +1,5 @@
-from typing import Any, Tuple, Generator, Dict
+from collections.abc import Generator
+from typing import Any, Dict, Tuple
 
 
 def clear(self: Any) -> None:

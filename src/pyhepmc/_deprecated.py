@@ -1,8 +1,8 @@
 import warnings
-from typing import Callable, Any
 from importlib.metadata import version
-from packaging.version import Version
+from typing import Any, Callable
 
+from packaging.version import Version
 
 CURRENT_VERSION = Version(version("pyhepmc"))
 
