@@ -11,31 +11,41 @@ reading and writing.
 """
 
 from __future__ import annotations
+
+from pathlib import PurePath
+from typing import Any, Callable, Optional, Union
+
 from ._core import (
     GenEvent,
-    ReaderAscii as ReaderAsciiBase,
-    ReaderAsciiHepMC2 as ReaderAsciiHepMC2Base,
-    ReaderLHEF as ReaderLHEFBase,
-    ReaderHEPEVT as ReaderHEPEVTBase,
+    UnparsedAttribute,
     WriterAscii,
     WriterAsciiHepMC2,
     WriterHEPEVT,
-    UnparsedAttribute,
     pyiostream,
 )
-from pathlib import PurePath
-from typing import Union, Any, Optional, Callable
+from ._core import (
+    ReaderAscii as ReaderAsciiBase,
+)
+from ._core import (
+    ReaderAsciiHepMC2 as ReaderAsciiHepMC2Base,
+)
+from ._core import (
+    ReaderHEPEVT as ReaderHEPEVTBase,
+)
+from ._core import (
+    ReaderLHEF as ReaderLHEFBase,
+)
 
 __all__ = [
-    "open",
     "ReaderAscii",
     "ReaderAsciiHepMC2",
-    "ReaderLHEF",
     "ReaderHEPEVT",
+    "ReaderLHEF",
+    "UnparsedAttribute",
     "WriterAscii",
     "WriterAsciiHepMC2",
     "WriterHEPEVT",
-    "UnparsedAttribute",
+    "open",
 ]
 
 
@@ -70,7 +80,7 @@ class _Iter:
             raise StopIteration
         return evt
 
-    def __iter__(self) -> "_Iter":
+    def __iter__(self) -> _Iter:
         return self
 
     next = __next__
@@ -177,7 +187,7 @@ class _WrappedWriter:
 
         self._writer.write_event(evt)
         if self._writer.failed():
-            raise IOError("writing GenEvent failed")
+            raise OSError("writing GenEvent failed")
 
     def close(self) -> None:
         if self._writer is not None:
@@ -253,7 +263,9 @@ class HepMCFile:
                 if version_info >= (3, 14):
                     # The canonical import should work from 3.14 onwards,
                     # but right now fails on Ubuntu even on 3.14
-                    from compression import zstd  # pyright: ignore[reportMissingImports]
+                    from compression import (
+                        zstd,  # pyright: ignore[reportMissingImports]
+                    )
                 else:
                     from backports import zstd
                 open = zstd.open
@@ -330,18 +342,18 @@ class HepMCFile:
 
     def flush(self) -> None:
         if not self._writer:
-            raise IOError("File opened for reading")
+            raise OSError("File opened for reading")
         self._ios.flush()
         self._file.flush()
 
     def read(self) -> GenEvent:
         if not self._reader:
-            raise IOError("File openened for writing")
+            raise OSError("File openened for writing")
         return self._reader.read()
 
     def write(self, event: GenEvent) -> None:
         if not self._writer:
-            raise IOError("File openened for reading")
+            raise OSError("File openened for reading")
         self._writer.write(event)
 
     def close(self) -> None:

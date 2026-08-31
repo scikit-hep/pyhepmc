@@ -1,12 +1,14 @@
-import pytest
-from test_basic import make_evt
-import pyhepmc
-from pyhepmc import view
-from pathlib import Path
 import io
 import os
-import numpy as np
 import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+from test_basic import make_evt
+
+import pyhepmc
+from pyhepmc import view
 
 CDIR = Path(__file__).parent
 RESULT_DIR = CDIR / "fig"
@@ -86,7 +88,7 @@ def test_Digraph_repr_png(graph):
 
 @pytest.mark.skipif(not DOT_IS_AVAILABLE, reason="requires dot")
 def test_Digraph_repr(graph):
-    from pyhepmc._graphviz import Digraph, Block
+    from pyhepmc._graphviz import Block, Digraph
 
     s = repr(graph)
     graph2 = eval(s, {"Digraph": Digraph, "Block": Block})
@@ -138,9 +140,8 @@ def test_savefig_2b(evt):
 
 
 def test_savefig_2c(evt):
-    with pytest.raises(ValueError):
-        with io.BytesIO() as f:
-            view.savefig(evt, f)
+    with pytest.raises(ValueError), io.BytesIO() as f:
+        view.savefig(evt, f)
 
 
 @pytest.mark.skipif("CI" in os.environ, reason="does not work on CI")

@@ -97,8 +97,7 @@ def handle_docs(node):
 def handle_compounddef(results, node):
     compoundname = node.find("compoundname").text
     prefix = "HepMC3::"
-    if compoundname.startswith(prefix):
-        compoundname = compoundname[len(prefix) :]
+    compoundname = compoundname.removeprefix(prefix)
     # for nested classes
     compoundname = compoundname.replace("::", ".")
     results[compoundname].append(handle_docs(node))

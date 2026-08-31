@@ -1,6 +1,6 @@
 import dataclasses
-from typing import Union, Dict, Type
 import subprocess as subp
+from typing import Dict, Type, Union
 
 
 class Value(str):

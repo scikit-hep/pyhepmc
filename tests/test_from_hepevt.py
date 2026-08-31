@@ -1,6 +1,7 @@
-import pyhepmc as hep
 import numpy as np
 import pytest
+
+import pyhepmc as hep
 
 
 @pytest.mark.parametrize("fortran", (True, False))

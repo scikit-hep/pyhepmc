@@ -1,5 +1,6 @@
-from pyhepmc._deprecated import deprecated
 import pytest
+
+from pyhepmc._deprecated import deprecated
 
 
 class Foo:

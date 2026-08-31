@@ -1,6 +1,7 @@
 import sys
-import pyhepmc
 from pathlib import Path
+
+import pyhepmc
 
 infile = Path(sys.argv[1])
 outfile = Path(sys.argv[2])

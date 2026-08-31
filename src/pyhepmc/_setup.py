@@ -1,12 +1,13 @@
-from pyhepmc._core import (
-    _Setup_print_errors,
-    _Setup_set_print_errors,
-    _Setup_print_warnings,
-    _Setup_set_print_warnings,
-    _Setup_debug_level,
-    _Setup_set_debug_level,
-)
 from typing import Any
+
+from pyhepmc._core import (
+    _Setup_debug_level,
+    _Setup_print_errors,
+    _Setup_print_warnings,
+    _Setup_set_debug_level,
+    _Setup_set_print_errors,
+    _Setup_set_print_warnings,
+)
 
 
 class _SetupMeta(type):
@@ -46,4 +47,4 @@ class Setup(metaclass=_SetupMeta):
     global values in the HepMC3 C++ library.
     """
 
-    __slots__ = ("print_errors", "print_warnings", "debug_level")
+    __slots__ = ("debug_level", "print_errors", "print_warnings")

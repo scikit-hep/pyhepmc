@@ -1,7 +1,7 @@
-import subprocess as subp
-from pathlib import Path
-import sys  # noqa
 import os
+import subprocess as subp
+import sys
+from pathlib import Path
 
 cdir = Path(__file__).parent
 sys.path.append(cdir)

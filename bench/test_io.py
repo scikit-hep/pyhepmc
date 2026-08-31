@@ -1,8 +1,9 @@
-import pyhepmc
-from pyhepmc.io import ReaderAscii
-from pyhepmc._core import pyiostream
 from pathlib import Path
 
+from pyhepmc._core import pyiostream
+
+import pyhepmc
+from pyhepmc.io import ReaderAscii
 
 fn = str(Path(__file__).parent.parent / "tests" / "pythia6.dat")
 

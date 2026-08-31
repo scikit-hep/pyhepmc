@@ -1,7 +1,8 @@
-import pytest
-import pyhepmc as hep
-from numpy.testing import assert_equal
 import numpy as np
+import pytest
+from numpy.testing import assert_equal
+
+import pyhepmc as hep
 
 
 def create_event_components():

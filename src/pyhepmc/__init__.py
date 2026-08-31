@@ -37,67 +37,68 @@ Missing functionality
 
 """
 
+from importlib.metadata import version
+from typing import Any
+
+from pyhepmc import _attributes
 from pyhepmc._core import (
-    Units,
     FourVector,
-    GenEventData,
-    GenEvent,
-    GenParticle,
-    GenVertex,
-    GenHeavyIon,
-    GenRunInfo,
-    GenPdfInfo,
     GenCrossSection,
-    HEPRUPAttribute,
+    GenEvent,
+    GenEventData,
+    GenHeavyIon,
+    GenParticle,
+    GenPdfInfo,
+    GenRunInfo,
+    GenVertex,
     HEPEUPAttribute,
-    equal_vertex_sets,
-    equal_particle_sets,
+    HEPRUPAttribute,
+    Units,
     content,
-    listing,
-    delta_phi,
     delta_eta,
+    delta_phi,
     delta_r2_eta,
-    delta_r_eta,
     delta_r2_rap,
+    delta_r_eta,
     delta_r_rap,
     delta_rap,
+    equal_particle_sets,
+    equal_vertex_sets,
+    listing,
 )
-from pyhepmc.io import open as open  # noqa: F401
-from pyhepmc import _attributes
 from pyhepmc._setup import Setup
+from pyhepmc.io import open as open
 from pyhepmc.view import to_dot
-from typing import Any
-from importlib.metadata import version
 
 __version__ = version("pyhepmc")
 
 __all__ = (
-    "Units",
     "FourVector",
-    "GenEventData",
-    "GenParticleData",
-    "GenVertexData",
-    "GenEvent",
-    "GenParticle",
-    "GenVertex",
-    "GenHeavyIon",
-    "GenRunInfo",
-    "GenPdfInfo",
     "GenCrossSection",
-    "HEPRUPAttribute",
+    "GenEvent",
+    "GenEventData",
+    "GenHeavyIon",
+    "GenParticle",
+    "GenParticleData",
+    "GenPdfInfo",
+    "GenRunInfo",
+    "GenVertex",
+    "GenVertexData",
     "HEPEUPAttribute",
-    "equal_vertex_sets",
-    "equal_particle_sets",
-    "content",
-    "listing",
+    "HEPRUPAttribute",
     "Setup",
-    "delta_phi",
+    "Units",
+    "content",
     "delta_eta",
+    "delta_phi",
     "delta_r2_eta",
-    "delta_r_eta",
     "delta_r2_rap",
+    "delta_r_eta",
     "delta_r_rap",
     "delta_rap",
+    "equal_particle_sets",
+    "equal_vertex_sets",
+    "listing",
     "open",
 )
 
@@ -107,8 +108,9 @@ GenEvent._repr_html_ = lambda self: to_dot(self)._repr_html_()
 
 
 def __getattr__(name: str) -> Any:
-    from . import io
     import warnings
+
+    from . import io
 
     if name in dir(io):
         warnings.warn(

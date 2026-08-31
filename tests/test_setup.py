@@ -1,6 +1,7 @@
-import pyhepmc
-from pyhepmc._core import _Setup_print_errors, _Setup_print_warnings, _Setup_debug_level
 import pytest
+from pyhepmc._core import _Setup_debug_level, _Setup_print_errors, _Setup_print_warnings
+
+import pyhepmc
 
 
 def test_all():

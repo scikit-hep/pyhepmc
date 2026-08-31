@@ -1,15 +1,17 @@
+import gzip
 import os
-import pyhepmc as hep
-import pyhepmc.io as io
-import pytest
-from test_basic import make_evt
-from pyhepmc._core import stringstream, pyiostream
+import subprocess as subp
+import typing
 from io import BytesIO
 from pathlib import Path
-import typing
-import gzip
 from sys import version_info
-import subprocess as subp
+
+import pytest
+from pyhepmc._core import pyiostream, stringstream
+from test_basic import make_evt
+
+import pyhepmc as hep
+from pyhepmc import io
 
 if version_info >= (3, 9):
     list_type = list
@@ -27,10 +29,8 @@ def evt():
 
 def test_pystream_1():
     fn = str(Path(__file__).parent / "sibyll21.dat")
-    with open(fn, "rb") as f:
-        with pyiostream(f, 1000) as s:
-            with io.ReaderAscii(s) as r:
-                ev1 = r.read()
+    with open(fn, "rb") as f, pyiostream(f, 1000) as s, io.ReaderAscii(s) as r:
+        ev1 = r.read()
     with io.ReaderAscii(fn) as r:
         ev2 = r.read()
 
@@ -43,17 +43,14 @@ def test_pystream_2():
     fn = str(Path(__file__).parent / "sibyll21.dat")
     fn2 = "sibyll21.dat.gz"
 
-    with open(fn, "rb") as f:
-        with gzip.open(fn2, "w") as f2:
-            for evt in f:
-                f2.write(evt)
+    with open(fn, "rb") as f, gzip.open(fn2, "w") as f2:
+        for evt in f:
+            f2.write(evt)
 
     ev1 = []
-    with gzip.open(fn2) as f:
-        with pyiostream(f, 1000) as s:
-            with io.ReaderAscii(s) as r:
-                for evt in r:
-                    ev1.append(evt)
+    with gzip.open(fn2) as f, pyiostream(f, 1000) as s, io.ReaderAscii(s) as r:
+        for evt in r:
+            ev1.append(evt)
 
     assert len(ev1) == 1
 
@@ -69,15 +66,11 @@ def test_pystream_2():
 
 def test_pystream_3(evt):
     fn = "test_pystream_3.dat.gz"
-    with gzip.open(fn, "w") as f:
-        with pyiostream(f, 1000) as s:
-            with io.WriterAscii(s) as w:
-                w.write(evt)
+    with gzip.open(fn, "w") as f, pyiostream(f, 1000) as s, io.WriterAscii(s) as w:
+        w.write(evt)
 
-    with gzip.open(fn) as f:
-        with pyiostream(f, 1000) as s:
-            with io.ReaderAscii(s) as r:
-                evt2 = r.read()
+    with gzip.open(fn) as f, pyiostream(f, 1000) as s, io.ReaderAscii(s) as r:
+        evt2 = r.read()
 
     assert evt == evt2
 
@@ -115,15 +108,11 @@ def test_pystream_6(evt):
         from backports import zstd
 
     fn = "test_pystream_6.dat.zst"
-    with zstd.open(fn, "w") as f:
-        with pyiostream(f, 1000) as s:
-            with io.WriterAscii(s) as w:
-                w.write(evt)
+    with zstd.open(fn, "w") as f, pyiostream(f, 1000) as s, io.WriterAscii(s) as w:
+        w.write(evt)
 
-    with zstd.open(fn) as f:
-        with pyiostream(f, 1000) as s:
-            with io.ReaderAscii(s) as r:
-                evt2 = r.read()
+    with zstd.open(fn) as f, pyiostream(f, 1000) as s, io.ReaderAscii(s) as r:
+        evt2 = r.read()
 
     assert evt == evt2
 
@@ -251,7 +240,6 @@ def test_open_2(evt):
     with hep.open(filename) as f:
         for i, evt2 in enumerate(f):
             assert i == 0
-            pass
 
     assert evt != evt2
 
@@ -261,7 +249,6 @@ def test_open_2(evt):
     with hep.open(filename) as f:
         for i, evt3 in enumerate(f):
             assert i == 0
-            pass
 
     assert evt == evt3
 
@@ -364,9 +351,8 @@ def test_open_6(evt, capsys):
 def test_open_7():
     fn = str(Path(__file__).parent / "sibyll21.dat")
 
-    with open(fn, "r") as f:
-        with hep.open(f, "r") as f2:
-            evt = f2.read()
+    with open(fn, "r") as f, hep.open(f, "r") as f2:
+        evt = f2.read()
 
     assert len(evt.particles) == 23
     assert len(evt.vertices) == 7
@@ -409,21 +395,18 @@ def test_open_failures():
             n += 1
     assert n == 0
 
-    with pytest.raises(ValueError, match="format"):
-        with hep.open(fn, format="foo") as f:
-            pass
+    with pytest.raises(ValueError, match="format"), hep.open(fn, format="foo") as f:
+        pass
 
     with pytest.raises(ValueError, match="format"):
         with hep.open("test.dat", "w", format="foo") as f:
             pass
 
-    with pytest.raises(ValueError, match="mode"):
-        with hep.open("test.dat", "x") as f:
-            pass
+    with pytest.raises(ValueError, match="mode"), hep.open("test.dat", "x") as f:
+        pass
 
-    with pytest.raises(ValueError, match="mode"):
-        with hep.open("test.dat", "rb") as f:
-            pass
+    with pytest.raises(ValueError, match="mode"), hep.open("test.dat", "rb") as f:
+        pass
 
 
 @pytest.mark.skipif(
@@ -436,9 +419,8 @@ def test_open_on_readonly_file():
     foo = Path("foo.dat")
     foo.touch(mode=0o000)  # not writeable
 
-    with pytest.raises(IOError):
-        with hep.open(foo, "w") as f:
-            f.write(hep.GenEvent())
+    with pytest.raises(IOError), hep.open(foo, "w") as f:
+        f.write(hep.GenEvent())
 
     foo.chmod(mode=0o666)
     foo.unlink()
@@ -456,7 +438,7 @@ def test_open_broken():
 @pytest.mark.parametrize(
     "writer", (io.WriterAscii, io.WriterAsciiHepMC2, io.WriterHEPEVT)
 )
-def test_open_with_writer(evt, writer):  # noqa
+def test_open_with_writer(evt, writer):
     filename = f"test_open_{writer.__name__}.dat"
     with writer(filename) as f:
         f.write(evt)
@@ -473,7 +455,7 @@ def test_open_with_writer(evt, writer):  # noqa
     os.unlink(filename)
 
 
-def test_open_standalone(evt):  # noqa
+def test_open_standalone(evt):
     filename = "test_open_standalone.dat"
 
     f = hep.open(filename, "w")
@@ -505,7 +487,7 @@ def test_deprecated_import():
 def test_attributes():
     filename = "test_attributes.dat"
 
-    evt = hep.GenEvent()  # noqa
+    evt = hep.GenEvent()
     p = hep.GenParticle((1, 2, 3, 4), 5, 6)
     evt.add_particle(p)
     evt.attributes = {
