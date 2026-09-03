@@ -328,6 +328,25 @@ def test_open_5():
     assert n == 1
 
 
+def test_open_5_pdf_info():
+    # pdf_info is only filled by HepMC3 >= 3.3.0 (issue #110), and both
+    # beam vertices must survive the read (issue #109)
+    fn = Path(__file__).parent / "pp.lhe"
+    with hep.open(fn) as f:
+        evt = next(iter(f))
+
+    assert len(evt.vertices) == 2
+
+    pdf = evt.pdf_info
+    assert pdf is not None
+    # incoming partons and pdf ids as written in pp.lhe
+    assert pdf.parton_id1 == 3
+    assert pdf.parton_id2 == 22
+    assert pdf.pdf_id1 == 20400
+    assert pdf.pdf_id2 == 20400
+    assert pdf.scale == 91.1876
+
+
 def test_open_6(evt, capsys):
     import sys
 

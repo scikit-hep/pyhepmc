@@ -63,13 +63,6 @@ def _exit_flush(self: Any, type: Exception, value: str, tb: Any) -> bool:
     return False
 
 
-def _read_event_lhef_patch(self: Any, evt: GenEvent) -> bool:
-    failed = self._read_event_unpatched(evt)
-    if failed and self.failed():  # probably EOF
-        return True
-    return not failed
-
-
 class _Iter:
     def __init__(self, reader: Any):
         self.reader = reader
@@ -119,9 +112,6 @@ class ReaderAsciiHepMC2(ReaderAsciiHepMC2Base, ReaderMixin):  # type:ignore
 
 class ReaderLHEF(ReaderLHEFBase, ReaderMixin):  # type:ignore
     """Reader for LHEF files."""
-
-    _read_event_unpatched = ReaderLHEFBase.read_event
-    read_event = _read_event_lhef_patch
 
 
 class ReaderHEPEVT(ReaderHEPEVTBase, ReaderMixin):  # type:ignore
@@ -258,9 +248,9 @@ class HepMCFile:
 
                 open = lzma.open  # type:ignore
             elif fn.endswith(".zst") or fn.endswith(".zstd"):
-                from sys import version_info
+                import sys
 
-                if version_info >= (3, 14):
+                if sys.version_info >= (3, 14):
                     # The canonical import should work from 3.14 onwards,
                     # but right now fails on Ubuntu even on 3.14
                     from compression import (
@@ -268,7 +258,7 @@ class HepMCFile:
                     )
                 else:
                     from backports import zstd
-                open = zstd.open
+                open = zstd.open  # type:ignore
             else:
                 from builtins import open  # type:ignore
 
