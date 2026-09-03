@@ -364,9 +364,17 @@ PYBIND11_MODULE(_core, m) {
               throw py::type_error("int or str required");
           },
           "index_or_name"_a, "value"_a, DOC(GenCrossSection.set_xsec_err))
-      .def("set_cross_section", &GenCrossSection::set_cross_section, "cross_section"_a,
-           "cross_section_error"_a, "accepted_events"_a = -1, "attempted_events"_a = -1,
-           DOC(GenCrossSection.set_cross_section))
+      .def("set_cross_section",
+           py::overload_cast<const double&, const double&, const long&, const long&>(
+               &GenCrossSection::set_cross_section),
+           "cross_section"_a, "cross_section_error"_a, "accepted_events"_a = -1,
+           "attempted_events"_a = -1, DOC(GenCrossSection.set_cross_section))
+      .def("set_cross_section",
+           py::overload_cast<const std::vector<double>&, const std::vector<double>&,
+                             const long&, const long&>(
+               &GenCrossSection::set_cross_section),
+           "cross_sections"_a, "cross_section_errors"_a, "accepted_events"_a = -1,
+           "attempted_events"_a = -1, DOC(GenCrossSection.set_cross_section))
       // clang-format off
       EQ(GenCrossSection)
       PROP2(accepted_events, GenCrossSection)
