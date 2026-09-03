@@ -33,4 +33,4 @@ html_theme = "sphinx_rtd_theme"
 
 # Autodoc options
 autodoc_member_order = "groupwise"
-autodoc_mock_imports = ["numpy", "particle"]
+autodoc_mock_imports = ["numpy", "particle<1.0.0"]
