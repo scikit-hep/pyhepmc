@@ -42,14 +42,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: true
+          submodules: recursive
           fetch-depth: 0 # needed by setuptools_scm
+
+      - run: git submodule update --init --recursive
 
       - uses: astral-sh/setup-uv@v10.0.1
 
       - uses: pypa/cibuildwheel@v4.2
         env:
           CIBW_BUILD: ${{ matrix.py }}-*
+          CIBW_BEFORE_ALL: "git submodule update --init --recursive"
 
       - uses: actions/upload-artifact@v7
         with:
@@ -62,8 +65,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: true
+          submodules: recursive
           fetch-depth: 0 # needed by setuptools_scm
+
+      - run: git submodule update --init --recursive
+
+      - uses: pypa/cibuildwheel@v4.2
+        env:
+          CIBW_BEFORE_ALL: "git submodule update --init --recursive"
 
       - uses: actions/setup-python@v7
         with:
