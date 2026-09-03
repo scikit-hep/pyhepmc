@@ -40,14 +40,14 @@ jobs:
             py: cp310
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: true
           fetch-depth: 0 # needed by setuptools_scm
 
-      - uses: astral-sh/setup-uv@v8.0.0
+      - uses: astral-sh/setup-uv@v8.2.0
 
-      - uses: pypa/cibuildwheel@v3.4
+      - uses: pypa/cibuildwheel@v4.1
         env:
           CIBW_BUILD: ${{ matrix.py }}-*
 
@@ -60,7 +60,7 @@ jobs:
     name: source package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: true
           fetch-depth: 0 # needed by setuptools_scm
@@ -99,4 +99,4 @@ jobs:
           merge-multiple: true
           path: dist
 
-      - uses: pypa/gh-action-pypi-publish@release/v1.13
+      - uses: pypa/gh-action-pypi-publish@release/v1.14
