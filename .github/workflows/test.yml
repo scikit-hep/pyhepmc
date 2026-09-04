@@ -42,8 +42,8 @@ jobs:
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.python-version }}
-      - uses: astral-sh/setup-uv@v8.2.0
-      - uses: actions/setup-python@v6
+      - uses: astral-sh/setup-uv@v10.0.1
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
