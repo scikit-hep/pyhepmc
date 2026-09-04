@@ -13,7 +13,7 @@ reading and writing.
 from __future__ import annotations
 
 from pathlib import PurePath
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Union
 
 from ._core import (
     GenEvent,
@@ -242,12 +242,12 @@ class HepMCFile:
             elif fn.endswith(".bz2"):
                 import bz2
 
-                open = bz2.open  # type:ignore
+                open = bz2.open
             elif fn.endswith(".xz"):
                 import lzma
 
-                open = lzma.open  # type:ignore
-            elif fn.endswith(".zst") or fn.endswith(".zstd"):
+                open = lzma.open
+            elif fn.endswith((".zst", ".zstd")):
                 import sys
 
                 if sys.version_info >= (3, 14):
@@ -258,9 +258,9 @@ class HepMCFile:
                     )
                 else:
                     from backports import zstd
-                open = zstd.open  # type:ignore
+                open = zstd.open
             else:
-                from builtins import open  # type:ignore
+                from builtins import open
 
                 mode += "b"
 

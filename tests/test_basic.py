@@ -336,7 +336,7 @@ def test_GenEvent(evt):
     for i, p in enumerate(evt.particles):
         assert p.status == i + 1
 
-    p1, p2, p3, p4, *rest = evt.particles
+    p1, p2, p3, p4, *_rest = evt.particles
     assert p1.pid == 2212
     assert p1.momentum == (0, 0, 7000, 7000)
     assert p1.generated_mass == 0.938

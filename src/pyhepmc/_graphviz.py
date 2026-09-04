@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import dataclasses
 import subprocess as subp
-from typing import Type, Union
+from typing import Union
 
 
 class Value(str):
@@ -22,7 +24,7 @@ class Block(dict[str, Union[Quoted, Value]]):
     def __setitem__(self, key: str, value: str) -> None:
         if not value:
             return
-        type: Union[type[Value], type[Quoted]] = Value
+        type: type[Value] | type[Quoted] = Value
         if key in ("size", "label", "tooltip", "labeltooltip"):
             type = Quoted
         super().__setitem__(key, type(value))
@@ -101,11 +103,14 @@ class Digraph:
         nl = "\n"
         return f"digraph {self.name} {{\n{nl.join(s)}\n}}"
 
-    def pipe(self, *, format: str, encoding: str = None) -> Union[str, bytes]:
+    def pipe(self, *, format: str, encoding: str = None) -> str | bytes:
         input = str(self)
         try:
             r = subp.run(
-                ["dot", f"-T{format}"], capture_output=True, input=input.encode("utf-8")
+                ["dot", f"-T{format}"],
+                capture_output=True,
+                check=False,
+                input=input.encode("utf-8"),
             )
         except FileNotFoundError:
             raise FileNotFoundError(

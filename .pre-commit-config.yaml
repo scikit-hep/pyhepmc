@@ -69,9 +69,3 @@ repos:
     rev: 2026.08.29
     hooks:
       - id: validate-pyproject
-  
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.21.2
-    hooks:
-      - id: pyupgrade
-        args: [--py39-plus]
