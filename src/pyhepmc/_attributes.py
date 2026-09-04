@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from typing import Any, Dict, Tuple
+from typing import Any
 
 
 def clear(self: Any) -> None:
@@ -9,12 +9,12 @@ def clear(self: Any) -> None:
 
 def items(
     self: Any,
-) -> Generator[Tuple[str, Any], None, None]:
+) -> Generator[tuple[str, Any], None, None]:
     for name in self:
         yield name, self[name]
 
 
-def eq(self: Any, other: Dict[str, Any]) -> bool:
+def eq(self: Any, other: dict[str, Any]) -> bool:
     if len(self) != len(other):
         return False
     for k, v in self.items():

@@ -1,6 +1,6 @@
 import dataclasses
 import subprocess as subp
-from typing import Dict, Type, Union
+from typing import Type, Union
 
 
 class Value(str):
@@ -13,7 +13,7 @@ class Quoted(str):
         return f'"{s}"'
 
 
-class Block(Dict[str, Union[Quoted, Value]]):
+class Block(dict[str, Union[Quoted, Value]]):
     def __init__(self, **kwargs: str):
         super().__init__()
         for k, v in kwargs.items():
@@ -22,7 +22,7 @@ class Block(Dict[str, Union[Quoted, Value]]):
     def __setitem__(self, key: str, value: str) -> None:
         if not value:
             return
-        type: Union[Type[Value], Type[Quoted]] = Value
+        type: Union[type[Value], type[Quoted]] = Value
         if key in ("size", "label", "tooltip", "labeltooltip"):
             type = Quoted
         super().__setitem__(key, type(value))
@@ -45,8 +45,8 @@ class Digraph:
     name: Quoted
     graph_attr: Block
     node_attr: Block
-    nodes: Dict[str, Block]
-    edges: Dict[str, Block]
+    nodes: dict[str, Block]
+    edges: dict[str, Block]
 
     def __init__(
         self,
@@ -54,8 +54,8 @@ class Digraph:
         name: str = "",
         graph_attr: Block = None,
         node_attr: Block = None,
-        nodes: Dict[str, Block] = None,
-        edges: Dict[str, Block] = None,
+        nodes: dict[str, Block] = None,
+        edges: dict[str, Block] = None,
     ):
         self.name = Quoted(name)
         self.graph_attr = graph_attr or Block()

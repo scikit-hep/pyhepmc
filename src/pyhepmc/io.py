@@ -80,7 +80,7 @@ class _Iter:
 
 
 class ReaderMixin:
-    def read(self) -> Optional[GenEvent]:
+    def read(self) -> GenEvent | None:
         assert hasattr(self, "failed")
         assert hasattr(self, "read_event")
         if self.failed():
@@ -143,7 +143,7 @@ class _WrappedWriter:
     def __init__(
         self,
         iostream: Any,
-        precision: Optional[int],
+        precision: int | None,
         Writer: Any,
     ):
         self._writer: Any = None
@@ -215,17 +215,17 @@ class HepMCFile:
     IOError if reading or writing fails.
     """
 
-    _reader: Optional[ReaderMixin]
-    _writer: Optional[Union[WriterAscii, WriterAsciiHepMC2, WriterHEPEVT]]
+    _reader: ReaderMixin | None
+    _writer: WriterAscii | WriterAsciiHepMC2 | WriterHEPEVT | None
 
     def __init__(
         self,
         fileobj: Filename,
         mode: str = "r",
-        precision: Optional[int] = None,
-        format: Optional[str] = None,
+        precision: int | None = None,
+        format: str | None = None,
     ):
-        open_file: Optional[Callable[[], Any]] = None
+        open_file: Callable[[], Any] | None = None
         if hasattr(fileobj, "read") and hasattr(fileobj, "write"):
             if hasattr(fileobj, "buffer"):
                 self._file = fileobj.buffer
@@ -273,7 +273,7 @@ class HepMCFile:
                 self._file = open_file()
             self._ios = pyiostream(self._file)
 
-            Reader: Optional[Any] = None
+            Reader: Any | None = None
             if format is None:
                 # auto-detect
                 if not self._file.seekable():
@@ -359,8 +359,8 @@ class HepMCFile:
 def open(
     fileobj: Filename,
     mode: str = "r",
-    precision: Optional[int] = None,
-    format: Optional[str] = None,
+    precision: int | None = None,
+    format: str | None = None,
 ) -> Any:
     """
     Open HepMC files for reading or writing.
