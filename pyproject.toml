@@ -40,8 +40,7 @@ documentation = "https://scikit-hep.org/pyhepmc"
 test = [
     "pytest",
     "particle<1.0.0",
-    # There are issues with binary wheels on some platforms right now
-    'matplotlib; (platform_system != "Windows" or python_version <"3.12") and (platform_system != "Linux" or platform_machine != "aarch64")',
+    "matplotlib",
 ]
 doc = ["sphinx", "sphinx-rtd-theme", "nbsphinx", "ipython", "ipykernel"]
 
