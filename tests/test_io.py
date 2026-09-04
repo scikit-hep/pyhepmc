@@ -1,7 +1,6 @@
 import gzip
 import os
 import subprocess as subp
-import typing
 from io import BytesIO
 from pathlib import Path
 from sys import version_info
@@ -414,9 +413,11 @@ def test_open_failures():
     with pytest.raises(ValueError, match="format"), hep.open(fn, format="foo") as f:
         pass
 
-    with pytest.raises(ValueError, match="format"):
-        with hep.open("test.dat", "w", format="foo") as f:
-            pass
+    with (
+        pytest.raises(ValueError, match="format"),
+        hep.open("test.dat", "w", format="foo") as f,
+    ):
+        pass
 
     with pytest.raises(ValueError, match="mode"), hep.open("test.dat", "x") as f:
         pass

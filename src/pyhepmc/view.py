@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, BinaryIO, Optional, Set, Union
+from typing import Any, BinaryIO
 
 import numpy as np
 
@@ -19,7 +19,7 @@ def _supported_formats() -> set[str]:
     import subprocess as subp
 
     try:
-        r = subp.run(["dot", "-T12345679"], stderr=subp.PIPE)
+        r = subp.run(["dot", "-T12345679"], stderr=subp.PIPE, check=False)
     except FileNotFoundError:
         return set()
     s = r.stderr.decode("ascii").strip()
