@@ -12,10 +12,10 @@ def merge_license_files():
     l1 = "LICENSE"
     l2 = "LICENSES_bundled"
 
-    with open(l1, "r") as f:
+    with open(l1) as f:
         content1 = f.read()
 
-    with open(l2, "r") as f:
+    with open(l2) as f:
         content2 = f.read()
 
     with open(l1, "w") as f:

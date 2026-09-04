@@ -13,10 +13,7 @@ from test_basic import make_evt
 import pyhepmc as hep
 from pyhepmc import io
 
-if version_info >= (3, 9):
-    list_type = list
-else:
-    list_type = typing.List
+list_type = list
 
 # this only does something if pyhepmc is compiled in debug mode
 hep.Setup.print_warnings = True
@@ -370,7 +367,7 @@ def test_open_6(evt, capsys):
 def test_open_7():
     fn = str(Path(__file__).parent / "sibyll21.dat")
 
-    with open(fn, "r") as f, hep.open(f, "r") as f2:
+    with open(fn) as f, hep.open(f, "r") as f2:
         evt = f2.read()
 
     assert len(evt.particles) == 23
@@ -381,7 +378,7 @@ def test_open_last_event_issue():
     fn = str(Path(__file__).parent / "last_event_issue.hepmc")
 
     n = 0
-    with io.open(fn) as f:
+    with open(fn) as f:
         while True:
             event = f.read()
             if event is None:
@@ -524,10 +521,10 @@ def test_attributes():
         # "9": hep.HEPEUPAttribute(),
     }
 
-    with io.open(filename, "w") as f:
+    with open(filename, "w") as f:
         f.write(evt)
 
-    with io.open(filename) as f:
+    with open(filename) as f:
         evt2 = f.read()
 
     with pytest.raises(TypeError):
@@ -564,10 +561,10 @@ def test_roundtrip(evt, format):
     # HepMC3 adds "0" to weight_names upon reading event if weight_names is empty
     evt.run_info.weight_names = ["0"]
 
-    with io.open(fn, "w", format=format) as f:
+    with open(fn, "w", format=format) as f:
         f.write(evt)
 
-    with io.open(fn, "r", format=format) as f:
+    with open(fn, format=format) as f:
         evt2 = f.read()
 
     os.unlink(fn)
@@ -581,7 +578,7 @@ def test_zip(evt, zip):
     # HepMC3 adds "0" to weight_names upon reading event if weight_names is empty
     evt.run_info.weight_names = ["0"]
 
-    with io.open(fn, "w") as f:
+    with open(fn, "w") as f:
         f.write(evt)
 
     try:
@@ -591,7 +588,7 @@ def test_zip(evt, zip):
     except FileNotFoundError:
         pass
 
-    with io.open(fn, "r") as f:
+    with open(fn) as f:
         evt2 = f.read()
 
     os.unlink(fn)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, BinaryIO, Optional, Set, Tuple, Union
+from typing import Any, BinaryIO, Optional, Set, Union
 
 import numpy as np
 
@@ -15,7 +15,7 @@ from pyhepmc._prettify import db as prettify
 __all__ = ("SUPPORTED_FORMATS", "savefig", "to_dot")
 
 
-def _supported_formats() -> Set[str]:
+def _supported_formats() -> set[str]:
     import subprocess as subp
 
     try:
@@ -61,7 +61,7 @@ SUPPORTED_FORMATS = _supported_formats()
 def to_dot(
     evt: GenEvent,
     *,
-    size: Optional[Tuple[int, int]] = None,
+    size: tuple[int, int] | None = None,
     color_hadron: str = "black",
     color_lepton_or_boson: str = "goldenrod",
     color_quark_or_gluon: str = "darkred",
@@ -221,8 +221,8 @@ def to_dot(
 
 
 def savefig(
-    event: Union[GenEvent, Digraph],
-    fname: Union[str, BinaryIO],
+    event: GenEvent | Digraph,
+    fname: str | BinaryIO,
     *,
     format: str = None,
     **kwargs: Any,
