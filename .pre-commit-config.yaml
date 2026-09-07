@@ -35,7 +35,7 @@ repos:
 
   # Ruff linter, replacement for flake8, pydocstyle, isort
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.16.5"
+    rev: "v0.16.6"
     hooks:
       - id: ruff
         args: [--fix, --show-fixes]
@@ -66,6 +66,6 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.08.29
+    rev: 2026.09.04
     hooks:
       - id: validate-pyproject
