@@ -24,10 +24,10 @@ class Block(dict[str, Union[Quoted, Value]]):
     def __setitem__(self, key: str, value: str) -> None:
         if not value:
             return
-        type: type[Value] | type[Quoted] = Value
+        value_type: type[Value | Quoted] = Value
         if key in ("size", "label", "tooltip", "labeltooltip"):
-            type = Quoted
-        super().__setitem__(key, type(value))
+            value_type = Quoted
+        super().__setitem__(key, value_type(value))
 
     def __str__(self) -> str:
         s = []
@@ -54,10 +54,10 @@ class Digraph:
         self,
         *,
         name: str = "",
-        graph_attr: Block = None,
-        node_attr: Block = None,
-        nodes: dict[str, Block] = None,
-        edges: dict[str, Block] = None,
+        graph_attr: Block | None = None,
+        node_attr: Block | None = None,
+        nodes: dict[str, Block] | None = None,
+        edges: dict[str, Block] | None = None,
     ):
         self.name = Quoted(name)
         self.graph_attr = graph_attr or Block()
@@ -103,7 +103,7 @@ class Digraph:
         nl = "\n"
         return f"digraph {self.name} {{\n{nl.join(s)}\n}}"
 
-    def pipe(self, *, format: str, encoding: str = None) -> str | bytes:
+    def pipe(self, *, format: str, encoding: str | None = None) -> str | bytes:
         input = str(self)
         try:
             r = subp.run(

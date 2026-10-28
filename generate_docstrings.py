@@ -132,8 +132,7 @@ def handle_compounddef(results, node):
                 if d:
                     results[member].append(d)
         else:
-            print("unexpected", compoundname, ch)
-            breakpoint()
+            raise ValueError(f"unexpected element in {compoundname}: {ch.tag}")
 
 
 results = defaultdict(list)
@@ -147,8 +146,7 @@ for fn in Path("docs/xml").glob("*.xml"):
         if node.tag == "compounddef":
             handle_compounddef(results, node)
         else:
-            print("unexpected", node)
-            breakpoint()
+            raise ValueError(f"unexpected element: {node.tag}")
 
 # postprocessing: constructors and delta_* methods
 for name in list(results):

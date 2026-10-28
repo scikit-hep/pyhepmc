@@ -18,7 +18,7 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         extdir = Path(self.get_ext_fullpath(ext.name)).parent.absolute()
 
-        debug = int(os.environ.get("DEBUG", 0)) if self.debug is None else self.debug
+        debug = int(os.environ.get("DEBUG", "0")) if self.debug is None else self.debug
         cfg = "Debug" if debug else "Release"
 
         # CMake lets you override the generator - we need to check this.
