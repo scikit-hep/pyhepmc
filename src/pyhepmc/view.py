@@ -224,7 +224,7 @@ def savefig(
     event: GenEvent | Digraph,
     fname: str | BinaryIO,
     *,
-    format: str = None,
+    format: str | None = None,
     **kwargs: Any,
 ) -> None:
     """

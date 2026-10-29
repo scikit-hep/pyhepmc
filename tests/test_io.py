@@ -43,17 +43,13 @@ def test_pystream_2():
         for evt in f:
             f2.write(evt)
 
-    ev1 = []
     with gzip.open(fn2) as f, pyiostream(f, 1000) as s, io.ReaderAscii(s) as r:
-        for evt in r:
-            ev1.append(evt)
+        ev1 = list(r)
 
     assert len(ev1) == 1
 
-    ev2 = []
     with io.ReaderAscii(fn) as r:
-        for evt in r:
-            ev2.append(evt)
+        ev2 = list(r)
 
     assert ev1 == ev2
 
@@ -377,7 +373,7 @@ def test_open_last_event_issue():
     fn = str(Path(__file__).parent / "last_event_issue.hepmc")
 
     n = 0
-    with open(fn) as f:
+    with hep.open(fn) as f:
         while True:
             event = f.read()
             if event is None:
@@ -522,10 +518,10 @@ def test_attributes():
         # "9": hep.HEPEUPAttribute(),
     }
 
-    with open(filename, "w") as f:
+    with hep.open(filename, "w") as f:
         f.write(evt)
 
-    with open(filename) as f:
+    with hep.open(filename) as f:
         evt2 = f.read()
 
     with pytest.raises(TypeError):
@@ -562,10 +558,10 @@ def test_roundtrip(evt, format):
     # HepMC3 adds "0" to weight_names upon reading event if weight_names is empty
     evt.run_info.weight_names = ["0"]
 
-    with open(fn, "w", format=format) as f:
+    with hep.open(fn, "w", format=format) as f:
         f.write(evt)
 
-    with open(fn, format=format) as f:
+    with hep.open(fn, format=format) as f:
         evt2 = f.read()
 
     os.unlink(fn)
@@ -579,7 +575,7 @@ def test_zip(evt, zip):
     # HepMC3 adds "0" to weight_names upon reading event if weight_names is empty
     evt.run_info.weight_names = ["0"]
 
-    with open(fn, "w") as f:
+    with hep.open(fn, "w") as f:
         f.write(evt)
 
     try:
@@ -589,7 +585,7 @@ def test_zip(evt, zip):
     except FileNotFoundError:
         pass
 
-    with open(fn) as f:
+    with hep.open(fn) as f:
         evt2 = f.read()
 
     os.unlink(fn)

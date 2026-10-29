@@ -12,6 +12,7 @@ reading and writing.
 
 from __future__ import annotations
 
+from functools import partial
 from pathlib import PurePath
 from typing import Any, Callable, Union
 
@@ -234,19 +235,20 @@ class HepMCFile:
             self._close_file = False
         else:
             fn = str(fileobj)
+            opener: Callable[..., Any]
 
             if fn.endswith(".gz"):
                 import gzip
 
-                open = gzip.open
+                opener = gzip.open
             elif fn.endswith(".bz2"):
                 import bz2
 
-                open = bz2.open
+                opener = bz2.open
             elif fn.endswith(".xz"):
                 import lzma
 
-                open = lzma.open
+                opener = lzma.open
             elif fn.endswith((".zst", ".zstd")):
                 import sys
 
@@ -258,13 +260,15 @@ class HepMCFile:
                     )
                 else:
                     from backports import zstd
-                open = zstd.open
+                opener = zstd.open
             else:
-                from builtins import open
+                import builtins
 
+                opener = builtins.open
                 mode += "b"
 
-            open_file = lambda: open(fn, mode)
+            # Defer opening until validation; HepMCFile.close owns the stream.
+            open_file = partial(opener, fn, mode)
 
             self._close_file = True
 
