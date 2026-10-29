@@ -18,6 +18,16 @@ A Pythonic wrapper for the `HepMC3 C++ library <http://hepmc.web.cern.ch/hepmc>`
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.7013498.svg
   :target: https://doi.org/10.5281/zenodo.7013498
 
+Supported platforms
+-------------------
+
+Python 3.10 or newer is required. macOS support and binary wheels target
+Apple Silicon (arm64); Python 3.9 and Intel macOS are no longer supported.
+Linux and Windows wheels continue to target their supported architectures.
+CI checks Python 3.10 and the latest stable Python. Wheel builds follow the
+stable CPython releases supported by cibuildwheel and the package metadata,
+using cibuildwheel's default Linux container images.
+
 pyhepmc was formerly known as pyhepmc-ng. The development of pyhepmc-ng continues in the pyhepmc package.
 
 HepMC3 has its own Python bindings. Why should you use these?

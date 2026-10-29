@@ -1,6 +1,7 @@
 import warnings
+from collections.abc import Callable
 from importlib.metadata import version
-from typing import Any, Callable
+from typing import Any
 
 from packaging.version import Version
 

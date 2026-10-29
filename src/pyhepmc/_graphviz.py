@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import subprocess as subp
-from typing import Union
 
 
 class Value(str):
@@ -15,7 +14,7 @@ class Quoted(str):
         return f'"{s}"'
 
 
-class Block(dict[str, Union[Quoted, Value]]):
+class Block(dict[str, Quoted | Value]):
     def __init__(self, **kwargs: str):
         super().__init__()
         for k, v in kwargs.items():
