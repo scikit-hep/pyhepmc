@@ -12,7 +12,7 @@ name = "pyhepmc"
 description = "Pythonic interface to the HepMC3 C++ library licensed under LGPL-v3."
 maintainers = [{ name = "Hans Dembinski", email = "hans.dembinski@gmail.com" }]
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license-files = ["LICENSE", "LICENSES_bundled"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -39,6 +39,7 @@ documentation = "https://scikit-hep.org/pyhepmc"
 [project.optional-dependencies]
 test = [
     "pytest",
+    "pytest-timeout",
     "particle<1.0.0",
     # There are issues with binary wheels on some platforms right now
     'matplotlib; (platform_system != "Windows" or python_version <"3.12") and (platform_system != "Linux" or platform_machine != "aarch64")',
@@ -100,10 +101,12 @@ pydocstyle.convention = "numpy"
 "setup*.py" = ["D"]
 
 [tool.cibuildwheel]
-skip = ["cp39-musllinux_i686"]                    # no numpy wheel
+build = "cp3*-*"
+# Keep the existing GIL-enabled ABI; free-threaded support needs separate validation.
+# Windows ARM64 CPython wheels start at Python 3.11.
+skip = ["cp3*t-*", "cp310-win_arm64"]
 test-extras = ["test"]
-test-command = "python -m pytest {package}/tests"
-test-skip = ["*universal2:arm64"]
+test-command = "python -m pytest -vv --timeout=120 --timeout-method=thread {package}/tests"
 
 [tool.cibuildwheel.environment]
 # this makes sure that we build only on platforms that have a corresponding numpy wheel
@@ -111,7 +114,5 @@ PIP_ONLY_BINARY = ":all:"
 # flag is used to disable a test that doesn't work on CI
 CIBW = "1"
 
-[[tool.cibuildwheel.overrides]]
-# to match numpy, we use manylinux2014 for cp310 (and 3.9, since manylinux2010 is dead)
-select = "cp3{9,10}-manylinux*"
-manylinux-x86_64-image = "manylinux2014"
+[tool.cibuildwheel.macos]
+archs = ["arm64"]

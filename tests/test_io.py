@@ -168,8 +168,12 @@ def test_failed_read_file():
     assert n == 0
 
 
-def test_failed_read_file_2():
-    fn = str(Path(__file__).parent / "broken.dat")
+@pytest.mark.parametrize("trailing_newline", (False, True))
+def test_failed_read_file_2(tmp_path, trailing_newline):
+    data = (Path(__file__).parent / "broken.dat").read_bytes().rstrip(b"\r\n")
+    path = tmp_path / "broken.dat"
+    path.write_bytes(data + (b"\n" if trailing_newline else b""))
+    fn = str(path)
     with io.ReaderAscii(fn) as f:
         event = f.read()
 
