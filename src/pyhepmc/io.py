@@ -12,9 +12,10 @@ reading and writing.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from functools import partial
 from pathlib import PurePath
-from typing import Any, Callable, Union
+from typing import Any
 
 from ._core import (
     GenEvent,
@@ -135,7 +136,7 @@ pyiostream.__enter__ = _enter
 pyiostream.__exit__ = _exit_flush
 
 
-Filename = Union[str, PurePath]
+Filename = str | PurePath
 
 
 class _WrappedWriter:

@@ -8,20 +8,24 @@ on:
     paths:
       - .github/workflows/wheels.yml
       - pyproject.toml
+      - MANIFEST.in
+      - CMakeLists.txt
+      - "setup*.py"
+      - cmake_ext.py
+      - "src/**"
+      - "extern/**"
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
 
-# Reminder
-# - name: Extract Branch Name
-#   run: echo "BRANCH=$(echo ${GITHUB_REF##*/})" >> $GITHUB_ENV
-# https://dev.to/tomassirio/if-statements-on-github-actions-545d
+env:
+  PYTEST_ADDOPTS: "-vv --timeout=120 --timeout-method=thread"
 
 jobs:
   wheels:
-    name: ${{ matrix.py }} ${{ matrix.os }} ${{ matrix.arch }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -30,14 +34,10 @@ jobs:
           [
             ubuntu-latest,
             windows-latest,
-            macos-14,
-            ubuntu-24.04-arm,
-            windows-11-arm,
+            macos-latest,
+            ubuntu-26.04-arm,
+            windows-11-vs2026-arm,
           ]
-        py: [cp310, cp311, cp312, cp313, cp314]
-        exclude:
-          - os: windows-11-arm
-            py: cp310
 
     steps:
       - uses: actions/checkout@v7
@@ -47,13 +47,12 @@ jobs:
 
       - uses: astral-sh/setup-uv@v8.2.0
 
+      # Supported stable CPython versions come from requires-python.
       - uses: pypa/cibuildwheel@v4.1
-        env:
-          CIBW_BUILD: ${{ matrix.py }}-*
 
       - uses: actions/upload-artifact@v7
         with:
-          name: wheel-${{ matrix.py }}-${{ matrix.os }}-${{ matrix.arch }}
+          name: wheel-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
   sdist:
@@ -67,7 +66,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.x"
 
       - run: pipx run build --sdist
       - run: python -m pip install --upgrade pip setuptools
@@ -93,7 +92,7 @@ jobs:
       attestations: write
 
     steps:
-      - uses: actions/download-artifact@v8.0.1
+      - uses: actions/download-artifact@v8
         with:
           pattern: "*"
           merge-multiple: true
