@@ -37,6 +37,7 @@ repository = "https://github.com/scikit-hep/pyhepmc"
 documentation = "https://scikit-hep.org/pyhepmc"
 
 [project.optional-dependencies]
+visualization = ["pygraphviz>=2.0.4"]
 test = [
     "pytest",
     "pytest-timeout",

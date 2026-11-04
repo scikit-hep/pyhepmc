@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTEST_ADDOPTS: "-vv --timeout=120 --timeout-method=thread"
+  PYTEST_ADDOPTS: "-vv --durations=20 --timeout=120 --timeout-method=thread"
 
 jobs:
   test:
@@ -59,6 +59,8 @@ jobs:
         env:
           HOMEBREW_NO_AUTO_UPDATE: "1"
           HOMEBREW_NO_INSTALL_CLEANUP: "1"
+      - if: runner.os == 'Windows'
+        run: uv pip install --system "pygraphviz>=2.0.4"
       - run: uv pip install --system ".[test]" ${{ matrix.installs }}
         env:
           DEBUG: 1
