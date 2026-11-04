@@ -65,12 +65,6 @@ pyhepmc is a hand-crafted mapping of C++ code to Python, `see documentation for 
 
 pyhepmc can optionally visualize events, using the mature `graphviz <https://graphviz.org>`_ library as a backend.
 
-Install ``pyhepmc[visualization]`` to use PyGraphviz for in-process rendering.
-This avoids repeated Graphviz font initialization, particularly on Windows.
-Without this extra, rendering uses the ``dot`` executable as before. An installed
-``dot`` also supplies additional output formats unavailable in the PyGraphviz
-build; without it, SVG, PNG and PDF are supported.
-
 .. image:: docs/_static/pyhepmc.svg
 
 **pyhepmc is actively maintained**

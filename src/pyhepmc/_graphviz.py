@@ -2,53 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import subprocess as subp
-import threading
-
-from packaging.version import Version
-
-try:
-    import pygraphviz as pygraphviz  # noqa: PLC0414 - explicit re-export for view
-except ImportError:
-    pygraphviz = None
-
-# Version 2 renders through the library instead of spawning a layout process.
-if pygraphviz is not None and Version(pygraphviz.__version__) < Version("2"):
-    pygraphviz = None
-
-_render_lock = threading.Lock()
-# Keep plugin-specific formats on the executable backend. In particular,
-# PyGraphviz 2.0.4's bundled build lacks several Windows/raster plugins, and
-# its FIG renderer retains state between calls.
-_library_formats = {
-    "svg",
-    "svg_inline",
-    "svgz",
-    "png",
-    "pdf",
-    "ps",
-    "ps2",
-    "dot",
-    "gv",
-    "canon",
-    "plain",
-    "plain-ext",
-    "json",
-    "dot_json",
-    "xdot",
-    "xdot1.2",
-    "xdot1.4",
-    "xdot_json",
-    "cmap",
-    "cmapx",
-    "cmapx_np",
-    "jpg",
-    "jpeg",
-    "jpe",
-    "gif",
-    "wbmp",
-    "pic",
-    "vrml",
-}
 
 
 class Value(str):
@@ -151,23 +104,6 @@ class Digraph:
 
     def pipe(self, *, format: str, encoding: str | None = None) -> str | bytes:
         input = str(self)
-        if pygraphviz is not None and format in _library_formats:
-            # Graphviz uses global native state. Serialize calls and release each
-            # graph while retaining the process's initialized font machinery.
-            with _render_lock:
-                graph = pygraphviz.AGraph(string=input)
-                try:
-                    output = graph.draw(format=format, prog="dot")
-                except (ValueError, TypeError):
-                    # The installed dot may provide plugins absent from the
-                    # Graphviz library bundled with PyGraphviz. Version 2.0.4
-                    # raises TypeError when gvRenderData returns an error code.
-                    pass
-                else:
-                    assert isinstance(output, bytes)
-                    return output.decode(encoding) if encoding else output
-                finally:
-                    graph.close()
         try:
             r = subp.run(
                 ["dot", f"-T{format}"],

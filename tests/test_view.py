@@ -168,36 +168,3 @@ def test_savefig_4(evt):
         g = view.to_dot(evt)
         with pytest.warns(RuntimeWarning):
             view.savefig(g, f, format="png", color_hadron="green")
-
-
-@pytest.mark.parametrize("format", ["svg", "png", "pdf"])
-def test_pygraphviz_without_dot(graph, monkeypatch, format):
-    from pyhepmc import _graphviz
-
-    if _graphviz.pygraphviz is None:
-        pytest.skip("requires PyGraphviz >= 2")
-
-    def no_dot(*args, **kwargs):
-        raise FileNotFoundError("dot is unavailable")
-
-    monkeypatch.setattr(_graphviz.subp, "run", no_dot)
-    assert view._supported_formats() == {"svg", "png", "pdf"}
-    output = graph.pipe(format=format)
-    assert isinstance(output, bytes)
-    assert output.startswith(
-        {"svg": b"<?xml", "png": b"\x89PNG", "pdf": b"%PDF"}[format]
-    )
-    if format == "svg":
-        graph.node("new_node")
-        assert "new_node" in graph.pipe(format="svg", encoding="utf-8")
-
-
-def test_dot_fallback(graph, monkeypatch):
-    import shutil
-
-    from pyhepmc import _graphviz
-
-    monkeypatch.setattr(_graphviz, "pygraphviz", None)
-    if shutil.which("dot") is None:
-        pytest.skip("requires dot")
-    assert "<svg" in graph.pipe(format="svg", encoding="utf-8")

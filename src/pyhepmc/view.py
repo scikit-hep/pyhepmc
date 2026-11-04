@@ -9,7 +9,7 @@ from typing import Any, BinaryIO
 import numpy as np
 
 from pyhepmc import GenEvent, Units
-from pyhepmc._graphviz import Digraph, pygraphviz
+from pyhepmc._graphviz import Digraph
 from pyhepmc._prettify import db as prettify
 
 __all__ = ("SUPPORTED_FORMATS", "savefig", "to_dot")
@@ -21,8 +21,7 @@ def _supported_formats() -> set[str]:
     try:
         r = subp.run(["dot", "-T12345679"], stderr=subp.PIPE, check=False)
     except FileNotFoundError:
-        # The optional PyGraphviz wheels render these without a dot executable.
-        return {"svg", "png", "pdf"} if pygraphviz is not None else set()
+        return set()
     s = r.stderr.decode("ascii").strip()
     match = "Use one of: "
     idx = s.index(match)
