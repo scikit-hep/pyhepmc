@@ -29,10 +29,10 @@ jobs:
       # must come after checkout
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.python-version }}
+          key: ${{ github.job }}-${{ runner.os }}-${{ runner.arch }}
       - uses: actions/setup-python@v6
         with:
-          python-version: 3.11
+          python-version: "3.x"
       - run: python -m pip install --upgrade pip
       - run: python -m pip install --prefer-binary coveralls
       - run: python -m pip install --prefer-binary -e .[test]

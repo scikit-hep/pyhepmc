@@ -1,4 +1,5 @@
-recursive-include extern/HepMC3/include *.h
+recursive-include extern/HepMC3/include *.h *.hpp
+include extern/HepMC3/include/HepMC3/bxzstr/LICENSE
 recursive-include extern/HepMC3/src *.cc
 include extern/HepMC3/LICENCE
 include extern/HepMC3/COPYING

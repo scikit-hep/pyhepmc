@@ -21,10 +21,10 @@ jobs:
       # must come after checkout
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.python-version }}
+          key: ${{ github.job }}-${{ runner.os }}-${{ runner.arch }}
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.x"
       - run: sudo apt-get install pandoc
       - run: python -m pip install --prefer-binary -v .[doc]
       - run: python -m ipykernel install --user --name python3
@@ -51,3 +51,4 @@ jobs:
     steps:
       - uses: actions/configure-pages@v6
       - uses: actions/deploy-pages@v5
+        id: deployment
