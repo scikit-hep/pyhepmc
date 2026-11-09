@@ -67,7 +67,7 @@ void from_hepevt(GenEvent& event, int event_number, py::array_t<double> px,
 
 } // namespace HepMC3
 
-PYBIND11_MODULE(_core, m) {
+PYBIND11_MODULE(_core, m, py::mod_gil_not_used()) {
   using namespace HepMC3;
 
   register_geneventdata_dtypes();
