@@ -1,11 +1,6 @@
 [build-system]
-requires = [
-    "setuptools>=46.4",
-    "setuptools_scm[toml]>=6.2",
-    "cmake>=3.13",
-    "wheel",
-]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.11", "setuptools-scm>=8", "pybind11>=3"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "pyhepmc"
@@ -13,10 +8,19 @@ description = "Pythonic interface to the HepMC3 C++ library licensed under LGPL-
 maintainers = [{ name = "Hans Dembinski", email = "hans.dembinski@gmail.com" }]
 readme = "README.rst"
 requires-python = ">=3.10"
-license-files = ["LICENSE", "LICENSES_bundled"]
+# pyhepmc is BSD-3-Clause; the compiled module includes HepMC3 (LGPL-3.0-or-later),
+# its bxzstr headers (MPL-2.0), pybind11 (BSD-3-Clause), Boost.Mp11 (BSL-1.0) and
+# cpp-member-accessor (MIT). See LICENSES_bundled.
+license = "BSD-3-Clause AND LGPL-3.0-or-later AND MPL-2.0 AND BSL-1.0 AND MIT"
+license-files = [
+    "LICENSE",
+    "LICENSES_bundled",
+    "extern/HepMC3/LICENCE",
+    "extern/HepMC3/COPYING",
+    "extern/HepMC3/include/HepMC3/bxzstr/LICENSE",
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 3",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
@@ -45,6 +49,22 @@ test = [
     'matplotlib; (platform_system != "Windows" or python_version <"3.12") and (platform_system != "Linux" or platform_machine != "aarch64")',
 ]
 doc = ["sphinx", "sphinx-rtd-theme", "nbsphinx", "ipython", "ipykernel"]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+build-dir = "build/{wheel_tag}"
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+# Ship only the parts of the bundled submodules that the build uses.
+sdist.exclude = ["/.github", "/extern/**"]
+sdist.include = [
+    "/extern/HepMC3/include",
+    "/extern/HepMC3/src",
+    "/extern/HepMC3/LICENCE",
+    "/extern/HepMC3/COPYING",
+    "/extern/mp11/include",
+    "/extern/cpp-member-accessor/include",
+    "/extern/cpp-member-accessor/LICENSE",
+]
 
 [tool.setuptools_scm]
 
@@ -96,9 +116,7 @@ pydocstyle.convention = "numpy"
 "test_*.py" = ["B", "D"]
 "bench/*.py" = ["D"]
 "docs/*.py" = ["D"]
-"cmake_ext.py" = ["D"]
 "generate_*.py" = ["D"]
-"setup*.py" = ["D"]
 
 [tool.cibuildwheel]
 build = "cp3*-*"
