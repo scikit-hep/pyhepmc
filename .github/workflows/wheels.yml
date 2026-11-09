@@ -8,10 +8,7 @@ on:
     paths:
       - .github/workflows/wheels.yml
       - pyproject.toml
-      - MANIFEST.in
       - CMakeLists.txt
-      - "setup*.py"
-      - cmake_ext.py
       - "src/**"
       - "extern/**"
   workflow_dispatch:
@@ -69,7 +66,6 @@ jobs:
           python-version: "3.x"
 
       - run: pipx run build --sdist
-      - run: python -m pip install --upgrade pip setuptools
       - run: python -m pip install -v $(echo dist/*)'[test]'
       - run: python -m pytest
 

@@ -61,7 +61,7 @@ jobs:
           HOMEBREW_NO_INSTALL_CLEANUP: "1"
       - run: uv pip install --system ".[test]" ${{ matrix.installs }}
         env:
-          DEBUG: 1
+          SKBUILD_CMAKE_BUILD_TYPE: Debug
       # A native-code deadlock can prevent pytest-timeout's Python thread from running.
       - run: >-
           python -u -c "import faulthandler;

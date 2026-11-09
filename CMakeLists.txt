@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13...3.17)
+cmake_minimum_required(VERSION 3.18...3.31)
 
 include(CMakePrintHelpers)
 
@@ -43,7 +43,10 @@ set(CMAKE_CXX_STANDARD
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # optional, ensure standard is supported
 set(CMAKE_CXX_EXTENSIONS OFF) # optional, keep compiler extensions off
 
-# Now we can find pybind11
+# Use CMake's FindPython; scikit-build-core passes Python_EXECUTABLE.
+set(PYBIND11_FINDPYTHON ON)
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+
 option(EXTERNAL_PYBIND11 "Build against an external pybind11" OFF)
 if(EXTERNAL_PYBIND11)
   find_package(pybind11 CONFIG REQUIRED)
@@ -70,3 +73,5 @@ if(MSVC)
 else()
   target_compile_options(_core PRIVATE -Wall -Wno-self-assign-overloaded)
 endif()
+
+install(TARGETS _core LIBRARY DESTINATION pyhepmc)

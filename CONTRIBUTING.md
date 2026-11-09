@@ -46,7 +46,7 @@ Activate the virtualenv and install the required packages for development:
 . venv/bin/activate
 python -m pip install -v -e .'[test]'
 ```
-This builds the package in develop mode and installs the extra libraries used for testing. The build should work fine if you have a reasonably recent C++ compiler, since pyhepmc is continuously tested on against gcc, clang and msvc. If it does not, please submit an issue with the build log and your compiler version.
+This builds the package in editable mode with [scikit-build-core](https://scikit-build-core.readthedocs.io) and installs the extra libraries used for testing. The CMake build directory is kept in `build/`, so rebuilds after C++ changes are incremental. To make a debug build, set `SKBUILD_CMAKE_BUILD_TYPE=Debug`; extra CMake options can be passed via `CMAKE_ARGS`. The build should work fine if you have a reasonably recent C++ compiler, since pyhepmc is continuously tested on against gcc, clang and msvc. If it does not, please submit an issue with the build log and your compiler version.
 
 You can now change the source code. Run pip again to build the project after you made changes. To run the unit tests:
 ```
