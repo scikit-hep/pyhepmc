@@ -7,7 +7,7 @@ License: LGPL-v3
   For details, see extern/HepMC3/LICENCE and extern/HepMC3/COPYING.
 
 Name: pybind11
-Files: extern/pybind11/*
+Files: pybind11 headers (a build requirement from PyPI), compiled into pyhepmc._core
 License:
   Copyright (c) 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>, All rights reserved.
 

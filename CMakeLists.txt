@@ -47,12 +47,7 @@ set(CMAKE_CXX_EXTENSIONS OFF) # optional, keep compiler extensions off
 set(PYBIND11_FINDPYTHON ON)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 
-option(EXTERNAL_PYBIND11 "Build against an external pybind11" OFF)
-if(EXTERNAL_PYBIND11)
-  find_package(pybind11 CONFIG REQUIRED)
-else()
-  add_subdirectory(extern/pybind11)
-endif()
+find_package(pybind11 CONFIG REQUIRED)
 
 cmake_print_variables(CMAKE_BUILD_TYPE)
 

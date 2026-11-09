@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core>=0.11", "setuptools-scm>=8"]
+requires = ["scikit-build-core>=0.11", "setuptools-scm>=8", "pybind11>=3"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -61,10 +61,6 @@ sdist.include = [
     "/extern/HepMC3/src",
     "/extern/HepMC3/LICENCE",
     "/extern/HepMC3/COPYING",
-    "/extern/pybind11/include",
-    "/extern/pybind11/tools",
-    "/extern/pybind11/CMakeLists.txt",
-    "/extern/pybind11/LICENSE",
     "/extern/mp11/include",
     "/extern/cpp-member-accessor/include",
     "/extern/cpp-member-accessor/LICENSE",
