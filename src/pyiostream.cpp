@@ -16,7 +16,7 @@ pystreambuf::pystreambuf(py::object iohandle, int size)
   if (has_readinto1 || py::hasattr(iohandle, "readinto"))
     readinto_ = iohandle.attr(has_readinto1 ? "readinto1" : "readinto");
   if (py::hasattr(iohandle, "write")) write_ = iohandle.attr("write");
-  char* b = PyByteArray_AS_STRING(buffer_.ptr());
+  char* b = PyByteArray_AsString(buffer_.ptr());
   setp(b, b + size);
 }
 
@@ -110,13 +110,8 @@ void pystreambuf::pywrite_buffer() {
   assert(write_);
   const int s = std::distance(pbase(), pptr());
   py::gil_scoped_acquire g;
-#if (PY_MAJOR_VERSION >= 3) && (PY_MINOR_VERSION >= 9)
-  Py_SET_SIZE(buffer_.ptr(), s);
-  PyByteArray_AS_STRING(buffer_.ptr())[s] = '\0'; /* Trailing null */
-  write_(buffer_);
-#else
-  write_(buffer_[py::slice(0, s, 1)]);
-#endif
+  // zero-copy view of the filled part of the buffer
+  write_(py::memoryview::from_memory(pbase(), s));
 }
 
 int pystreambuf::pyreadinto_buffer() {
