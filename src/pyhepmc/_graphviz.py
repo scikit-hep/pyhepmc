@@ -47,7 +47,7 @@ class Digraph:
     graph_attr: Block
     node_attr: Block
     nodes: dict[str, Block]
-    edges: dict[str, Block]
+    edges: dict[str | tuple[str, int], Block]
 
     def __init__(
         self,
@@ -56,7 +56,7 @@ class Digraph:
         graph_attr: Block | None = None,
         node_attr: Block | None = None,
         nodes: dict[str, Block] | None = None,
-        edges: dict[str, Block] | None = None,
+        edges: dict[str | tuple[str, int], Block] | None = None,
     ):
         self.name = Quoted(name)
         self.graph_attr = graph_attr or Block()
@@ -77,7 +77,14 @@ class Digraph:
         tooltip: str = "",
         labeltooltip: str = "",
     ) -> None:
-        self.edges[f"{vin} -> {vout}"] = Block(
+        edge = f"{vin} -> {vout}"
+        key: str | tuple[str, int] = edge
+        index = len(self.edges)
+        # Keep parallel edges distinct, even when their attributes are equal.
+        while key in self.edges:
+            key = (edge, index)
+            index += 1
+        self.edges[key] = Block(
             dir=dir,
             label=label,
             color=color,
@@ -98,7 +105,8 @@ class Digraph:
         for k, v in self.nodes.items():
             s.append(f"{k} {v}")
         for k, v in self.edges.items():
-            s.append(f"{k} {v}")
+            edge = k[0] if isinstance(k, tuple) else k
+            s.append(f"{edge} {v}")
         nl = "\n"
         return f"digraph {self.name} {{\n{nl.join(s)}\n}}"
 
