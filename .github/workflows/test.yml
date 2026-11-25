@@ -38,6 +38,9 @@ jobs:
           - os: ubuntu-latest
             python-version: "3.x"
             installs: "scipy"
+          - os: ubuntu-latest
+            python-version: "3.14t"
+            installs: ""
       fail-fast: false
     steps:
       - uses: actions/checkout@v7

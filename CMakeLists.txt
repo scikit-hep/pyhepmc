@@ -54,6 +54,27 @@ cmake_print_variables(CMAKE_BUILD_TYPE)
 file(GLOB SOURCES "src/*.cpp")
 file(GLOB HEPMC3_SOURCES "extern/HepMC3/src/*.cc")
 
+# Fix for the bundled HepMC3: the ASCII readers put a 256 KiB line buffer on the
+# stack, which overflows musl's 128 KiB thread stacks. Compile patched copies
+# from the build tree instead; fail if a submodule update makes the fix stale.
+foreach(f ReaderAscii.cc ReaderAsciiHepMC2.cc ReaderHEPEVT.cc)
+  set(orig "${PROJECT_SOURCE_DIR}/extern/HepMC3/src/${f}")
+  file(READ "${orig}" text)
+  string(REPLACE "std::array<char, 262144> buf{};"
+                 "std::vector<char> buf(262144);" patched "${text}")
+  if(patched STREQUAL text)
+    message(FATAL_ERROR "HepMC3 fix no longer applies to ${f}")
+  endif()
+  file(WRITE "${PROJECT_BINARY_DIR}/hepmc3_patched/${f}"
+       "#include <vector>\n${patched}")
+  set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY CMAKE_CONFIGURE_DEPENDS "${orig}")
+  list(REMOVE_ITEM HEPMC3_SOURCES "${orig}")
+  list(APPEND HEPMC3_SOURCES "${PROJECT_BINARY_DIR}/hepmc3_patched/${f}")
+endforeach()
+
 # pyhepmc falls under Section 5 "Combined Libraries" of the LGPL-v3. Since we
 # satisfy a) and b), we do not need to compile the code into a separate library.
 pybind11_add_module(_core MODULE ${SOURCES} ${HEPMC3_SOURCES})
