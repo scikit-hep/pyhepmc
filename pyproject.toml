@@ -120,9 +120,8 @@ pydocstyle.convention = "numpy"
 
 [tool.cibuildwheel]
 build = "cp3*-*"
-# Keep the existing GIL-enabled ABI; free-threaded support needs separate validation.
 # Windows ARM64 CPython wheels start at Python 3.11.
-skip = ["cp3*t-*", "cp310-win_arm64"]
+skip = ["cp310-win_arm64"]
 test-extras = ["test"]
 test-command = "python -m pytest -vv --timeout=120 --timeout-method=thread {package}/tests"
 
