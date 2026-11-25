@@ -3,7 +3,7 @@ import os
 import subprocess as subp
 from io import BytesIO
 from pathlib import Path
-from sys import version_info
+from sys import executable, version_info
 
 import pytest
 from pyhepmc._core import pyiostream, stringstream
@@ -322,6 +322,40 @@ def test_open_5():
         for ev in f:
             n += 1
     assert n == 1
+
+
+def test_open_lhef_with_cdata_header(tmp_path):
+    data = (Path(__file__).parent / "pp.lhe").read_bytes()
+    header = (
+        b"<header>\n"
+        b"<MGRunCard>\n"
+        b"<![CDATA[\n"
+        b"# type 'update syscalc' for options\n"
+        b"]]>\n"
+        b"</MGRunCard>\n"
+        b"</header>\n"
+    )
+    path = tmp_path / "header.lhe"
+    path.write_bytes(data.replace(b"<init>", header + b"<init>", 1))
+
+    script = (
+        "import pyhepmc, sys\n"
+        "with pyhepmc.open(sys.argv[1]) as events:\n"
+        "    for event in events:\n"
+        "        print('LHE event:', len(event.particles), *event.weights)\n"
+    )
+    # A regressed native parser can hang, so give it a subprocess deadline.
+    completed = subp.run(
+        [executable, "-c", script, str(path)],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=30,
+    )
+    event_lines = [
+        line for line in completed.stdout.splitlines() if line.startswith("LHE event:")
+    ]
+    assert event_lines == ["LHE event: 6 1.0"]
 
 
 def test_open_5_pdf_info():
