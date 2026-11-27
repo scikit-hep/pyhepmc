@@ -82,3 +82,27 @@ def test_negative_parents_range(bad, fortran):
         hep.GenEvent().from_hepevt(
             0, px, py, pz, en, m, pid, sta, parents, fortran=fortran
         )
+
+
+@pytest.mark.parametrize("fortran", (True, False))
+@pytest.mark.parametrize(
+    ("parents", "expected_in", "expected_out"),
+    [
+        ([(0, 0), (1, 0), (1, 1), (0, 0)], [1], [2, 3]),
+        ([(0, 0), (0, 0), (1, 2), (2, 1)], [1, 2], [3, 4]),
+    ],
+)
+def test_equivalent_parent_ranges_share_vertex(
+    fortran, parents, expected_in, expected_out
+):
+    px = py = pz = en = m = np.linspace(0, 1, 4)
+    pid = np.arange(4) + 1
+    sta = np.ones(4, dtype=np.int32)
+    if not fortran:
+        parents = np.subtract(parents, 1)
+    hev = hep.GenEvent()
+    hev.from_hepevt(0, px, py, pz, en, m, pid, sta, parents, fortran=fortran)
+    assert len(hev.vertices) == 1
+    v = hev.vertices[0]
+    assert [p.id for p in v.particles_in] == expected_in
+    assert [p.id for p in v.particles_out] == expected_out
