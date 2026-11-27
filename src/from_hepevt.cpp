@@ -84,8 +84,11 @@ void connect_parents_and_children(GenEvent& event, bool parents,
   std::map<std::pair<int, int>, std::vector<int>> vmap;
   const int invalid = fortran ? 0 : -1;
   for (int i = 0; i < n; ++i) {
-    if (rco(i, 0) <= invalid && rco(i, 1) <= invalid) continue;
-    vmap[std::make_pair(rco(i, 0), rco(i, 1))].push_back(i);
+    int m1 = rco(i, 0);
+    int m2 = rco(i, 1);
+    if (m1 <= invalid && m2 <= invalid) continue;
+    normalize(m1, m2, fortran);
+    vmap[std::make_pair(m1, m2)].push_back(i);
   }
 
   const int has_vertex = !vx.is_none() + !vy.is_none() + !vz.is_none() + !vt.is_none();
@@ -120,11 +123,8 @@ void connect_parents_and_children(GenEvent& event, bool parents,
 
   for (const auto& vi : vmap) {
 
-    int m1 = vi.first.first;
-    int m2 = vi.first.second;
-
-    // there must be at least one parent or child when we arrive here...
-    normalize(m1, m2, fortran);
+    const int m1 = vi.first.first;
+    const int m2 = vi.first.second;
 
     if (m1 < 0 || m2 > n) {
       std::ostringstream os;
